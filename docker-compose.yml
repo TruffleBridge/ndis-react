@@ -1,0 +1,9 @@
+# NDIS admin UI (static SPA) — served by nginx on host port 8080.
+# Deployed by ndis-devops/deploy/ndis-react.sh:  docker compose up -d --build
+services:
+  admin:
+    build: .
+    image: ndis-react-admin:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
