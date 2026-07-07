@@ -1,0 +1,19 @@
+export const RolesCheckboxIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={20}
+        height={20}
+        fill="none"
+        {...props}
+    >
+        <rect
+            width={17.748}
+            height={17.75}
+            x={0.75}
+            y={0.75}
+            stroke="#E6E6E6"
+            strokeWidth={1.5}
+            rx={3.25}
+        />
+    </svg>
+)
