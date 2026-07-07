@@ -17,7 +17,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CircleIcon from "@mui/icons-material/Circle";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
 import {
   Chart as ChartJS,
@@ -430,7 +429,7 @@ const Dashboard = () => {
           <Card sx={S.bookingCard}>
 
             <CardContent sx={{ p: 0 }}>
-              <Grid container spacing={2} sx={{ mb: 1, px: 4, py: 2, alignItems:'center' }}>
+              <Grid container spacing={2} sx={{ mb: 1, px: 4, py: 2, alignItems: 'center' }}>
                 {/* Title */}
                 <Grid size={{ xs: 12, md: 3 }}>
                   <Typography variant="h6" sx={S.bookingChartTitle}>
@@ -538,7 +537,7 @@ const Dashboard = () => {
           <Card sx={S.sideCard}>
             <CardContent sx={S.sideCardContent}>
               <Box sx={S.pendingHeader}>
-                <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} />
+                {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.sideCardTitle}>
                   Live Activity
                 </Typography>
@@ -580,7 +579,7 @@ const Dashboard = () => {
       {/* ── Bottom row: Revenue | Compliance | Pending Actions ──────────── */}
       <Grid container spacing={2}>
         {/* Revenue Trends */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 12,lg:6 }}>
           <Card sx={S.revenueCard}>
             <CardContent>
               <Typography variant="h6" sx={S.revenueTitle}>
@@ -597,12 +596,12 @@ const Dashboard = () => {
         </Grid>
 
         {/* Compliance Alerts */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 6, lg: 3  }}>
           <Card sx={S.complianceCard}>
             <CardContent sx={S.pendingCardContent}>
               <Box sx={S.complianceHeader}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} />
+                  {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                   <Typography variant="h6" sx={S.complianceTitle}>
                     Compliance Alerts
                   </Typography>
@@ -656,11 +655,11 @@ const Dashboard = () => {
         </Grid>
 
         {/* Pending Actions */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.pendingCard}>
             <CardContent sx={S.pendingCardContent}>
               <Box sx={S.pendingHeader}>
-                <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} />
+                {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.pendingTitle}>
                   Pending Actions
                 </Typography>
