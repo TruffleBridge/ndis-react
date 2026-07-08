@@ -80,7 +80,7 @@ const FormActions: React.FC<FormActionsProps> = ({
             sx={{
                 fontSize: "14px",
                 fontWeight: 600,
-                bgcolor: '#086D63',
+                bgcolor: 'primary.main',
                 color: "#FFFFFF",
                 borderRadius: "8px",
                 px: 2.5,

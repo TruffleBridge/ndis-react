@@ -13,25 +13,19 @@ interface VerificationQueueStore {
         payload: VerificationQueuePayload
     ) => Promise<void>;
 }
-
+// get table api list
 export const useVerificationQueueStore =
     create<VerificationQueueStore>((set) => ({
         loading: false,
         workers: [],
         total: 0,
-
         getVerificationQueue: async (payload) => {
             try {
                 set({ loading: true });
-
-                const res = await createApiRequest(
-                    "/admin/verificationQueue",
-                    payload
-                );
-
+                const res = await createApiRequest("/admin/verificationQueue", payload);
                 set({
-                    workers: res.data.data,
-                    total: res.data.total,
+                    workers: res.data.data.rows,
+                    total: res.data.totalCount,
                 });
             } catch (err) {
                 console.log(err);

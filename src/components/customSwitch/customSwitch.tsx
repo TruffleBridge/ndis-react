@@ -45,7 +45,7 @@ export const CustomSwitch: React.FC<CustomSwitchProps> = ({
                 color: "#fff",
 
                 "& + .MuiSwitch-track": {
-                    bgcolor: "#0B7C77",
+                    bgcolor: "primary.main",
                     opacity: 1,
                 },
             },

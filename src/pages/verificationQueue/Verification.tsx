@@ -8,14 +8,15 @@ import {
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Loading,
-  NoDataFound,
   TableComponent,
   type ColumnDef,
   type ColumnState,
   type RowAction,
 } from "../../components";
 import { useVerificationQueueStore } from "../../store/useVerification";
+import dayjs from "dayjs";
+import { formatStatus } from "../../utils/menuUtils";
+import { cta, VerifyStyles } from "./style";
 
 interface VerificationRow {
   id: number;
@@ -38,23 +39,23 @@ const STATUS_STYLES: Record<
     borderColor?: string;
   }
 > = {
-  Completed: {
+  completed: {
     backgroundColor: "#FFF0D8",
     color: "#B6760E",
   },
 
-  Inprogress: {
+  inprogress: {
     backgroundColor: "#EBF1FD",
     color: "#1442A7",
   },
 
-  Pending: {
+  pending: {
     backgroundColor: "#F3F4F6",
     color: "#374151",
     borderColor: "#D1D5DB",
   },
 
-  High: {
+  high: {
     backgroundColor: "#EAECF0",
     color: "#34485F",
   },
@@ -77,19 +78,10 @@ export default function VerificationTable() {
     getVerificationQueue,
   } = useVerificationQueueStore();
 
-  const [selected, setSelected] = useState<"client" | "worker" | string>("client");
+  const [selected, setSelected] = useState<"client" | "worker">("client");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ROWS_PER_PAGE = 10;
-
-  useEffect(() => {
-    getVerificationQueue({
-      offset: 0,
-      limit: ROWS_PER_PAGE,
-      search: "",
-      type: selected,
-    });
-  }, [selected]);
 
   /*
       API response mapping-> Table data
@@ -97,23 +89,27 @@ export default function VerificationTable() {
   const tableRows = useMemo(() => {
     return workers.map((item) => ({
       id: item.id,
-      name: item.name,
+      name: item.fullName,
       email: item.email,
       phone: item.phone,
-      applicationDate: item.applicationDate,
-      documentStatus: item.documentStatus,
+      applicationDate: dayjs(item.createdAt).format('MM/DD/YYYY'),
+      documentStatus: item.uploadedDocumentCount,
       verificationType: item.verificationType,
       status: item.status,
-      avatar: item.avatar,
     }));
   }, [workers]);
 
 
   // column name
-  const columns: ColumnDef<VerificationRow>[] = [
+  const columns = useMemo<ColumnDef<VerificationRow>[]>(() => [
     {
-      headerName: "Worker Name",
+      headerName:
+        selected === "client"
+          ? "Clients"
+          : "Support Worker",
+
       field: "name",
+
       render: (_, row) => (
         <Box
           sx={{
@@ -123,72 +119,79 @@ export default function VerificationTable() {
           }}
         >
           <Avatar
-            src={row.avatar}
-            sx={{
-              width: 32,
-              height: 32,
-              bgcolor: "#E5E7EB",
-              color: "#374151",
-              fontSize: 14,
-            }}
-          />
+            src={row?.avatar || ""}
+            sx={VerifyStyles.avatarSx}
+          >{row.name[0]}</Avatar>
+
           <Typography
             sx={{
               fontSize: 14,
-              fontWeight: 500,
-            }}>
+              fontWeight: 400,
+            }}
+          >
             {row.name}
           </Typography>
+
         </Box>
       ),
     },
+
     {
       headerName: "Email Address",
       field: "email",
     },
+
     {
       headerName: "Phone Number",
       field: "phone",
     },
+
     {
       headerName: "Application Date",
       field: "applicationDate",
     },
+
     {
       headerName: "Document Status",
       field: "documentStatus",
     },
+
     {
       headerName: "Verification Type",
       field: "verificationType",
     },
+
     {
       headerName: "Status",
       field: "status",
+
       render: (value) => {
-        const label =
-          value as string;
+
+        const key = formatStatus(value as string);
+
         const style =
-          STATUS_STYLES[label] ?? {};
+          STATUS_STYLES[key?.toLowerCase()] ?? {};
+
         return (
           <Chip
-            label={label}
+            label={key}
             size="small"
             sx={{
               ...style,
               height: 24,
-              borderRadius:
-                "12px",
+              borderRadius: "12px",
               fontSize: 12,
               fontWeight: 500,
-              border:
-                style.borderColor ? `1px solid ${style.borderColor}` : "none",
+              border: style.borderColor
+                ? `1px solid ${style.borderColor}`
+                : "none",
             }}
           />
         );
       },
     },
-  ];
+
+  ], [selected]);
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(columns)
@@ -216,17 +219,12 @@ export default function VerificationTable() {
   ];
 
   // tab function
-  const handleTab = (val: string) => {
+  const handleTab = (val: any) => {
     setSelected(val);
     setCurrentPage(1);
-    getVerificationQueue({
-      offset: 0,
-      limit: ROWS_PER_PAGE,
-      search: searchValue,
-      type: val,
-    });
   }
 
+  //table search function with api call
   const handleSearch = (value: string) => {
     setSearchValue(value);
     setCurrentPage(1);
@@ -237,6 +235,8 @@ export default function VerificationTable() {
       type: selected,
     });
   }
+
+  // page changing function
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     getVerificationQueue({
@@ -247,43 +247,35 @@ export default function VerificationTable() {
     });
   }
 
+  // tab to changing table name updating funciton
+  useEffect(() => {
+    setColumnStates(
+      buildColumnStates(columns)
+    );
+  }, [columns]);
+
+  // initial time calling api
+  useEffect(() => {
+    getVerificationQueue({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: "",
+      type: selected,
+    });
+  }, [selected]);
+
   return (
 
     <Box>
       {/* Client / Worker Toggle */}
       <Box
-        sx={{
-          backgroundColor: "#EFEFEF",
-          padding: "6px",
-          borderRadius: "50px",
-          display: "flex",
-          gap: 1,
-          width: "fit-content",
-          marginBottom: 2,
-        }}
+        sx={VerifyStyles.mainSx}
       >
         <Button
           disableRipple
           onClick={() => handleTab("client")}
-          sx={{
-            minWidth: 140,
-            height: 36,
-            borderRadius: "50px",
-            textTransform: "none",
-            fontSize: 14,
-            fontWeight: 500,
-            color:
-              selected === "client"
-                ? "#FFFFFF"
-                : "#6F6F6F",
-            backgroundColor:
-              selected === "client"
-                ? "#086D63"
-                : "transparent",
-            "&:hover": {
-              backgroundColor: selected === "client" ? "#086D63" : "transparent",
-            },
-          }}
+          sx={cta(selected, "client")}
+
         >
           Clients
         </Button>
@@ -291,48 +283,30 @@ export default function VerificationTable() {
         <Button
           disableRipple
           onClick={() => handleTab("worker")}
-          sx={{
-            minWidth: 140,
-            height: 36,
-            borderRadius: "50px",
-            textTransform: "none",
-            fontSize: 14,
-            fontWeight: 500,
-            color: selected === "worker" ? "#FFFFFF" : "#6F6F6F",
-            backgroundColor:
-              selected === "worker" ? "#086D63" : "transparent",
-            "&:hover": {
-              backgroundColor: selected === "worker" ? "#086D63" : "transparent",
-            },
-          }}
+          sx={cta(selected, "worker")}
         >
           Support Worker
         </Button>
       </Box>
 
       {/* Table */}
-      {
-        loading ? (
-          <Loading />
-        ) : tableRows.length === 0 ? (
-          <NoDataFound message="No verification records found" />
-        ) : (
-          <TableComponent
-            rows={tableRows}
-            columns={columns}
-            rowActions={rowActions}
-            totalPages={Math.ceil(total / ROWS_PER_PAGE)}
-            currentPage={currentPage}
-            searchValue={searchValue}
-            columnStates={columnStates}
-            onColumnStatesChange={setColumnStates}
-            onSearch={handleSearch}
-            onPageChange={handlePageChange}
-            onExportData={() => { }}
-            onFilter={() => { }}
-          />
-        )
-      }
+      <TableComponent
+        rows={tableRows}
+        columns={columns}
+        rowActions={rowActions}
+        searchPlaceholder={selected === 'client' ? 'Search Client name' : 'Search Support Worker name'}
+        noData="No verification records found"
+        isLoading={loading}
+        totalPages={Math.ceil(total / ROWS_PER_PAGE)}
+        currentPage={currentPage}
+        searchValue={searchValue}
+        columnStates={columnStates}
+        onColumnStatesChange={setColumnStates}
+        onSearch={handleSearch}
+        onPageChange={handlePageChange}
+        onExportData={() => { }}
+        onFilter={() => { }}
+      />
     </Box>
   );
 }

@@ -184,7 +184,7 @@ export const CustomModal = ({
                                 height: 48,
                                 borderRadius: "50px",
                                 textTransform: "none",
-                                bgcolor: "#086D63",
+                                bgcolor: "primary.main",
                                 fontWeight: 700,
                                 fontSize: 14,
                                 color: "#FFFFFF",

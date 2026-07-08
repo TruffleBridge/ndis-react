@@ -166,7 +166,7 @@ const ClientFormPage = () => {
                                         mt: "0 !important",
                                         cursor: "pointer",
                                         bgcolor: isActive ? "#F2FCFA" : "transparent",
-                                        borderLeft: isActive ? "4px solid #086D63" : "4px solid transparent",
+                                        borderLeft: isActive ? "4px solid primary.main" : "4px solid transparent",
                                         transition: "0.2s",
                                         display: "flex",
                                         gap: 1,

@@ -158,9 +158,10 @@ export const SideNavbar = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(item.path);
-                    if (isMobileNav) {
-                      setOpen(false);
-                    }
+                    setOpen(false)
+                    // if (isMobileNav) {
+                    //   setOpen(false);
+                    // }
                   }}
                   sx={{
                     ...(active ? S.navItemActive : S.navItemInactive),

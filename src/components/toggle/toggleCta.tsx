@@ -74,9 +74,9 @@ export const ToggleGroup = ({
 
                             "&.Mui-selected": {
                                 backgroundColor: "#D4E6E5",
-                                color: "#086D63",
+                                color: "primary.main",
                                 fontWeight: 600,
-                                borderColor: "#086D63 !important",
+                                borderColor: "primary.main !important",
                             },
 
                             "&.Mui-selected:hover": {

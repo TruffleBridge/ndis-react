@@ -7,14 +7,14 @@ export interface VerificationQueuePayload {
 
 export interface VerificationQueueItem {
   id: number;
-  name: string;
+  fullName: string;
   email: string;
   phone: string;
-  applicationDate: string;
-  documentStatus: string;
+  profilePicture:string;
+  createdAt: string;
+  uploadedDocumentCount: string;
   verificationType: string;
   status: string;
-  avatar?: string;
 }
 
 export interface VerificationQueueResponse {
