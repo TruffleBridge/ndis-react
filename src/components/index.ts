@@ -26,3 +26,5 @@ export { CustomSwitch, type SwitchItem } from "./customSwitch/customSwitch";
 export { CustomModal, type CustomModalProps } from "./modal/modal";
 export type { VirtualAssistantWidgetProps, ChatMessage, QuickOption } from "./askAI/index";
 export { VirtualAssistantLauncher } from "./askAI/index";
+export { NoDataFound } from "./noData/NoDataFound";
+export { Loading } from "./loading/loading";

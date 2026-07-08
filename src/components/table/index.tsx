@@ -220,7 +220,6 @@ export function TableComponent<T extends Record<string, unknown>>({
             boxShadow:
                 "0px 1px 3px rgba(0,0,0,0.04), 0px 12px 32px rgba(0,0,0,0.08)",
             borderRadius: "12px",
-
         }}>
             <Paper
                 elevation={0}
@@ -537,56 +536,61 @@ export function TableComponent<T extends Record<string, unknown>>({
                                 )}
                             </TableRow>
                         </TableHead>
+                        <Box sx={{
+                            minHeight: 200,
+                            maxHeight: 300,
+                            height: '100%'
+                        }}>
+                            <TableBody>
+                                {rows.map((row, rowIdx) => (
+                                    <TableRow key={rowIdx} sx={{
+                                        height: '100%', minHeight: '360px'
+                                    }}>
+                                        {visibleColumns.map((col, colIdx) => {
+                                            const rawValue = col.field !== undefined ? row[col.field] : undefined;
+                                            return (
+                                                <TableCell
+                                                    key={colIdx}
+                                                    sx={{
+                                                        ...baseBodyCellSx,
+                                                        ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
+                                                        ...col.cellSx,
+                                                        ...((isHasAction && isStatusLast) &&
+                                                            col.field === "status" && {
+                                                            borderLeft: "1px solid #E5E7EB",
+                                                        }),
+                                                    }}
+                                                >
+                                                    {col.render
+                                                        ? col.render(rawValue, row)
+                                                        : (rawValue as React.ReactNode) ?? "—"}
+                                                </TableCell>
+                                            );
+                                        })}
 
-                        <TableBody>
-                            {rows.map((row, rowIdx) => (
-                                <TableRow key={rowIdx} sx={{
-                                    height: '100%', minHeight: '360px'
-                                }}>
-                                    {visibleColumns.map((col, colIdx) => {
-                                        const rawValue = col.field !== undefined ? row[col.field] : undefined;
-                                        return (
+                                        {hasActions && (
                                             <TableCell
-                                                key={colIdx}
                                                 sx={{
-                                                    ...baseBodyCellSx,
-                                                    ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
-                                                    ...col.cellSx,
-                                                    ...((isHasAction && isStatusLast) &&
-                                                        col.field === "status" && {
-                                                        borderLeft: "1px solid #E5E7EB",
-                                                    }),
+                                                    px: 1,
+                                                    py: 1.5,
+                                                    width: 48,
+                                                    borderBottom: rowIdx === rows.length - 1 ? 0 : "1px solid #E5E7EB",
+                                                    borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
                                                 }}
                                             >
-                                                {col.render
-                                                    ? col.render(rawValue, row)
-                                                    : (rawValue as React.ReactNode) ?? "—"}
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => openMenu(e, row)}
+                                                    sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
+                                                >
+                                                    <MoreVertIcon fontSize="small" />
+                                                </IconButton>
                                             </TableCell>
-                                        );
-                                    })}
-
-                                    {hasActions && (
-                                        <TableCell
-                                            sx={{
-                                                px: 1,
-                                                py: 1.5,
-                                                width: 48,
-                                                borderBottom: rowIdx === rows.length - 1 ? 0 : "1px solid #E5E7EB",
-                                                borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
-                                            }}
-                                        >
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => openMenu(e, row)}
-                                                sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
-                                            >
-                                                <MoreVertIcon fontSize="small" />
-                                            </IconButton>
-                                        </TableCell>
-                                    )}
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                                        )}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Box>
                     </Table>
                 </Box>
             </Paper >
@@ -658,7 +662,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                     }}
                 >
                     <Pagination
-                        count={totalPages}
+                        count={totalPages ? totalPages : 1}
                         page={currentPage}
                         onChange={(_, p) => onPageChange?.(p)}
                         siblingCount={1}
