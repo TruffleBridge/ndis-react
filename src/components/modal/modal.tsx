@@ -26,6 +26,7 @@ export interface CustomModalProps {
     loading?: boolean;
     showStatusSwitch?: boolean;
     status?: boolean;
+    showIcon?: boolean;
     onStatusChange?: (checked: boolean) => void;
 }
 
@@ -74,6 +75,7 @@ export const CustomModal = ({
     loading = false,
     showStatusSwitch = false,
     status = false,
+    showIcon,
     onStatusChange = () => { },
 }: CustomModalProps) => {
     const config = iconConfig[type];
@@ -159,7 +161,7 @@ export const CustomModal = ({
                         >
                             <Typography sx={{
                                 fontSize: 14,
-                                fontWeight:500,
+                                fontWeight: 500,
                                 color: "#222214",
                             }}>
                                 {status ? "Active" : "Inactive"}
@@ -206,7 +208,7 @@ export const CustomModal = ({
                             variant="contained"
                             onClick={onPrimary}
                             disabled={loading}
-                            endIcon={!showStatusSwitch && <ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />}
+                            endIcon={(!showStatusSwitch || !showIcon && <ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />)}
                             sx={{
                                 height: 48,
                                 borderRadius: "50px",

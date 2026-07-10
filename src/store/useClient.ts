@@ -5,7 +5,6 @@ import {
     getApiRequest,
     createApiRequest,
     // updateApiRequest,
-    deleteApiRequest,
     updateApiRequest,
 } from "../api/api";
 
@@ -86,7 +85,8 @@ interface ClientStore {
     fetchClients: () => Promise<void>;
     setSearchValue: (value: string) => void;
     setCurrentPage: (page: number) => void;
-    deleteClient: (id: number | string) => Promise<boolean>;
+    deleteClient?: (id: number | string) => Promise<boolean>;
+    deleteStatus?: boolean;
 
     // ---------------- form actions ----------------
     initForm: (mode: FormMode, clientId?: number | string | null) => Promise<void>;
@@ -102,7 +102,7 @@ interface ClientStore {
     resetForm: () => void;
     closeSubmitSuccess: () => void;
     status?: boolean;
-    updateState?: (val: boolean) => void;
+    updateState?: (key: string, val: boolean) => void;
     getStatusUpdate: (id: any) => Promise<any>
 }
 
@@ -124,6 +124,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     isFormLoading: false,
     isSubmitting: false,
     submitSuccess: false,
+    deleteStatus: false,
 
     // =========================== TABLE (getTableApi) ===========================
     fetchClients: async () => {
@@ -148,13 +149,18 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     setCurrentPage: (page) => set({ currentPage: page }),
 
     // ========================== table status update =====================
-    updateState: (val) => set({ status: val }),
+    updateState: (key, val) =>
+        set(
+            key === "delete"
+                ? { deleteStatus: val }
+                : { status: val }
+        ),
     getStatusUpdate: async (id: any) => {
-        const { status } = get();
+        const { status, deleteStatus } = get();
         try {
             await updateApiRequest(ENDPOINTS.status, {
                 "userId": id,
-                "status": status ? "ACTIVE" : "INACTIVE"
+                "status": deleteStatus ? "DELETED" : status ? "ACTIVE" : "INACTIVE"
             });
             set((state) => ({ clients: state.clients.filter((c) => c.id !== id) }));
             return true;
@@ -165,16 +171,16 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     },
 
     // =========================== DELETE (getDelete) ===========================
-    deleteClient: async (id) => {
-        try {
-            await deleteApiRequest(ENDPOINTS.delete(id));
-            set((state) => ({ clients: state.clients.filter((c) => c.id !== id) }));
-            return true;
-        } catch (err) {
-            set({ clientsError: "Failed to delete client" });
-            return false;
-        }
-    },
+    // deleteClient: async (id) => {
+    //     try {
+    //         await deleteApiRequest(ENDPOINTS.delete(id));
+    //         set((state) => ({ clients: state.clients.filter((c) => c.id !== id) }));
+    //         return true;
+    //     } catch (err) {
+    //         set({ clientsError: "Failed to delete client" });
+    //         return false;
+    //     }
+    // },
 
     // ===================== FORM INIT (getView / getEdit) =====================
     initForm: async (mode, clientId = null) => {

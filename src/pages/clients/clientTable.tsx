@@ -45,7 +45,7 @@ export default function ClientTable() {
     const fetchClients = useClientStore((s) => s.fetchClients);
     const setSearchValue = useClientStore((s) => s.setSearchValue);
     const setCurrentPage = useClientStore((s) => s.setCurrentPage);
-    const deleteClient = useClientStore((s) => s.deleteClient);
+    const deleteStatus = useClientStore((s) => s.deleteStatus);
     const status = useClientStore((s) => s.status);
     const updateState = useClientStore((s) => s.updateState);
     const getStatusUpdate = useClientStore((s) => s.getStatusUpdate);
@@ -176,23 +176,24 @@ export default function ClientTable() {
     })
 
     const getRowActions = (row: Client): RowAction<Client>[] => [
+        {
+            label: "Status",
+            icon: (
+                <AutorenewOutlinedIcon
+                    sx={{
+                        fontSize: 14,
+                        color: "#7F7F7F",
+                    }}
+                />
+            ),
+            onClick: () => {
+                updateState?.('delete', false)
+                setValues(row);
+                setStateModal(true);
+            },
+        },
         ...(row?.clientStatus === "ACTIVE"
             ? [
-                {
-                    label: "Status",
-                    icon: (
-                        <AutorenewOutlinedIcon
-                            sx={{
-                                fontSize: 14,
-                                color: "#7F7F7F",
-                            }}
-                        />
-                    ),
-                    onClick: () => {
-                        setValues(row);
-                        setStateModal(true);
-                    },
-                },
                 {
                     label: "Edit",
                     icon: (
@@ -237,7 +238,11 @@ export default function ClientTable() {
                     sx: {
                         color: "#7F7F7F",
                     },
-                    onClick: () => deleteClient(row.id),
+                    onClick: () => {
+                        updateState?.('delete', true)
+                        setValues(row);
+                        setStateModal(true)
+                    },
                 },
             ]
             : []),
@@ -246,9 +251,18 @@ export default function ClientTable() {
     const handleStatueChange = async () => {
         const res = await getStatusUpdate(values?.id)
         if (res) {
+            setStateModal(false);
+            updateState?.('delete', false)
+            updateState?.('status', false)
             fetchClients();
         }
     }
+
+    const handleClose = () => {
+        setStateModal(false)
+        updateState?.('status', false)
+        updateState?.("delete", false);
+    };
 
     return (
         <Box>
@@ -277,15 +291,18 @@ export default function ClientTable() {
             />
             <CustomModal
                 open={stateModal}
-                onClose={() => setStateModal(false)}
+                onClose={handleClose}
                 type="warning"
-                showStatusSwitch
-                onStatusChange={updateState}
+                showIcon={true}
+                showStatusSwitch={!deleteStatus}
+                onStatusChange={(e) => updateState?.('status', e)}
                 status={status}
+                backText={deleteStatus ? "cancel" : ''}
                 primaryText="Confirm"
+                onBack={handleClose}
                 onPrimary={handleStatueChange}
                 title={values?.clientName}
-                description={`Your account status is now ${values?.clientStatus}`}
+                description={deleteStatus ? 'Are you sure you want to delete this client?' : `Your account status is now ${values?.clientStatus}`}
             />
             <Menu
                 anchorEl={supportAnchor}
