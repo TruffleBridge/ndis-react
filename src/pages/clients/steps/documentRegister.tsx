@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Button } from "@mui/material";
+import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
@@ -65,13 +65,6 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <Box sx={{ mb: 1, flexShrink: 0, textAlign: "left" }}>
-                <Typography sx={ClientStyles.title}>Document Registration</Typography>
-                <Typography sx={ClientStyles.subtitle}>
-                    Please upload the official registered documents for the NDIS provider business registration
-                </Typography>
-            </Box>
-
             <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={0}>
                     {mandatoryFields.map((field) => (

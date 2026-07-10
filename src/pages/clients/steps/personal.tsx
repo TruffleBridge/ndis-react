@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Grid } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import dayjs, { type Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
@@ -63,12 +63,6 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <Box sx={{ textAlign: "left", flexShrink: 0, mb: 1 }}>
-                <Typography sx={ClientStyles.title}>Personal Information</Typography>
-                <Typography sx={ClientStyles.subtitle}>
-                    Just the basics - take about 30 seconds to set up a secure identity
-                </Typography>
-            </Box>
 
             <Box sx={ClientStyles.scrollArea}>
                 <Grid container spacing={2}>

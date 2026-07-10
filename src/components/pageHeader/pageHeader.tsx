@@ -1,35 +1,39 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, type SxProps, type Theme } from "@mui/material";
 import { styles } from "./styles";
 
 interface PageHeaderProps {
-  title: string;
-  subtitle?: string;
+  title: string | null;
+  subtitle?: string | null;
   icon?: React.ReactNode
+  mainSx?: SxProps<Theme>
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
-  icon
+  icon,
+  mainSx
 }) => {
   return (
-    <Box sx={styles.root}>
+    <Box sx={{ ...styles.root, ...mainSx } as any}>
 
       {icon}
 
-      <Box>
+      < Box >
         <Typography sx={styles.title}>
           {title}
         </Typography>
 
-        {subtitle && (
-          <Typography sx={styles.subtitle}>
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-    </Box>
+        {
+          subtitle && (
+            <Typography sx={styles.subtitle}>
+              {subtitle}
+            </Typography>
+          )
+        }
+      </Box >
+    </Box >
   );
 };
 export default PageHeader;

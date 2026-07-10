@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Button } from "@mui/material";
+import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
@@ -36,13 +36,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <Box sx={{ mb: 1, flexShrink: 0, textAlign: "left" }}>
-                <Typography sx={ClientStyles.title}>NDIS Business</Typography>
-                <Typography sx={ClientStyles.subtitle}>
-                    Please provide the official registered business name as it appears on your NDIS provider registration documents
-                </Typography>
-            </Box>
-
             <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
                 <SectionCard title="Entity Information" icon={<CompanyIcon />}>
                     <Grid container spacing={2}>

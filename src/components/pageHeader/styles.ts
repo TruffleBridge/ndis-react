@@ -16,13 +16,19 @@ export const styles: Record<string, SxProps<Theme>> = {
   },
 
   title: {
-    fontSize: "18px",
+    fontSize: {
+      md: "18px",
+      xs: '14'
+    },
     fontWeight: 600,
     color: "#111827",
   },
 
   subtitle: {
-    fontSize: "14px",
+    fontSize: {
+      md: "14px",
+      xs: '14'
+    },
     color: "#7F7F7F",
     mt: "1px",
     fontWeight: 400

@@ -14,19 +14,23 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
         flexShrink: 0,
     },
-    rightSide: {
-        flex: 1,
-        minWidth: 0,
-        height: { xs: "auto", md: "68vh" },
-        maxHeight: { xs: "none", md: "68vh" },
-        overflowY: "auto",
-        overflowX: "hidden",
+    rightSideMain: {
+        bgcolor: "#FFFFFF",
+        boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
         border: "1px solid #E2E8F0",
         px: { xs: 2, sm: 3 },
         py: 2,
         borderRadius: "14px",
-        bgcolor: "#FFFFFF",
-        boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
+        width: '100%',
+
+    },
+    rightSide: {
+        flex: 1,
+        minWidth: 0,
+        height: { xs: "auto", md: "49.7vh", xl: '58vh', },
+        maxHeight: { xs: "none", md: "55.7vh", xl: '58vh' },
+        overflowY: "auto",
+        overflowX: "hidden",
         scrollbarGutter: "stable",
     },
     formLayout: {
@@ -50,21 +54,13 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         height: 42,
         boxShadow: "none",
         minWidth: "130px",
-        "&:hover": {
-            bgcolor: (theme: Theme) => theme.palette.primary.dark,
-            boxShadow: "none",
-        },
-    },
-    title: {
-        fontSize: { xs: "16px", sm: "18px" },
-        fontWeight: 600,
-        color: "#1E293B",
-    },
-    subtitle: {
-        fontSize: { xs: "13px", sm: "14px" },
-        color: "#64748B",
-        mt: "2px",
-        mb: 2,
+        '&.Mui-disabled': {
+            backgroundColor: 'currentColor',
+        }
+        // "&:hover": {
+        //     bgcolor: (theme: Theme) => theme.palette.primary.dark,
+        //     boxShadow: "none",
+        // },
     },
     scrollArea: {
         flex: 1,

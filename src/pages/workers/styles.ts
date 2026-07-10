@@ -41,7 +41,7 @@ export const WorkerStyles: Record<string, SxProps<Theme>> = {
     nextCta: {
         fontSize: "14px",
         fontWeight: 600,
-        bgcolor: (theme: Theme) => theme.palette.primary.main,
+        bgcolor: 'primary.main',
         color: "#FFFFFF",
         borderRadius: "8px",
         px: 2.5,
@@ -50,10 +50,13 @@ export const WorkerStyles: Record<string, SxProps<Theme>> = {
         height: 42,
         boxShadow: "none",
         minWidth: "130px",
-        "&:hover": {
-            bgcolor: (theme: Theme) => theme.palette.primary.dark,
-            boxShadow: "none",
-        },
+        '&.Mui-disabled': {
+            backgroundColor: 'currentColor',
+        }
+        // "&:hover": {
+        //     bgcolor: (theme: Theme) => theme.palette.primary.dark,
+        //     boxShadow: "none",
+        // },
     },
     title: {
         fontSize: { xs: "16px", sm: "18px" },

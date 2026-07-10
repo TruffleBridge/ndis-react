@@ -26,8 +26,8 @@ export interface DocumentFieldConfig {
 
 export const DOCUMENT_FIELDS: DocumentFieldConfig[] = [
     { key: "ndisCertificate", label: "NDIS Certificate of Registration", sublabel: "Mandatory for all registered providers", section: "mandatory" },
-    { key: "ndisAudit", label: "NDIS Audit Certificate", sublabel: "Latest audit documents", icon: <RuleOutlinedIcon  htmlColor="#3E4947"  />, section: "mandatory" },
-    { key: "publicLiabilityInsurance", label: "Public Liability Insurance", sublabel: "Mandatory for all registered providers", icon: <ShieldOutlinedIcon  htmlColor="#3E4947"  />, section: "mandatory" },
+    { key: "ndisAudit", label: "NDIS Audit Certificate", sublabel: "Latest audit documents", icon: <RuleOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
+    { key: "publicLiabilityInsurance", label: "Public Liability Insurance", sublabel: "Mandatory for all registered providers", icon: <ShieldOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
     { key: "personalIndemnityInsurance", label: "Personal Indemnity Insurance", sublabel: "Mandatory for all registered providers", icon: <AssuredWorkloadOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
     { key: "workersCompInsurance", label: "Workers Compensation Insurance", sublabel: "Mandatory for all registered providers", icon: <WorkerIcon color="#3E4947" />, section: "mandatory" },
     { key: "incidentManagementPolicy", label: "Incident Management Policy", sublabel: "Mandatory for all registered providers", icon: <PolicyIcon />, section: "mandatory" },
@@ -46,3 +46,10 @@ export const FORM_STEPS = [
     { id: "business", label: "NDIS Business" },
     { id: "document", label: "Document Registration" },
 ] as const;
+
+export const progressValue = (activeStep: string) =>
+({
+    info: 33.3,
+    business: 66.6,
+    document: 100,
+}[activeStep] ?? 0);

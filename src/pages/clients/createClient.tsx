@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowForwardIosOutlined } from "@mui/icons-material";
 
@@ -9,7 +9,7 @@ import DocumentRegisterStep from "./steps/documentRegister";
 import { ClientIcon } from "../../assets";
 import { CustomModal, Loading, PageHeader } from "../../components";
 import { ClientStyles } from "./styles";
-import { FORM_STEPS } from "./utils/constants";
+import { FORM_STEPS, progressValue } from "./utils/constants";
 import { useClientStore } from "../../store/useClient";
 import type { ClientFormNavState, FormMode, StepId } from "../../types/client";
 
@@ -96,11 +96,37 @@ const ClientFormPage = () => {
         }
     };
 
+    const getHeader = () => {
+        switch (activeStep) {
+            case "info":
+                return 'Personal Information';
+            case "business":
+                return 'NDIS Business';
+            case "document":
+                return 'Document Registration';
+            default:
+                return null;
+        }
+    }
+    const getSubHeader = () => {
+        switch (activeStep) {
+            case "info":
+                return 'Just the basics - take about 30 seconds to set up a secure identity';
+            case "business":
+                return 'Please provide the official registered business name as it appears on your NDIS provider registration documents';
+            case "document":
+                return 'Please upload the official registered documents for the NDIS provider business registration';
+            default:
+                return null;
+        }
+    }
+
     const pageTitle = mode === "create" ? "Add New Client" : mode === "edit" ? "Edit Client" : "View Client";
 
     return (
         <Box>
-            {isFormLoading ? <Loading />
+            {isFormLoading ?
+                <Loading />
                 :
                 <>
                     <PageHeader icon={<ClientIcon color="#3A3838" />} title={pageTitle} subtitle="Create Role" />
@@ -146,7 +172,31 @@ const ClientFormPage = () => {
                         </Paper>
 
                         {/* RIGHT SIDE */}
-                        <Box sx={ClientStyles.rightSide}>{renderRightSide()}</Box>
+                        <Box sx={ClientStyles.rightSideMain}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginBottom: '10px',
+                            }}>
+                                <PageHeader mainSx={{ boxShadow: 'none', border: 'none', p: 0 }}
+                                    title={getHeader && getHeader()}
+                                    subtitle={getSubHeader && getSubHeader()} />
+
+                                <CircularProgress
+                                    size={42}
+                                    thickness={4}
+                                    value={progressValue(activeStep)}
+                                    variant="determinate"
+                                    enableTrackSlot
+                                    sx={{
+                                        color: "primary.main",
+                                    }}
+                                />
+                            </div>
+                            <Box sx={ClientStyles.rightSide}>
+                                {renderRightSide()}
+                            </Box>
+                        </Box>
                     </Box>
                 </>}
             <CustomModal
