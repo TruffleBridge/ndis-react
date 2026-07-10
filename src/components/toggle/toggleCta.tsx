@@ -94,7 +94,13 @@ export const ToggleGroup = ({
                             },
                             "&.MuiToggleButtonGroup-lastButton": {
                                 border: "1px solid #BEC9C6",
-                            }
+                            },
+                            '&.MuiToggleButtonGroup-middleButton.Mui-disabled': {
+                                borderLeft: '1px solid #BEC9C6'
+                            },
+                            '&.MuiToggleButtonGroup-lastButton.Mui-disabled': {
+                                borderLeft: '1px solid #BEC9C6'
+                            },
                         }}
                     >
                         {item.label}

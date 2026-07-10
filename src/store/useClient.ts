@@ -6,6 +6,7 @@ import {
     createApiRequest,
     // updateApiRequest,
     deleteApiRequest,
+    updateApiRequest,
 } from "../api/api";
 
 import type {
@@ -134,8 +135,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             });
             const payload = res.data?.data ?? res.data ?? {};
             set({
-                clients: payload.rows ?? payload.clients ?? payload ?? [],
-                totalPages: payload.totalPages ?? 1,
+                clients: payload?.rows ?? payload.clients ?? payload ?? [],
+                totalPages: payload.totalCount ?? 1,
                 clientsLoading: false,
             });
         } catch (err) {
@@ -151,7 +152,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     getStatusUpdate: async (id: any) => {
         const { status } = get();
         try {
-            await createApiRequest(ENDPOINTS.update, {
+            await updateApiRequest(ENDPOINTS.status, {
                 "userId": id,
                 "status": status ? "ACTIVE" : "INACTIVE"
             });
@@ -212,7 +213,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
                 if (field) {
                     // First uploaded file
-                    mappedDoc[field.key] = doc.documentUrls?.[0] ?? null;
+                    mappedDoc[field.key] = { documentType: doc?.documentType?.name, ...doc.documentUrls?.[0] ?? null };
 
                     // If your UI expects array, use this instead:
                     // mappedDoc[field.key] = doc.documentUrls ?? [];
@@ -335,7 +336,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     // ======================= SUBMIT (getCreateApi / edit) =======================
     submitForm: async () => {
         debugger;
-        const { mode = 'edit', clientId = 10, personalData, businessData, documentData } = get();
+        const { mode, clientId, personalData, businessData, documentData } = get();
         set({ isSubmitting: true });
 
         // const payload = {
@@ -389,11 +390,11 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         console.log(payload, 'payload');
 
         try {
-            // if (mode === "edit" && clientId != null) {
-            //     await updateApiRequest(ENDPOINTS.update, payload);
-            // } else {
-            await createApiRequest(ENDPOINTS.create, payload);
-            // }
+            if (mode === "edit" && clientId != null) {
+                await updateApiRequest(ENDPOINTS.update, payload);
+            } else {
+                await createApiRequest(ENDPOINTS.create, payload);
+            }
             set({ isSubmitting: false, submitSuccess: true });
             return true;
         } catch (err) {

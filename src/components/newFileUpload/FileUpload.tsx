@@ -9,11 +9,10 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import { FileDownloadIcon } from "../../assets";
+import { DeleteIcon, FileDownloadIcon } from "../../assets";
 import FieldError from "../fieldError/fieldError";
 
 // ---------------------------------------------------------------------------
@@ -206,9 +205,9 @@ function FileRow({ uploadedFile, onRemove, compact = false, disabled = false }: 
             {/* Hide the delete action entirely in disabled/View mode */}
             {!disabled && (
                 <IconButton
-                    size="small"
+                    size="medium"
                     onClick={onRemove}
-                    sx={{ color: DANGER, flexShrink: 0, "&:hover": { backgroundColor: "#FFEBEE" } }}
+                    sx={{ color: DANGER, flexShrink: 0 }}
                 >
                     <DeleteIcon fontSize="small" />
                 </IconButton>
@@ -443,9 +442,9 @@ export function UploadVariant2({
                         {/* Hide the delete action entirely in disabled/View mode */}
                         {!disabled && (
                             <IconButton
-                                size="small"
+                                size="medium"
                                 onClick={() => onChange(null)}
-                                sx={{ color: DANGER, flexShrink: 0, "&:hover": { backgroundColor: "#FFEBEE" } }}
+                                sx={{ color: DANGER, flexShrink: 0 }}
                             >
                                 <DeleteIcon fontSize="small" />
                             </IconButton>
@@ -520,7 +519,7 @@ export function UploadVariant3({ label, value, onChange, disabled = false }: Var
                         <IconButton
                             size="small"
                             onClick={() => onChange(null)}
-                            sx={{ color: DANGER, flexShrink: 0, "&:hover": { backgroundColor: "#FFEBEE" } }}
+                            sx={{ color: DANGER, flexShrink: 0 }}
                         >
                             <DeleteIcon fontSize="small" />
                         </IconButton>

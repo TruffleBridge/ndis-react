@@ -6,6 +6,7 @@ import { InputTextField, SectionCard } from "../../../components";
 import { ClientStyles } from "../styles";
 import { CompanyHomeIcon, CompanyIcon, LocationIcon, LocationIcon1 } from "../../../assets";
 import { useClientStore } from "../../../store/useClient";
+import { getViewFunction } from "../../../utils/viewfunction";
 
 interface BusinessProps {
     isView?: boolean;
@@ -46,42 +47,54 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                 <SectionCard title="Entity Information" icon={<CompanyIcon />}>
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12 }}>
-                            <InputTextField
-                                label="Registered NDIS Business Name"
-                                placeholder="e.g Care Solutions Pty. Ltd"
-                                value={businessData.businessName}
-                                required
-                                isView={isView}
-                                error={!!errors.businessName}
-                                errors={errors.businessName}
-                                onChange={(e) => setBusinessField("businessName", e)}
-                                startAdornment={<CompanyHomeIcon />}
-                            />
+                            {isView ? getViewFunction('Registered NDIS Business Name', businessData?.businessName, 'plain', <CompanyHomeIcon />) :
+                                <InputTextField
+                                    label="Registered NDIS Business Name"
+                                    placeholder="e.g Care Solutions Pty. Ltd"
+                                    value={businessData?.businessName}
+                                    required
+                                    isView={isView}
+                                    error={!!errors.businessName}
+                                    errors={errors.businessName}
+                                    onChange={(e) => setBusinessField("businessName", e)}
+                                    startAdornment={<CompanyHomeIcon />}
+                                />}
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="Active ABN"
-                                placeholder="#11-digit ABN"
-                                value={businessData.abn}
-                                required
-                                isView={isView}
-                                error={!!errors.abn}
-                                errors={errors.abn}
-                                onChange={(e) => setBusinessField("abn", e)}
-                                slotProps={{ htmlInput: { maxLength: 11 } }}
-                            />
+                            {isView ? getViewFunction('Active ABN', businessData?.abn, 'plain') :
+                                <InputTextField
+                                    label="Active ABN"
+                                    placeholder="#11-digit ABN"
+                                    value={businessData?.abn}
+                                    required
+                                    isView={isView}
+                                    error={!!errors.abn}
+                                    errors={errors.abn}
+                                    onChange={(e) => {
+                                        if (/^\d*$/.test(e) && e?.length !== 12) {
+                                            setBusinessField("abn", e)
+                                        }
+                                    }
+                                    }
+                                    slotProps={{ htmlInput: { maxLength: 11 } }}
+                                />}
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="ACN"
-                                placeholder="#9-digit ACN"
-                                value={businessData.acn}
-                                isView={isView}
-                                error={!!errors.acn}
-                                errors={errors.acn}
-                                onChange={(e) => setBusinessField("acn", e)}
-                                slotProps={{ htmlInput: { maxLength: 9 } }}
-                            />
+                            {isView ? getViewFunction('ACN', businessData?.acn, 'plain') :
+                                <InputTextField
+                                    label="ACN"
+                                    placeholder="#9-digit ACN"
+                                    value={businessData?.acn}
+                                    isView={isView}
+                                    error={!!errors.acn}
+                                    errors={errors.acn}
+                                    onChange={(e) => {
+                                        if (/^\d*$/.test(e) && e?.length !== 10) {
+                                            setBusinessField("acn", e)
+                                        }
+                                    }}
+                                    slotProps={{ htmlInput: { maxLength: 9 } }}
+                                />}
                         </Grid>
                     </Grid>
                 </SectionCard>
@@ -89,47 +102,56 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                 <SectionCard title="Business Address" icon={<LocationIcon1 />}>
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12 }}>
-                            <InputTextField
-                                label="Enter your business address"
-                                placeholder="123 example street"
-                                value={businessData.address}
-                                required
-                                isView={isView}
-                                error={!!errors.address}
-                                errors={errors.address}
-                                onChange={(e) => setBusinessField("address", e)}
-                                startAdornment={<LocationIcon />}
-                            />
+                            {isView ? getViewFunction('Enter your business address', businessData?.address, 'plain', <LocationIcon />) :
+                                <InputTextField
+                                    label="Enter your business address"
+                                    placeholder="123 example street"
+                                    value={businessData?.address}
+                                    required
+                                    isView={isView}
+                                    error={!!errors.address}
+                                    errors={errors.address}
+                                    onChange={(e) => setBusinessField("address", e)}
+                                    startAdornment={<LocationIcon />}
+                                />}
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <InputTextField
-                                label="Suburb"
-                                required
-                                placeholder="enter suburb"
-                                value={businessData.suburb}
-                                isView={isView}
-                                error={!!errors.suburb}
-                                errors={errors.suburb}
-                                onChange={(e) => setBusinessField("suburb", e)}
-                            />
+                            {isView ? getViewFunction('Enter suburb', businessData?.suburb, 'plain') :
+                                <InputTextField
+                                    label="Suburb"
+                                    required
+                                    placeholder="enter suburb"
+                                    value={businessData?.suburb}
+                                    isView={isView}
+                                    error={!!errors.suburb}
+                                    errors={errors.suburb}
+                                    onChange={(e) => setBusinessField("suburb", e)}
+                                />}
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <InputTextField
-                                label="State"
-                                placeholder="enter state"
-                                value={businessData.state}
-                                isView={isView}
-                                onChange={(e) => setBusinessField("state", e)}
-                            />
+                            {isView ? getViewFunction('Enter state', businessData?.state, 'plain') :
+                                <InputTextField
+                                    label="State"
+                                    placeholder="enter state"
+                                    value={businessData?.state}
+                                    isView={isView}
+                                    onChange={(e) => setBusinessField("state", e)}
+                                />}
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <InputTextField
-                                label="Postal Code"
-                                placeholder="0000"
-                                value={businessData.postalCode}
-                                isView={isView}
-                                onChange={(e) => setBusinessField("postalCode", e)}
-                            />
+                            {isView ? getViewFunction('Postal Code', businessData?.postalCode, 'plain') :
+                                <InputTextField
+                                    label="Postal Code"
+                                    placeholder="0000"
+                                    value={businessData?.postalCode}
+                                    isView={isView}
+                                    onChange={(e) => {
+                                        if (/^\d*$/.test(e)) {
+                                            setBusinessField("postalCode", e)
+                                        }
+                                    }
+                                    }
+                                />}
                         </Grid>
                     </Grid>
                 </SectionCard>

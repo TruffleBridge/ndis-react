@@ -52,14 +52,23 @@ const iconConfig = {
     },
 };
 
+const style = {
+    fontSize: 14,
+    color: "#7F7F7F",
+    lineHeight: 1.7,
+    fontWeight: 400,
+    maxWidth: 500,
+    mx: "auto",
+    mb: 5,
+}
 export const CustomModal = ({
     open,
     onClose,
     type = "success",
     title,
     description,
-    backText = "Back",
-    primaryText = "Continue",
+    backText = "",
+    primaryText = "",
     onBack,
     onPrimary,
     loading = false,
@@ -133,15 +142,7 @@ export const CustomModal = ({
                     </Typography>
 
                     <Typography
-                        sx={{
-                            fontSize: 14,
-                            color: "#7F7F7F",
-                            lineHeight: 1.7,
-                            fontWeight: 400,
-                            maxWidth: 500,
-                            mx: "auto",
-                            mb: 5,
-                        }}
+                        sx={style}
                     >
                         {description}
                     </Typography>
@@ -156,12 +157,15 @@ export const CustomModal = ({
                                 mb: 4,
                             }}
                         >
-                            <Typography>
+                            <Typography sx={{
+                                fontSize: 14,
+                                fontWeight:500,
+                                color: "#222214",
+                            }}>
                                 {status ? "Active" : "Inactive"}
                             </Typography>
 
                             <CustomSwitch
-                                label="Profile Preferences"
                                 checked={status}
                                 onChange={(items) => onStatusChange(items)}
                             />
@@ -202,7 +206,7 @@ export const CustomModal = ({
                             variant="contained"
                             onClick={onPrimary}
                             disabled={loading}
-                            endIcon={<ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />}
+                            endIcon={!showStatusSwitch && <ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />}
                             sx={{
                                 height: 48,
                                 borderRadius: "50px",

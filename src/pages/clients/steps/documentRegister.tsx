@@ -136,7 +136,7 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
 
                 <Button
                     sx={ClientStyles.nextCta}
-                    endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />}
+                    endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
                     onClick={onNext}
                     disabled={isSubmitting}
                 >

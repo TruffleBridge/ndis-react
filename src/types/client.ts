@@ -56,7 +56,7 @@ export interface Client {
   activeJobs: number;
   location: string;
   fundingType: string;
-  clientStatus: "Active" | "Inactive" | "Pending";
+  clientStatus: "ACTIVE" | "INACTIVE" | "PENDING";
   [key: string]: unknown;
 }
 

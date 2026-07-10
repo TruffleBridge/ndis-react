@@ -7,7 +7,7 @@ import PersonalInformation from "./steps/personal";
 import BusinessStep from "./steps/business";
 import DocumentRegisterStep from "./steps/documentRegister";
 import { ClientIcon } from "../../assets";
-import { CustomModal, PageHeader } from "../../components";
+import { CustomModal, Loading, PageHeader } from "../../components";
 import { ClientStyles } from "./styles";
 import { FORM_STEPS } from "./utils/constants";
 import { useClientStore } from "../../store/useClient";
@@ -32,6 +32,7 @@ const ClientFormPage = () => {
     const isSubmitting = useClientStore((s) => s.isSubmitting);
     const submitSuccess = useClientStore((s) => s.submitSuccess);
     const closeSubmitSuccess = useClientStore((s) => s.closeSubmitSuccess);
+    const isFormLoading = useClientStore((s) => s.isFormLoading);
 
     // Loads the right record for edit/view (getViewApi/getEditApi under the
     // hood) or resets to blanks for create - runs once whenever mode/id changes.
@@ -41,7 +42,6 @@ const ClientFormPage = () => {
     }, [mode, clientId]);
 
     const handleCancel = () => {
-        resetForm();
         navigate("/clients");
     };
 
@@ -100,57 +100,60 @@ const ClientFormPage = () => {
 
     return (
         <Box>
-            <PageHeader icon={<ClientIcon color="#3A3838" />} title={pageTitle} subtitle="Create Role" />
-            <Box sx={ClientStyles.formLayout}>
-                {/* LEFT SIDEBAR */}
-                <Paper elevation={0} sx={ClientStyles.sideMenu}>
-                    <Stack spacing={1}>
-                        {FORM_STEPS.map((step) => {
-                            const isActive = activeStep === step.id;
-                            return (
-                                <Box
-                                    key={step.id}
-                                    // onClick={() => goToStep(step.id)}
-                                    sx={{
-                                        p: 1.3,
-                                        mt: "0 !important",
-                                        cursor: "pointer",
-                                        bgcolor: isActive ? "#F2FCFA" : "transparent",
-                                        borderLeft: isActive ? "4px solid" : "4px solid",
-                                        borderColor: isActive ? "primary.main" : "transparent",
-                                        transition: "0.2s",
-                                        display: "flex",
-                                        gap: 1,
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        "&:hover": { bgcolor: "#f5f5f5" },
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            fontWeight: isActive ? 600 : 500,
-                                            fontSize: 13,
-                                            color: isActive ? "#1E293B" : "#64748B",
-                                        }}
-                                    >
-                                        {step.label}
-                                    </Typography>
-                                    <ArrowForwardIosOutlined sx={{ fontSize: 18, color: "#94A3B8" }} />
-                                </Box>
-                            );
-                        })}
-                    </Stack>
-                </Paper>
+            {isFormLoading ? <Loading />
+                :
+                <>
+                    <PageHeader icon={<ClientIcon color="#3A3838" />} title={pageTitle} subtitle="Create Role" />
+                    <Box sx={ClientStyles.formLayout}>
+                        {/* LEFT SIDEBAR */}
+                        <Paper elevation={0} sx={ClientStyles.sideMenu}>
+                            <Stack spacing={1}>
+                                {FORM_STEPS.map((step) => {
+                                    const isActive = activeStep === step.id;
+                                    return (
+                                        <Box
+                                            key={step.id}
+                                            // onClick={() => goToStep(step.id)}
+                                            sx={{
+                                                p: 1.3,
+                                                mt: "0 !important",
+                                                cursor: "pointer",
+                                                bgcolor: isActive ? "#F2FCFA" : "transparent",
+                                                borderLeft: isActive ? "4px solid" : "4px solid",
+                                                borderColor: isActive ? "primary.main" : "transparent",
+                                                transition: "0.2s",
+                                                display: "flex",
+                                                gap: 1,
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                "&:hover": { bgcolor: "#f5f5f5" },
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: isActive ? 600 : 500,
+                                                    fontSize: 13,
+                                                    color: isActive ? "#1E293B" : "#64748B",
+                                                }}
+                                            >
+                                                {step.label}
+                                            </Typography>
+                                            <ArrowForwardIosOutlined sx={{ fontSize: 18, color: "#94A3B8" }} />
+                                        </Box>
+                                    );
+                                })}
+                            </Stack>
+                        </Paper>
 
-                {/* RIGHT SIDE */}
-                <Box sx={ClientStyles.rightSide}>{renderRightSide()}</Box>
-            </Box>
-
+                        {/* RIGHT SIDE */}
+                        <Box sx={ClientStyles.rightSide}>{renderRightSide()}</Box>
+                    </Box>
+                </>}
             <CustomModal
                 open={submitSuccess}
                 onClose={closeSubmitSuccess}
                 type="success"
-                title="Client Successfully Created!"
+                title={mode === "edit" ? "Client Successfully Updated!" : "Client Successfully Created!"}
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Go to Dashboard"

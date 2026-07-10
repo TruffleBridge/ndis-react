@@ -8,6 +8,7 @@ import {
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Loading,
   TableComponent,
   type ColumnDef,
   type ColumnState,
@@ -268,6 +269,7 @@ export default function VerificationTable() {
 
     <Box>
       {/* Client / Worker Toggle */}
+      {loading && <Loading />}
       <Box
         sx={VerifyStyles.mainSx}
       >

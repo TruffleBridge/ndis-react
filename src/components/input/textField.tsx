@@ -62,6 +62,7 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                 {...rest}
                 error={!!errors}
                 onChange={(e) => onChange?.(e.target.value)}
+                autoComplete="off"
                 slotProps={{
                     input: {
                         readOnly: isView,

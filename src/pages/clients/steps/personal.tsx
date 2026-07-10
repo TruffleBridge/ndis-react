@@ -9,6 +9,7 @@ import { ClientStyles } from "../styles";
 import { GENDER_OPTIONS } from "../utils/constants";
 import { useClientStore } from "../../../store/useClient";
 import { useUploadStore } from "../../../store/useUpload";
+import { getViewFunction } from "../../../utils/viewfunction";
 
 interface PersonalProps {
     isView?: boolean;
@@ -71,21 +72,22 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
 
             <Box sx={ClientStyles.scrollArea}>
                 <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <InputTextField
-                            label="First Name"
-                            value={personalData.firstName}
-                            placeholder="e.g. Jane Cooper"
-                            isView={isView}
-                            error={!!errors.firstName}
-                            errors={errors.firstName}
-                            required
-                            onChange={(e) => setPersonalField("firstName", e)}
-                        />
+                    <Grid size={{ xs: 12, md: isView ? 3 : 6 }}>
+                        {isView ? getViewFunction('First Name', personalData.firstName, 'plain') :
+                            <InputTextField
+                                label="First Name"
+                                value={personalData.firstName}
+                                placeholder="e.g. Jane Cooper"
+                                isView={isView}
+                                error={!!errors.firstName}
+                                errors={errors.firstName}
+                                required
+                                onChange={(e) => setPersonalField("firstName", e)}
+                            />}
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }} sx={ClientStyles.dateFieldGrid}>
-                        <DateField
+                    <Grid size={{ xs: 12, md: isView ? 3 : 6 }} sx={ClientStyles.dateFieldGrid}>
+                        {isView ? getViewFunction('Date of Birth', dayjs(personalData.dob).format('YYYY-MM-DD'), 'plain') : <DateField
                             label="Date of Birth"
                             value={personalData.dob ? dayjs(personalData.dob) : null}
                             isView={isView}
@@ -99,33 +101,35 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                             onChange={(value: Dayjs | null) =>
                                 setPersonalField("dob", value ? value.format("MM/DD/YYYY") : null)
                             }
-                        />
+                        />}
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <InputTextField
-                            label="Mobile Number"
-                            placeholder="+61 400 000 000"
-                            value={personalData.mobile}
-                            isView={isView}
-                            required
-                            error={!!errors.mobile}
-                            errors={errors.mobile}
-                            onChange={(e) => setPersonalField("mobile", e)}
-                        />
+                    <Grid size={{ xs: 12, md: isView ? 3 : 6 }}>
+                        {isView ? getViewFunction('Mobile Number', personalData?.mobile, 'plain') :
+                            <InputTextField
+                                label="Mobile Number"
+                                placeholder="+61 400 000 000"
+                                value={personalData?.mobile}
+                                isView={isView}
+                                required
+                                error={!!errors.mobile}
+                                errors={errors.mobile}
+                                onChange={(e) => setPersonalField("mobile", e)}
+                            />}
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <InputTextField
-                            label="Email Address"
-                            value={personalData.email}
-                            placeholder="jane@gmail.com"
-                            isView={isView}
-                            required
-                            error={!!errors.email}
-                            errors={errors.email}
-                            onChange={(e) => setPersonalField("email", e)}
-                        />
+                    <Grid size={{ xs: 12, md: isView ? 3 : 6 }}>
+                        {isView ? getViewFunction('Email Address', personalData?.email, 'plain') :
+                            <InputTextField
+                                label="Email Address"
+                                value={personalData?.email}
+                                placeholder="jane@gmail.com"
+                                isView={isView}
+                                required
+                                error={!!errors.email}
+                                errors={errors.email}
+                                onChange={(e) => setPersonalField("email", e)}
+                            />}
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
@@ -143,6 +147,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                         <UploadVariant1
                             label="Upload ID Proof"
                             value={personalData.idProofFile}
+                            disabled={isView}
                             onChange={(file) => handleUpload(file)}
                             errors={errors.idProofFile || idProofUploadError}
                         />

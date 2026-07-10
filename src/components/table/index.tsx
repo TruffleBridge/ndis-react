@@ -32,7 +32,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { NoDataFound } from "../noData/NoDataFound";
-import { Loading } from "../loading/loading";
 
 //  Types 
 
@@ -60,7 +59,7 @@ export interface ColumnState {
 export interface TableComponentProps<T = Record<string, unknown>> {
     rows: T[];
     columns: ColumnDef<T>[];
-    rowActions?: RowAction<T>[];
+    rowActions?: RowAction<T>[] | ((row: T) => RowAction<T>[]);
 
     totalPages?: number;
     currentPage?: number;
@@ -113,13 +112,27 @@ export function TableComponent<T extends Record<string, unknown>>({
     isHasAction = false,
     noData = '',
     noDataSubTitle = '',
-    isLoading = false,
 }: TableComponentProps<T>) {
 
     // ── Row context menu ──────────────────────────────────────────────────────
     const [menuState, setMenuState] = useState<{ anchor: HTMLElement; row: T } | null>(null);
-    const openMenu = (e: React.MouseEvent<HTMLElement>, row: T) => setMenuState({ anchor: e.currentTarget, row });
+    const openMenu = (
+        event: React.MouseEvent<HTMLElement>,
+        row: T
+    ) => {
+        setMenuState({
+            anchor: event.currentTarget,
+            row,
+        });
+    };
     const closeMenu = () => setMenuState(null);
+    const actions: any =
+        menuState && rowActions
+            ? typeof rowActions === "function"
+                ? rowActions(menuState.row)
+                : rowActions
+            : [];
+
     const hasActions = rowActions && rowActions.length > 0;
 
     // ── Customize Table panel
@@ -485,9 +498,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                 </Box>
             </Paper>
 
-            {isLoading ? (
-                <Loading />
-            ) : rows.length === 0 ? (
+            {rows.length === 0 ? (
                 <NoDataFound message={noData} subTitle={noDataSubTitle} />
             ) : (<Box>
                 {/* ── Table ── */}
@@ -587,13 +598,13 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                     borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
                                                 }}
                                             >
-                                                <IconButton
+                                                {rowActions && (<IconButton
                                                     size="small"
                                                     onClick={(e) => openMenu(e, row)}
                                                     sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
                                                 >
                                                     <MoreVertIcon fontSize="small" />
-                                                </IconButton>
+                                                </IconButton>)}
                                             </TableCell>
                                         )}
                                     </TableRow>
@@ -604,7 +615,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                 </Paper >
 
                 {/* ── Row Context Menu ── */}
-                {hasActions && (
+                {rowActions && (
                     <Menu
                         anchorEl={menuState?.anchor}
                         open={Boolean(menuState)}
@@ -629,7 +640,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                         transformOrigin={{ horizontal: "right", vertical: "top" }}
                         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
-                        {rowActions!.map((action, i) => (
+                        {actions?.map((action:any, i:number) => (
                             <MenuItem
                                 key={i}
                                 sx={{
