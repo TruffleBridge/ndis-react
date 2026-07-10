@@ -10,24 +10,23 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import { ErrorOutlineOutlined } from "@mui/icons-material";
+import { CustomSwitch } from "../customSwitch/customSwitch";
 
 export interface CustomModalProps {
     open: boolean;
     onClose: () => void;
-
     type?: "success" | "error" | "warning" | "info";
-
     title: string;
     description?: string;
-
     showBackButton?: boolean;
     backText?: string;
     primaryText?: string;
-
     onBack?: () => void;
     onPrimary?: () => void;
-
     loading?: boolean;
+    showStatusSwitch?: boolean;
+    status?: boolean;
+    onStatusChange?: (checked: boolean) => void;
 }
 
 const iconConfig = {
@@ -59,12 +58,14 @@ export const CustomModal = ({
     type = "success",
     title,
     description,
-    showBackButton = true,
     backText = "Back",
     primaryText = "Continue",
     onBack,
     onPrimary,
     loading = false,
+    showStatusSwitch = false,
+    status = false,
+    onStatusChange = () => { },
 }: CustomModalProps) => {
     const config = iconConfig[type];
 
@@ -145,6 +146,28 @@ export const CustomModal = ({
                         {description}
                     </Typography>
 
+                    {showStatusSwitch && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 1,
+                                mb: 4,
+                            }}
+                        >
+                            <Typography>
+                                {status ? "Active" : "Inactive"}
+                            </Typography>
+
+                            <CustomSwitch
+                                label="Profile Preferences"
+                                checked={status}
+                                onChange={(items) => onStatusChange(items)}
+                            />
+                        </Box>
+                    )}
+
                     <Box
                         sx={{
                             display: "flex",
@@ -152,7 +175,7 @@ export const CustomModal = ({
                             justifyContent: 'center'
                         }}
                     >
-                        {showBackButton && (
+                        {backText && (
                             <Button
                                 fullWidth
                                 variant="outlined"
@@ -173,7 +196,7 @@ export const CustomModal = ({
                             </Button>
                         )}
 
-                        <Button
+                        {primaryText && <Button
                             fullWidth
                             disableElevation
                             variant="contained"
@@ -192,7 +215,7 @@ export const CustomModal = ({
                             }}
                         >
                             {primaryText}
-                        </Button>
+                        </Button>}
                     </Box>
                 </Box>
             </DialogContent>

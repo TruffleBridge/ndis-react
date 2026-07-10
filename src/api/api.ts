@@ -12,9 +12,10 @@ export const getApiRequest = (
 // POST
 export const createApiRequest = (
   url: string,
-  payload: any
+  payload: any,
+  header?: any
 ): Promise<AxiosResponse> => {
-  return axiosInstance.post(url, payload);
+  return axiosInstance.post(url, payload, header);
 };
 
 // PUT

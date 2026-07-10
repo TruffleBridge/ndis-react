@@ -14,6 +14,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import { FileDownloadIcon } from "../../assets";
+import FieldError from "../fieldError/fieldError";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -43,9 +44,21 @@ function formatSize(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function formatDate(date: Date): string {
-    return date
-        .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+function formatDate(date: Date | string | null | undefined): string {
+    if (!date) return "";
+
+    const parsedDate = date instanceof Date ? date : new Date(date);
+
+    if (isNaN(parsedDate.getTime())) {
+        return "";
+    }
+
+    return parsedDate
+        .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        })
         .toUpperCase();
 }
 
@@ -58,6 +71,7 @@ export interface UploadedFile {
     name: string;
     size: number;
     uploadedAt: Date;
+    type?: any
 }
 
 interface FileRowProps {
@@ -82,6 +96,7 @@ interface Variant1Props {
     value: UploadedFile | null;
     onChange: (file: UploadedFile | null) => void;
     disabled?: boolean;
+    errors?: string;
 }
 
 interface Variant2Props {
@@ -91,6 +106,7 @@ interface Variant2Props {
     value: UploadedFile | null;
     onChange: (file: UploadedFile | null) => void;
     disabled?: boolean;
+    errors?: string;
 }
 
 interface Variant3Props {
@@ -137,7 +153,7 @@ const UploadButton = styled(Button)(() => ({
 // ---------------------------------------------------------------------------
 
 function FileRow({ uploadedFile, onRemove, compact = false, disabled = false }: FileRowProps) {
-    const isPdf = uploadedFile.file.type === "application/pdf";
+    const isPdf = ["application/pdf", "pdf"]?.includes(uploadedFile?.type || uploadedFile?.file?.type);
 
     return (
         <Paper
@@ -183,7 +199,7 @@ function FileRow({ uploadedFile, onRemove, compact = false, disabled = false }: 
                 </Typography>
 
                 <Typography variant="caption" sx={{ color: SUB_COLOR, textTransform: "uppercase", letterSpacing: 0.3 }}>
-                    {`Uploaded ${formatDate(uploadedFile.uploadedAt)} • ${formatSize(uploadedFile.size)}`}
+                    {`Uploaded ${formatDate(new Date(uploadedFile?.uploadedAt))} • ${formatSize(uploadedFile?.size)}`}
                 </Typography>
             </Box>
 
@@ -257,6 +273,7 @@ export function UploadVariant1({
     value,
     onChange,
     disabled = false,
+    errors = ''
 }: Variant1Props) {
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -340,6 +357,7 @@ export function UploadVariant1({
                     <FileRow uploadedFile={value} onRemove={() => onChange(null)} disabled={disabled} />
                 </Box>
             )}
+            <FieldError message={errors} />
         </Box>
     );
 }
@@ -355,6 +373,7 @@ export function UploadVariant2({
     value,
     onChange,
     disabled = false,
+    errors = ''
 }: Variant2Props) {
     const [error, setError] = useState<string | null>(null);
 
@@ -448,6 +467,7 @@ export function UploadVariant2({
                     <FileRow uploadedFile={value} onRemove={() => onChange(null)} disabled={disabled} />
                 </Box>
             )} */}
+            <FieldError message={errors} />
         </Box>
     );
 }

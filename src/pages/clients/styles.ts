@@ -41,7 +41,7 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
     nextCta: {
         fontSize: "14px",
         fontWeight: 600,
-        bgcolor: (theme: Theme) => theme.palette.primary.main,
+        bgcolor: 'primary.main',
         color: "#FFFFFF",
         borderRadius: "8px",
         px: 2.5,

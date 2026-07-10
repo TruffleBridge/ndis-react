@@ -4,13 +4,13 @@ import { FormLabel, FieldError } from "../../components";
 import { styles } from "./styles";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, type DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import type { Dayjs } from "dayjs";
 import { CalendarInputIcon } from "../../assets";
 
-interface DateFieldProps {
+interface DateFieldProps extends DatePickerProps {
     label: string;
     value: Dayjs | null;
     onChange: (value: Dayjs | null) => void;
@@ -22,6 +22,8 @@ interface DateFieldProps {
     disableFuture?: boolean;
     error?: string;
     isView?: boolean;
+    referenceDate?: Dayjs;
+    openToYear?: 'day' | 'month' | 'year'
 }
 
 const DateField: React.FC<DateFieldProps> = ({
@@ -35,7 +37,9 @@ const DateField: React.FC<DateFieldProps> = ({
     disablePast,
     disableFuture,
     error,
-    isView = false
+    isView = false,
+    openToYear,
+    referenceDate
 }) => {
     const [open, setOpen] = React.useState(false);
     const isValidDate = value?.isValid?.();
@@ -53,6 +57,8 @@ const DateField: React.FC<DateFieldProps> = ({
                     onChange={onChange}
                     format="MM/DD/YYYY"
                     minDate={minDate}
+                    openTo={openToYear}
+                    referenceDate={referenceDate}
                     maxDate={maxDate}
                     disablePast={disablePast}
                     disableFuture={disableFuture}

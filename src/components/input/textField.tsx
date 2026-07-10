@@ -106,6 +106,9 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                             borderColor: "#086D63",
                         },
                     },
+                    "& input": {
+                        height: '100%',
+                    },
                     "& input::placeholder": {
                         color: "#7F7F7F",
                         opacity: 1,

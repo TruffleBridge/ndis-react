@@ -3,14 +3,13 @@ import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { FormLabel } from "../../../components";
-import { UploadVariant2, type UploadedFile } from "../../../components/newFileUpload/FileUpload";
+import { UploadVariant2 } from "../../../components/newFileUpload/FileUpload";
 import { ClientStyles } from "../styles";
 import { DOCUMENT_FIELDS } from "../utils/constants";
-import type { DocumentFormData } from "../utils/types";
+import { useClientStore } from "../../../store/useClient";
+import { useUploadStore } from "../../../store/useUpload";
 
 interface DocumentRegisterProps {
-    data: DocumentFormData;
-    onChange: (key: string, file: UploadedFile | null) => void;
     isView?: boolean;
     isSubmitting?: boolean;
     handlePrev?: () => void;
@@ -19,18 +18,50 @@ interface DocumentRegisterProps {
 }
 
 /**
- * Renders every document upload by looping over DOCUMENT_FIELDS instead of
- * hand-repeating each <UploadVariant2 />, split into "mandatory" and
- * "recommended" sections exactly like the original static markup.
+ * Renders every document upload by looping over DOCUMENT_FIELDS, split into
+ * "mandatory" and "recommended" sections exactly like before - but now reads
+ * from and writes into useClientStore instead of local/parent props.
  *
- * Each UploadVariant2 is now fully controlled: `value={data[field.key]}`
- * means an already-uploaded mock file (Edit/View) or a freshly-picked file
- * (Create) both render immediately, and `onChange` writes straight back into
- * ClientFormPage's `documentData` state under that field's key.
+ * Each uploaded file gets `documentType` set to that field's label before
+ * being saved into the store, exactly as required.
  */
-const DocumentRegisterStep = ({ data, onChange, isView, isSubmitting, handleNext, handlePrev }: DocumentRegisterProps) => {
+const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: DocumentRegisterProps) => {
+    const documentData = useClientStore((s) => s.documentData);
+    const setDocumentField = useClientStore((s) => s.setDocumentField);
+    const errors = useClientStore((s) => s.errors.document);
+    const goToNextStep = useClientStore((s) => s.goToNextStep);
+    const mode = useClientStore((s) => s.mode);
+
     const mandatoryFields = DOCUMENT_FIELDS.filter((f) => f.section === "mandatory");
     const recommendedFields = DOCUMENT_FIELDS.filter((f) => f.section === "recommended");
+    const mandatoryKeys = mandatoryFields.map((f) => f.key);
+    const uploadDocument = useUploadStore((s) => s.uploadDocument);
+    const idProofUploadError = useUploadStore((s) => s.uploadErrors);
+
+    const onNext = () => {
+        if (isView) {
+            handleNext?.();
+            return;
+        }
+        // Only mandatory documents block progress - "recommended" stays optional.
+        const valid = goToNextStep("document", mandatoryKeys);
+        if (valid) handleNext?.();
+    };
+
+    const handleUpload = async (field: string, file: any) => {
+        const files = file?.file
+        if (!files) {
+            setDocumentField(field, file)
+            return;
+        }
+        // Actually uploads to /api/uploads/, stamps documentType
+        // = "ID Proof" on the response, then saves it into the store.
+        const uploaded = await uploadDocument(files, "ID Proof", "idProofFile");
+        if (uploaded) setDocumentField(field, {
+            ...file,
+            url: uploaded?.url,
+        });
+    }
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -44,14 +75,18 @@ const DocumentRegisterStep = ({ data, onChange, isView, isSubmitting, handleNext
             <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
                 <Grid container spacing={0}>
                     {mandatoryFields.map((field) => (
-                        <Grid size={{ xs: 12 }} key={field.key}>
+                        <Grid size={{ xs: 12 }} key={field.key} sx={{ mb: 1 }}>
                             <UploadVariant2
                                 icon={field.icon}
                                 label={field.label}
                                 sublabel={field.sublabel}
-                                value={data[field.key] ?? null}
+                                value={documentData[field.key] ?? null}
                                 disabled={isView}
-                                onChange={(file) => onChange(field.key, file)}
+                                onChange={(file) => handleUpload(field.key, file ? { ...file, documentType: field.label } : null)}
+                                // onChange={(file) =>
+                                //     setDocumentField(field.key, file ? { ...file, documentType: field.label } : null)
+                                // }
+                                errors={errors[field.key] || idProofUploadError[field.key]}
                             />
                         </Grid>
                     ))}
@@ -63,14 +98,17 @@ const DocumentRegisterStep = ({ data, onChange, isView, isSubmitting, handleNext
                     />
 
                     {recommendedFields.map((field) => (
-                        <Grid size={{ xs: 12 }} key={field.key}>
+                        <Grid size={{ xs: 12 }} key={field.key} sx={{ mb: 1 }}>
                             <UploadVariant2
                                 icon={field.icon}
                                 label={field.label}
                                 sublabel={field.sublabel}
-                                value={data[field.key] ?? null}
+                                value={documentData[field.key] ?? null}
                                 disabled={isView}
-                                onChange={(file) => onChange(field.key, file)}
+                                onChange={(file) => handleUpload(field.key, file ? { ...file, documentType: field.label } : null)}
+                            // onChange={(file) =>
+                            //     setDocumentField(field.key, file ? { ...file, documentType: field.label } : null)
+                            // }
                             />
                         </Grid>
                     ))}
@@ -99,10 +137,10 @@ const DocumentRegisterStep = ({ data, onChange, isView, isSubmitting, handleNext
                 <Button
                     sx={ClientStyles.nextCta}
                     endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />}
-                    onClick={handleNext}
+                    onClick={onNext}
                     disabled={isSubmitting}
                 >
-                    {isView ? "Close" : isSubmitting ? "Submitting..." : "Submit"}
+                    {isView ? "Close" : mode === 'edit' ? "Update" : isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
             </Box>
         </Box>

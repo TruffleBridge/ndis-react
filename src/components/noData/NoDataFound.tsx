@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 
 interface NoDataFoundProps {
     message?: string;
+    subTitle?: string
 }
 
 const style = {
@@ -25,10 +26,13 @@ const style = {
     backgroundColor: "#FFFFFF",
     width: "100%",
     borderTopLeftRadius: 0,
-    borderTopRightRadius: 0
+    borderTopRightRadius: 0,
+    flexDirection: 'column',
+    gap: 1
 }
 export const NoDataFound = ({
     message = "No data found",
+    subTitle = ''
 }: NoDataFoundProps) => {
     return (
         <Box
@@ -46,6 +50,14 @@ export const NoDataFound = ({
             >
                 {message}
             </Typography>
+            <Typography sx={{
+                color: "#6B7280",
+                fontSize: {
+                    xs: 12,
+                    sm: 14,
+                },
+                fontWeight: 400,
+            }}>{subTitle}</Typography>
         </Box>
     );
 }

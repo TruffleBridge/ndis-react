@@ -83,7 +83,8 @@ export interface TableComponentProps<T = Record<string, unknown>> {
     onCustomChange?: () => void;
     customLabel?: string;
     isHasAction?: boolean;
-    noData?: string
+    noData?: string;
+    noDataSubTitle?: string;
     isLoading?: boolean;
 }
 
@@ -111,6 +112,7 @@ export function TableComponent<T extends Record<string, unknown>>({
     onCustomChange,
     isHasAction = false,
     noData = '',
+    noDataSubTitle = '',
     isLoading = false,
 }: TableComponentProps<T>) {
 
@@ -486,218 +488,216 @@ export function TableComponent<T extends Record<string, unknown>>({
             {isLoading ? (
                 <Loading />
             ) : rows.length === 0 ? (
-                <NoDataFound message="No verification records found" />
-            ) : rows.length === 0 ? (
-                <NoDataFound message={noData} />)
-                : (<Box>
-                    {/* ── Table ── */}
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            borderRadius: "2px",
-                            // border: "1px solid #E5E7EB",
-                            fontFamily: "'Inter', sans-serif",
-                            height: '100%',
-                            maxHeight: '335px',
-                            overflow: 'auto'
-                        }}
-                    >
+                <NoDataFound message={noData} subTitle={noDataSubTitle} />
+            ) : (<Box>
+                {/* ── Table ── */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        borderRadius: "2px",
+                        // border: "1px solid #E5E7EB",
+                        fontFamily: "'Inter', sans-serif",
+                        height: '100%',
+                        maxHeight: '335px',
+                        overflow: 'auto'
+                    }}
+                >
 
-                        <Box sx={{
-                            overflowX: "auto",
-                            minHeight: 270,
-                            "&::-webkit-scrollbar": {
-                                height: 2, // horizontal scrollbar
-                                width: 2,  // vertical scrollbar
-                            },
+                    <Box sx={{
+                        overflowX: "auto",
+                        minHeight: 270,
+                        "&::-webkit-scrollbar": {
+                            height: 2, // horizontal scrollbar
+                            width: 2,  // vertical scrollbar
+                        },
 
-                            "&::-webkit-scrollbar-thumb": {
-                                backgroundColor: "#bdbdbd",
-                                borderRadius: 10,
-                            },
+                        "&::-webkit-scrollbar-thumb": {
+                            backgroundColor: "#bdbdbd",
+                            borderRadius: 10,
+                        },
 
-                            "&::-webkit-scrollbar-track": {
-                                backgroundColor: "#f5f5f5",
-                            },
-                        }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        {visibleColumns.map((col, i) => (
-                                            <TableCell
-                                                key={i}
-                                                sx={{
-                                                    ...baseHeaderCellSx,
-                                                    ...(col.width !== undefined ? { width: col.width, minWidth: col.width } : {}),
-                                                    ...col.headerSx,
-                                                    ...((isHasAction && isStatusLast) &&
-                                                        col.field === "status" && {
-                                                        borderLeft: "1px solid #FFFFFF",
-                                                    }),
-                                                }}
-                                            >
-                                                {col.headerName}
-                                            </TableCell>
-                                        ))}
-                                        {hasActions && (
-                                            <TableCell sx={{
+                        "&::-webkit-scrollbar-track": {
+                            backgroundColor: "#f5f5f5",
+                        },
+                    }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    {visibleColumns.map((col, i) => (
+                                        <TableCell
+                                            key={i}
+                                            sx={{
                                                 ...baseHeaderCellSx,
-                                                ...(isHasAction && {
+                                                ...(col.width !== undefined ? { width: col.width, minWidth: col.width } : {}),
+                                                ...col.headerSx,
+                                                ...((isHasAction && isStatusLast) &&
+                                                    col.field === "status" && {
                                                     borderLeft: "1px solid #FFFFFF",
                                                 }),
-                                                width: 48, minWidth: 48
-                                            }} />
-                                        )}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rows.map((row, rowIdx) => (
-                                        <TableRow key={rowIdx} sx={{
-                                            height: '100%', minHeight: '360px'
-                                        }}>
-                                            {visibleColumns.map((col, colIdx) => {
-                                                const rawValue = col.field !== undefined ? row[col.field] : undefined;
-                                                return (
-                                                    <TableCell
-                                                        key={colIdx}
-                                                        sx={{
-                                                            ...baseBodyCellSx,
-                                                            ...(rowIdx === rows.length - 3 ? { borderBottom: 0 } : {}),
-                                                            ...col.cellSx,
-                                                            ...((isHasAction && isStatusLast) &&
-                                                                col.field === "status" && {
-                                                                borderLeft: "1px solid #E5E7EB",
-                                                            }),
-                                                        }}
-                                                    >
-                                                        {col.render
-                                                            ? col.render(rawValue, row)
-                                                            : (rawValue as React.ReactNode) ?? "—"}
-                                                    </TableCell>
-                                                );
-                                            })}
-
-                                            {hasActions && (
+                                            }}
+                                        >
+                                            {col.headerName}
+                                        </TableCell>
+                                    ))}
+                                    {hasActions && (
+                                        <TableCell sx={{
+                                            ...baseHeaderCellSx,
+                                            ...(isHasAction && {
+                                                borderLeft: "1px solid #FFFFFF",
+                                            }),
+                                            width: 48, minWidth: 48
+                                        }} />
+                                    )}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows.map((row, rowIdx) => (
+                                    <TableRow key={rowIdx} sx={{
+                                        height: '100%', minHeight: '360px'
+                                    }}>
+                                        {visibleColumns.map((col, colIdx) => {
+                                            const rawValue = col.field !== undefined ? row[col.field] : undefined;
+                                            return (
                                                 <TableCell
+                                                    key={colIdx}
                                                     sx={{
-                                                        px: 1,
-                                                        py: 1.5,
-                                                        width: 48,
-                                                        borderBottom: rowIdx === rows.length - 3 ? 0 : "1px solid #E5E7EB",
-                                                        borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
+                                                        ...baseBodyCellSx,
+                                                        ...(rowIdx === rows.length - 3 ? { borderBottom: 0 } : {}),
+                                                        ...col.cellSx,
+                                                        ...((isHasAction && isStatusLast) &&
+                                                            col.field === "status" && {
+                                                            borderLeft: "1px solid #E5E7EB",
+                                                        }),
                                                     }}
                                                 >
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={(e) => openMenu(e, row)}
-                                                        sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
-                                                    >
-                                                        <MoreVertIcon fontSize="small" />
-                                                    </IconButton>
+                                                    {col.render
+                                                        ? col.render(rawValue, row)
+                                                        : (rawValue as React.ReactNode) ?? "—"}
                                                 </TableCell>
-                                            )}
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </Box>
-                    </Paper >
+                                            );
+                                        })}
 
-                    {/* ── Row Context Menu ── */}
-                    {hasActions && (
-                        <Menu
-                            anchorEl={menuState?.anchor}
-                            open={Boolean(menuState)}
-                            onClose={closeMenu}
-                            slotProps={{
-                                paper: {
-                                    elevation: 2,
-                                    sx: {
-                                        borderRadius: "10px",
-                                        border: "1px solid #E5E7EB",
-                                        minWidth: 140,
-                                        "& .MuiMenuItem-root": {
-                                            fontSize: "0.875rem",
-                                            color: "#7F7F7F",
-                                            gap: 1.25,
-                                            py: 1,
-                                            px: 2,
-                                        },
+                                        {hasActions && (
+                                            <TableCell
+                                                sx={{
+                                                    px: 1,
+                                                    py: 1.5,
+                                                    width: 48,
+                                                    borderBottom: rowIdx === rows.length - 3 ? 0 : "1px solid #E5E7EB",
+                                                    borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
+                                                }}
+                                            >
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => openMenu(e, row)}
+                                                    sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
+                                                >
+                                                    <MoreVertIcon fontSize="small" />
+                                                </IconButton>
+                                            </TableCell>
+                                        )}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Box>
+                </Paper >
+
+                {/* ── Row Context Menu ── */}
+                {hasActions && (
+                    <Menu
+                        anchorEl={menuState?.anchor}
+                        open={Boolean(menuState)}
+                        onClose={closeMenu}
+                        slotProps={{
+                            paper: {
+                                elevation: 2,
+                                sx: {
+                                    borderRadius: "10px",
+                                    border: "1px solid #E5E7EB",
+                                    minWidth: 140,
+                                    "& .MuiMenuItem-root": {
+                                        fontSize: "0.875rem",
+                                        color: "#7F7F7F",
+                                        gap: 1.25,
+                                        py: 1,
+                                        px: 2,
                                     },
                                 },
-                            }}
-                            transformOrigin={{ horizontal: "right", vertical: "top" }}
-                            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                        >
-                            {rowActions!.map((action, i) => (
-                                <MenuItem
-                                    key={i}
-                                    sx={{
-                                        ...action.sx,
-                                        "&.MuiMenuItem-root": {
-                                            fontSize: "12px",
-                                            fontWeight: 500,
-                                            color: "#7F7F7F"
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        if (menuState) action.onClick(menuState.row);
-                                        closeMenu();
-                                    }}
-                                >
-                                    {action.icon}
-                                    {action.label}
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    )}
-
-                    {/* ── Pagination ── */}
-                    {
-                        // totalPages > 1 && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                px: 2.5,
-                                py: 1.5,
-                                backgroundColor: "#FFFFFF",
-                                borderTop: "1px solid #E5E7EB",
-                                borderBottomLeftRadius: "12px",
-                                borderBottomRightRadius: "12px",
-                            }}
-                        >
-                            <Pagination
-                                count={totalPages ? totalPages : 1}
-                                page={currentPage}
-                                onChange={(_, p) => onPageChange?.(p)}
-                                siblingCount={1}
-                                boundaryCount={1}
-                                shape="rounded"
+                            },
+                        }}
+                        transformOrigin={{ horizontal: "right", vertical: "top" }}
+                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                    >
+                        {rowActions!.map((action, i) => (
+                            <MenuItem
+                                key={i}
                                 sx={{
-                                    "& .MuiPaginationItem-root": {
-                                        fontSize: "14px",
-                                        color: "#b3abab",
-                                        fontWeight: 400,
-                                        minWidth: 34,
-                                        height: 34,
-                                        borderRadius: "8px",
-                                        border: "none",
-                                    },
-                                    "& .MuiPaginationItem-root.Mui-selected": {
-                                        backgroundColor: "#c9c2c2db",
-                                        color: "#222124",
-                                        fontSize: '14px',
-                                        borderRadius: "8px",
-                                        fontWeight: 600,
-                                        "&:hover": { backgroundColor: "#c9c2c2db" },
-                                    },
+                                    ...action.sx,
+                                    "&.MuiMenuItem-root": {
+                                        fontSize: "12px",
+                                        fontWeight: 500,
+                                        color: "#7F7F7F"
+                                    }
                                 }}
-                            />
-                        </Box>
-                        // )
-                    }
-                </Box>)}
+                                onClick={() => {
+                                    if (menuState) action.onClick(menuState.row);
+                                    closeMenu();
+                                }}
+                            >
+                                {action.icon}
+                                {action.label}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                )}
+
+                {/* ── Pagination ── */}
+                {
+                    // totalPages > 1 && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            px: 2.5,
+                            py: 1.5,
+                            backgroundColor: "#FFFFFF",
+                            borderTop: "1px solid #E5E7EB",
+                            borderBottomLeftRadius: "12px",
+                            borderBottomRightRadius: "12px",
+                        }}
+                    >
+                        <Pagination
+                            count={totalPages ? totalPages : 1}
+                            page={currentPage}
+                            onChange={(_, p) => onPageChange?.(p)}
+                            siblingCount={1}
+                            boundaryCount={1}
+                            shape="rounded"
+                            sx={{
+                                "& .MuiPaginationItem-root": {
+                                    fontSize: "14px",
+                                    color: "#b3abab",
+                                    fontWeight: 400,
+                                    minWidth: 34,
+                                    height: 34,
+                                    borderRadius: "8px",
+                                    border: "none",
+                                },
+                                "& .MuiPaginationItem-root.Mui-selected": {
+                                    backgroundColor: "#c9c2c2db",
+                                    color: "#222124",
+                                    fontSize: '14px',
+                                    borderRadius: "8px",
+                                    fontWeight: 600,
+                                    "&:hover": { backgroundColor: "#c9c2c2db" },
+                                },
+                            }}
+                        />
+                    </Box>
+                    // )
+                }
+            </Box>)}
         </Box>
     );
 }

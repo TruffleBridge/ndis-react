@@ -113,6 +113,10 @@ const PersonalInformation = ({
                             label="Date of Birth"
                             value={dayjs(data.dateOfBirth)}
                             isView={isView}
+                            minDate={dayjs("1900-01-01")}
+                            maxDate={dayjs(new Date())}
+                            referenceDate={dayjs("1900-01-01")}
+                            openToYear="year"
                             onChange={(value) =>
                                 updateField(
                                     "dateOfBirth",

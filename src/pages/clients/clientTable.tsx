@@ -1,27 +1,12 @@
+import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { useState } from "react";
+import { CustomModal, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
 import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
-import type { ClientFormNavState } from "./utils/types";
-
-interface Client {
-    id: number;
-    clientId: string;
-    avatar?: string;
-    clientName: string;
-    email: string;
-    supportType: string;
-    assignedWorker: string;
-    activeJobs: number;
-    location: string;
-    fundingType: string;
-    clientStatus: "Active" | "Inactive" | "Pending";
-
-    [key: string]: unknown;
-}
+import type { Client, ClientFormNavState } from "../../types/client";
+import { useClientStore } from "../../store/useClient";
 
 const CLIENT_STATUS_STYLES = {
     Active: {
@@ -37,58 +22,6 @@ const CLIENT_STATUS_STYLES = {
         color: "#A11A1A",
     },
 };
-
-const INITIAL_CLIENTS: Client[] = [
-    {
-        id: 1,
-        clientId: "CL-1042",
-        clientName: "Jane Cooper",
-        email: "lanasteiner@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Lana Steiner",
-        activeJobs: 2,
-        location: "Sydney",
-        fundingType: "NDIS / Private",
-        clientStatus: "Active",
-    },
-    {
-        id: 2,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    {
-        id: 3,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    {
-        id: 4,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    // ...remaining rows unchanged from the original list
-];
 
 const CLIENT_COLUMNS: ColumnDef<Client>[] = [
     { headerName: "Client ID", field: "clientId" },
@@ -129,70 +62,103 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
 }
 
 export default function ClientTable() {
-    const [clients] = useState<Client[]>(INITIAL_CLIENTS);
-    const [searchValue, setSearchValue] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(CLIENT_COLUMNS));
     const navigate = useNavigate();
+    const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(CLIENT_COLUMNS));
+    const [stateModal, setStateModal] = useState(false);
 
-    const ROWS_PER_PAGE = 5;
+    // All data + list actions now live in the store (getTableApi under the hood).
+    const clients = useClientStore((s) => s.clients);
+    const clientsLoading = useClientStore((s) => s.clientsLoading);
+    const searchValue = useClientStore((s) => s.searchValue);
+    const currentPage = useClientStore((s) => s.currentPage);
+    const totalPages = useClientStore((s) => s.totalPages);
+    const fetchClients = useClientStore((s) => s.fetchClients);
+    const setSearchValue = useClientStore((s) => s.setSearchValue);
+    const setCurrentPage = useClientStore((s) => s.setCurrentPage);
+    const deleteClient = useClientStore((s) => s.deleteClient);
+    const status = useClientStore((s) => s.status);
+    const updateState = useClientStore((s) => s.updateState);
+    const getStatusUpdate = useClientStore((s) => s.getStatusUpdate);
 
-    const filteredClients = clients.filter(
-        (client) =>
-            client.clientName.toLowerCase().includes(searchValue.toLowerCase()) ||
-            client.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-            client.clientId.toLowerCase().includes(searchValue.toLowerCase())
-    );
-
-    const paginatedClients = filteredClients.slice(
-        (currentPage - 1) * ROWS_PER_PAGE,
-        currentPage * ROWS_PER_PAGE
-    );
-
-    const totalPages = Math.ceil(filteredClients.length / ROWS_PER_PAGE);
+    // Refetch whenever search text or page changes.
+    useEffect(() => {
+        fetchClients();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchValue, currentPage]);
 
     // Single helper so Edit/View/Create all navigate the same way - only the
     // nav state differs. ClientFormPage reads this state to decide what mode
-    // to boot into and which mock record (if any) to load.
+    // to boot into and which record (if any) to load.
     const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
 
-    const rowActions: RowAction<Client>[] = [
-        {
-            label: "Edit",
-            icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
-            onClick: (row) => goToForm({ mode: "edit", clientId: row.id }),
-        },
+    const getRowActions = (row: Client): RowAction<Client>[] => [
+        ...(row.clientStatus === "Active"
+            ? [
+                {
+                    label: "Status",
+                    icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
+                    onClick: (row: Client) => {
+                        getStatusUpdate(row.id);
+                        setStateModal(true);
+                    },
+                },
+                {
+                    label: "Edit",
+                    icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
+                    onClick: (row: Client) =>
+                        goToForm({ mode: "edit", clientId: row.id }),
+                },
+                {
+                    label: "Delete",
+                    icon: <DeleteIcon height={13} width={11} />,
+                    sx: { color: "#7F7F7F" },
+                    onClick: (row: Client) => deleteClient(row.id),
+                },
+            ]
+            : []),
+
         {
             label: "View",
-            icon: <VisibilityOutlinedIcon sx={{ fontSize: 14, color: "#7F7F7F" }} />,
+            icon: (
+                <VisibilityOutlinedIcon
+                    sx={{ fontSize: 14, color: "#7F7F7F" }}
+                />
+            ),
             onClick: (row) => goToForm({ mode: "view", clientId: row.id }),
-        },
-        {
-            label: "Delete",
-            icon: <DeleteIcon height={13} width={11} />,
-            sx: { color: "#7F7F7F" },
-            onClick: (row) => console.log("Delete", row),
         },
     ];
 
     return (
         <Box>
             <TableComponent
-                rows={paginatedClients}
+                rows={clients}
                 columns={CLIENT_COLUMNS}
-                rowActions={rowActions}
+                rowActions={getRowActions}
                 totalPages={totalPages}
                 currentPage={currentPage}
+                noData="No client records found"
+                noDataSubTitle="There is no data available to display at the moment."
+                isLoading={clientsLoading}
                 searchValue={searchValue}
-                searchPlaceholder="Search here..."
+                searchPlaceholder="Search ClientId, Client name"
                 columnStates={columnStates}
                 onColumnStatesChange={setColumnStates}
-                onSearch={(v) => { setSearchValue(v); setCurrentPage(1); }}
+                onSearch={setSearchValue}
                 onPageChange={setCurrentPage}
                 onExportData={() => console.log("Export")}
                 onFilter={() => console.log("Filter")}
                 customLabel="Add Client"
                 onCustomChange={() => goToForm({ mode: "create" })}
+            />
+            <CustomModal
+                open={stateModal}
+                onClose={() => setStateModal(false)}
+                type="success"
+                showStatusSwitch
+                onStatusChange={updateState}
+                status={status}
+                title="Client Successfully Created!"
+                description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
             />
         </Box>
     );

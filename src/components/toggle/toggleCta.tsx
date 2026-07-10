@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material";
+import FieldError from "../fieldError/fieldError";
 
 interface Option {
     label: string;
@@ -11,7 +12,8 @@ interface GenderToggleProps {
     value: string;
     options: Option[];
     onChange: (value: string) => void;
-    disabled?: boolean
+    disabled?: boolean;
+    errors?: string;
 }
 
 export const ToggleGroup = ({
@@ -19,7 +21,8 @@ export const ToggleGroup = ({
     value,
     options,
     onChange,
-    disabled
+    disabled,
+    errors
 }: GenderToggleProps) => {
     const handleChange = (
         _: React.MouseEvent<HTMLElement>,
@@ -98,6 +101,8 @@ export const ToggleGroup = ({
                     </ToggleButton>
                 ))}
             </ToggleButtonGroup>
+
+            <FieldError message={errors} />
         </Box>
     );
 };

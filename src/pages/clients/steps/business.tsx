@@ -5,21 +5,34 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { InputTextField, SectionCard } from "../../../components";
 import { ClientStyles } from "../styles";
 import { CompanyHomeIcon, CompanyIcon, LocationIcon, LocationIcon1 } from "../../../assets";
-import type { BusinessFormData } from "../utils/types";
+import { useClientStore } from "../../../store/useClient";
 
 interface BusinessProps {
-    data: BusinessFormData;
-    onChange: <K extends keyof BusinessFormData>(field: K, value: BusinessFormData[K]) => void;
     isView?: boolean;
     handlePrev?: () => void;
     handleNext?: () => void;
 }
 
 /**
- * Fully controlled, same pattern as PersonalInformation: values come from
- * `data`, edits go through `onChange`, `isView` disables every field.
+ * Fully store-driven, same pattern as PersonalInformation: values come from
+ * useClientStore, edits go through setBusinessField, `isView` disables every
+ * field.
  */
-const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: BusinessProps) => {
+const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
+    const businessData = useClientStore((s) => s.businessData);
+    const setBusinessField = useClientStore((s) => s.setBusinessField);
+    const errors = useClientStore((s) => s.errors.business);
+    const goToNextStep = useClientStore((s) => s.goToNextStep);
+
+    const onNext = () => {
+        if (isView) {
+            handleNext?.();
+            return;
+        }
+        const valid = goToNextStep("business");
+        if (valid) handleNext?.();
+    };
+
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <Box sx={{ mb: 1, flexShrink: 0, textAlign: "left" }}>
@@ -36,10 +49,12 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                             <InputTextField
                                 label="Registered NDIS Business Name"
                                 placeholder="e.g Care Solutions Pty. Ltd"
-                                value={data.businessName}
+                                value={businessData.businessName}
                                 required
                                 isView={isView}
-                                onChange={(e) => onChange("businessName", e)}
+                                error={!!errors.businessName}
+                                errors={errors.businessName}
+                                onChange={(e) => setBusinessField("businessName", e)}
                                 startAdornment={<CompanyHomeIcon />}
                             />
                         </Grid>
@@ -47,10 +62,12 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                             <InputTextField
                                 label="Active ABN"
                                 placeholder="#11-digit ABN"
-                                value={data.abn}
+                                value={businessData.abn}
                                 required
                                 isView={isView}
-                                onChange={(e) => onChange("abn", e)}
+                                error={!!errors.abn}
+                                errors={errors.abn}
+                                onChange={(e) => setBusinessField("abn", e)}
                                 slotProps={{ htmlInput: { maxLength: 11 } }}
                             />
                         </Grid>
@@ -58,9 +75,11 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                             <InputTextField
                                 label="ACN"
                                 placeholder="#9-digit ACN"
-                                value={data.acn}
+                                value={businessData.acn}
                                 isView={isView}
-                                onChange={(e) => onChange("acn", e)}
+                                error={!!errors.acn}
+                                errors={errors.acn}
+                                onChange={(e) => setBusinessField("acn", e)}
                                 slotProps={{ htmlInput: { maxLength: 9 } }}
                             />
                         </Grid>
@@ -73,10 +92,12 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                             <InputTextField
                                 label="Enter your business address"
                                 placeholder="123 example street"
-                                value={data.address}
+                                value={businessData.address}
                                 required
                                 isView={isView}
-                                onChange={(e) => onChange("address", e)}
+                                error={!!errors.address}
+                                errors={errors.address}
+                                onChange={(e) => setBusinessField("address", e)}
                                 startAdornment={<LocationIcon />}
                             />
                         </Grid>
@@ -85,27 +106,29 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                                 label="Suburb"
                                 required
                                 placeholder="enter suburb"
-                                value={data.suburb}
+                                value={businessData.suburb}
                                 isView={isView}
-                                onChange={(e) => onChange("suburb", e)}
+                                error={!!errors.suburb}
+                                errors={errors.suburb}
+                                onChange={(e) => setBusinessField("suburb", e)}
                             />
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
                             <InputTextField
                                 label="State"
                                 placeholder="enter state"
-                                value={data.state}
+                                value={businessData.state}
                                 isView={isView}
-                                onChange={(e) => onChange("state", e)}
+                                onChange={(e) => setBusinessField("state", e)}
                             />
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
                             <InputTextField
                                 label="Postal Code"
                                 placeholder="0000"
-                                value={data.postalCode}
+                                value={businessData.postalCode}
                                 isView={isView}
-                                onChange={(e) => onChange("postalCode", e)}
+                                onChange={(e) => setBusinessField("postalCode", e)}
                             />
                         </Grid>
                     </Grid>
@@ -131,7 +154,7 @@ const BusinessStep = ({ data, onChange, isView, handleNext, handlePrev }: Busine
                     Prev
                 </Button>
 
-                <Button sx={ClientStyles.nextCta} endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />} onClick={handleNext}>
+                <Button sx={ClientStyles.nextCta} endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />} onClick={onNext}>
                     Next
                 </Button>
             </Box>

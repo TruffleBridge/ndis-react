@@ -296,6 +296,7 @@ export default function VerificationTable() {
         rowActions={rowActions}
         searchPlaceholder={selected === 'client' ? 'Search Client name' : 'Search Support Worker name'}
         noData="No verification records found"
+        noDataSubTitle="There is no data available to display at the moment."
         isLoading={loading}
         totalPages={Math.ceil(total / ROWS_PER_PAGE)}
         currentPage={currentPage}
