@@ -64,8 +64,8 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
     }
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <Box sx={{ flex: 1, overflowY: "auto", pr: 1 }}>
+        <Box sx={ClientStyles.mainHeightRes}>
+            <Box sx={ClientStyles.subHeightRes}>
                 <Grid container spacing={0}>
                     {mandatoryFields.map((field) => (
                         <Grid size={{ xs: 12 }} key={field.key} sx={{ mb: 1 }}>
@@ -108,17 +108,7 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
                 </Grid>
             </Box>
 
-            <Box
-                sx={{
-                    flexShrink: 0,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #E2E8F0",
-                    pt: 2,
-                    mt: 2,
-                    bgcolor: "#fff",
-                }}
-            >
+            <Box sx={ClientStyles.bottomFixed}>
                 <Button
                     sx={{ ...ClientStyles.nextCta, bgcolor: "transparent !important", color: "#222124", fontWeight: 500, border: "1px solid #E2E8F0" }}
                     startIcon={<ArrowBackOutlinedIcon sx={{ width: 18, height: 18, color: "#222124" }} />}

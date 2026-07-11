@@ -1,6 +1,5 @@
 import {
     Box,
-    Typography,
     Button,
     Grid,
 } from "@mui/material";
@@ -54,31 +53,8 @@ const PersonalInformation = ({
     };
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-            }}
-        >
-            <Box
-                sx={{
-                    textAlign: "left",
-                    flexShrink: 0,
-                    mb: 1,
-                }}
-            >
-                <Typography sx={WorkerStyles.title}>
-                    Personal Information
-                </Typography>
-
-                <Typography sx={WorkerStyles.subtitle}>
-                    Just the basics - take about 30 seconds
-                    to set up a secure identity
-                </Typography>
-            </Box>
-
-            <Box sx={WorkerStyles.scrollArea}>
+        <Box sx={WorkerStyles.mainHeightRes}>
+            <Box sx={WorkerStyles.subHeightRes}>
                 <Grid container spacing={2}>
 
                     <Grid size={{ xs: 12, md: 4 }}>
@@ -271,7 +247,7 @@ const PersonalInformation = ({
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
                                 <AutocompleteField
                                     label="Current Employment Status"
                                     value={data.employmentStatus}
@@ -289,7 +265,7 @@ const PersonalInformation = ({
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
                                 <CustomSwitch
                                     sxProps={{
                                         flexDirection: "column-reverse",
@@ -311,17 +287,8 @@ const PersonalInformation = ({
                     </SectionCard>
                 </Grid>
             </Box>
-            <Box
-                sx={{
-                    flexShrink: 0,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #E2E8F0",
-                    pt: 2,
-                    mt: 1,
-                    bgcolor: "#fff",
-                }}
-            >
+
+            <Box sx={WorkerStyles.bottomFixed}>
                 <Button
                     sx={{
                         ...WorkerStyles.nextCta,

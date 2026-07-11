@@ -62,9 +62,8 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
     }
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-
-            <Box sx={ClientStyles.scrollArea}>
+        <Box sx={ClientStyles.mainHeightRes}>
+            <Box sx={ClientStyles.subHeightRes}>
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12, md: isView ? 3 : 6 }}>
                         {isView ? getViewFunction('First Name', personalData.firstName, 'plain') :
@@ -149,17 +148,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                 </Grid>
             </Box>
 
-            <Box
-                sx={{
-                    flexShrink: 0,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #E2E8F0",
-                    pt: 2,
-                    mt: 1,
-                    bgcolor: "#fff",
-                }}
-            >
+            <Box sx={ClientStyles.bottomFixed}>
                 <Button
                     sx={{ ...ClientStyles.nextCta, bgcolor: "transparent !important", color: "#222124", fontWeight: 500, border: "1px solid #E2E8F0" }}
                     onClick={() => navigate(-1)}

@@ -20,3 +20,19 @@ export const validateMobile = (value: string) => {
 
   return /^\d{10}$/.test(value) ? "" : "Invalid mobile number";
 };
+
+/// progress value
+export const progressValue = (activeStep: string, isCompleted?: boolean) => {
+  const step = activeStep.trim().toLowerCase();
+  if (isCompleted) return 100;
+
+
+  return (
+    {
+      basic: 0,
+      support: 50,
+      qual: 75,
+      compliance: 100,
+    }[step] ?? 0
+  );
+};

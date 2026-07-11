@@ -49,7 +49,32 @@ export const FORM_STEPS = [
 
 export const progressValue = (activeStep: string) =>
 ({
-    info: 33.3,
-    business: 66.6,
+    info: 0,
+    business: 50,
     document: 100,
 }[activeStep] ?? 0);
+
+export const getHeader = (activeStep: string) => {
+    switch (activeStep) {
+        case "info":
+            return 'Personal Information';
+        case "business":
+            return 'NDIS Business';
+        case "document":
+            return 'Document Registration';
+        default:
+            return null;
+    }
+}
+export const getSubHeader = (activeStep: string) => {
+    switch (activeStep) {
+        case "info":
+            return 'Just the basics - take about 30 seconds to set up a secure identity';
+        case "business":
+            return 'Please provide the official registered business name as it appears on your NDIS provider registration documents';
+        case "document":
+            return 'Please upload the official registered documents for the NDIS provider business registration';
+        default:
+            return null;
+    }
+}

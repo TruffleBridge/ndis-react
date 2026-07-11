@@ -9,7 +9,7 @@ import Qualification from "./steps/qualification";
 import Compliance from "./steps/complicance";
 
 import { WorkerIcon } from "../../assets";
-import { CustomModal, PageHeader } from "../../components";
+import { CircularProgressWithLabel, CustomModal, PageHeader } from "../../components";
 import { WorkerStyles } from "./styles";
 
 import {
@@ -20,6 +20,8 @@ import {
 } from "./utils/defaultData";
 
 import { workerDummy } from "./utils/dummyData";
+import { progressValue } from "../../utils/helper";
+import { getHeader, getSubHeader } from "./utils/constants";
 
 const steps = [
     { id: "basic", label: "Basic Info" },
@@ -155,7 +157,7 @@ const WorkerPage = () => {
     };
 
     return (
-        <Box>
+        <Box sx={{ height: '100%' }}>
             <PageHeader
                 icon={<WorkerIcon color="#3A3838" />}
                 title={
@@ -218,10 +220,23 @@ const WorkerPage = () => {
                 </Paper>
 
                 {/* RIGHT SIDE */}
-                <Box
-                    sx={WorkerStyles.rightSide}
-                >
-                    {renderRightSide()}
+                <Box sx={WorkerStyles.rightSideMain}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '10px',
+                    }}>
+                        <PageHeader mainSx={{ boxShadow: 'none', border: 'none', p: 0 }}
+                            title={getHeader && getHeader(activeStep)}
+                            subtitle={getSubHeader && getSubHeader(activeStep)} />
+
+                        <CircularProgressWithLabel
+                            value={progressValue(activeStep)}
+                        />
+                    </div>
+                    <Box sx={WorkerStyles.rightSide}>
+                        {renderRightSide()}
+                    </Box>
                 </Box>
             </Box>
 

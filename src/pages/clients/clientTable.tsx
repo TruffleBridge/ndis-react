@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
 import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
@@ -35,6 +35,8 @@ export default function ClientTable() {
     const [values, setValues] = useState<any>();
     const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
     const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
+    const ROWS_PER_PAGE = 10;
+
 
     // All data + list actions now live in the store (getTableApi under the hood).
     const clients = useClientStore((s) => s.clients);
@@ -266,11 +268,12 @@ export default function ClientTable() {
 
     return (
         <Box>
+            {clientsLoading && <Loading />}
             <TableComponent
                 rows={tableData}
                 columns={CLIENT_COLUMNS}
                 rowActions={getRowActions}
-                totalPages={totalPages}
+                totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
                 currentPage={currentPage}
                 noData="No client records found"
                 noDataSubTitle="There is no data available to display at the moment."

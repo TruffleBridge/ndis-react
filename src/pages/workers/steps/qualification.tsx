@@ -1,6 +1,5 @@
 import {
     Box,
-    Typography,
     Grid,
     Button,
 } from "@mui/material";
@@ -58,25 +57,6 @@ const Qualification = ({
                 height: "100%",
             }}
         >
-            {/* Header */}
-
-            <Box
-                sx={{
-                    mb: 1,
-                    flexShrink: 0,
-                    textAlign: "left",
-                }}
-            >
-                <Typography sx={WorkerStyles.title}>
-                    Qualification & Credentials
-                </Typography>
-
-                <Typography sx={WorkerStyles.subtitle}>
-                    Just the basics - take about
-                    30 seconds to set up a secure
-                    identity
-                </Typography>
-            </Box>
 
             {/* Scrollable Body */}
 

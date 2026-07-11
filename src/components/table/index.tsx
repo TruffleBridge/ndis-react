@@ -506,17 +506,20 @@ export function TableComponent<T extends Record<string, unknown>>({
                     elevation={0}
                     sx={{
                         borderRadius: "2px",
-                        // border: "1px solid #E5E7EB",
-                        fontFamily: "'Inter', sans-serif",
-                        height: '100%',
-                        maxHeight: '335px',
-                        overflow: 'auto'
+                        height: {
+                            xs: "40vh",
+                            sm: "45vh",
+                            md: "50vh",
+                            lg: "55vh",
+                            xl: "60vh",
+                        },
+                        overflow: "hidden",
                     }}
                 >
 
                     <Box sx={{
-                        overflowX: "auto",
-                        minHeight: 270,
+                        height: "100%",
+                        overflow: 'auto',
                         "&::-webkit-scrollbar": {
                             height: 2, // horizontal scrollbar
                             width: 2,  // vertical scrollbar
@@ -573,7 +576,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                     key={colIdx}
                                                     sx={{
                                                         ...baseBodyCellSx,
-                                                        ...(rowIdx === rows.length - 3 ? { borderBottom: 0 } : {}),
+                                                        ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
                                                         ...col.cellSx,
                                                         ...((isHasAction && isStatusLast) &&
                                                             col.field === "status" && {
@@ -594,7 +597,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                     px: 1,
                                                     py: 1.5,
                                                     width: 48,
-                                                    borderBottom: rowIdx === rows.length - 3 ? 0 : "1px solid #E5E7EB",
+                                                    borderBottom: rowIdx === rows.length - 1 ? 0 : "1px solid #E5E7EB",
                                                     borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
                                                 }}
                                             >
@@ -640,7 +643,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                         transformOrigin={{ horizontal: "right", vertical: "top" }}
                         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
-                        {actions?.map((action:any, i:number) => (
+                        {actions?.map((action: any, i: number) => (
                             <MenuItem
                                 key={i}
                                 sx={{

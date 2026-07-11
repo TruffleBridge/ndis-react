@@ -184,7 +184,6 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
     // ===================== FORM INIT (getView / getEdit) =====================
     initForm: async (mode, clientId = null) => {
-        debugger;
         set({
             mode,
             clientId,
@@ -211,7 +210,6 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
             const mappedDoc: Record<string, any> = {};
 
-            debugger;
             (record?.userDocuments ?? []).forEach((doc: any) => {
                 const field = DOCUMENT_FIELDS.find(
                     (item) => item.label === doc.documentType?.name
@@ -249,7 +247,6 @@ export const useClientStore = create<ClientStore>((set, get) => ({
                 },
                 isFormLoading: false,
             });
-            console.log(mappedDoc, 'mappedDoc');
 
         } catch (err) {
             set({ isFormLoading: false, clientsError: "Failed to load client record" });
@@ -341,15 +338,9 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
     // ======================= SUBMIT (getCreateApi / edit) =======================
     submitForm: async () => {
-        debugger;
-        const { mode, clientId, personalData, businessData, documentData } = get();
+        const { mode, clientId, personalData, businessData, documentData, fetchClients } = get();
         set({ isSubmitting: true });
 
-        // const payload = {
-        //   personal: personalData,
-        //   business: businessData,
-        //   documents: documentData,
-        // };
         const payload = {
             ...(mode === "edit" && { userId: clientId }),
             firstName: personalData?.firstName,
@@ -393,14 +384,13 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             })),
         };
 
-        console.log(payload, 'payload');
-
         try {
             if (mode === "edit" && clientId != null) {
                 await updateApiRequest(ENDPOINTS.update, payload);
             } else {
                 await createApiRequest(ENDPOINTS.create, payload);
             }
+            fetchClients();
             set({ isSubmitting: false, submitSuccess: true });
             return true;
         } catch (err) {

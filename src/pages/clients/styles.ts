@@ -2,11 +2,19 @@ import type { SxProps, Theme } from "@mui/material";
 
 export const ClientStyles: Record<string, SxProps<Theme>> = {
     sideMenu: {
-        width: { xs: "100%", md: 240 },
+        width: { xs: "100%", md: 260 },
         minWidth: { md: 240 },
-        height: { xs: "auto", md: "68vh" },
-        maxHeight: { xs: "none", md: "68vh" },
-        overflow: "hidden",
+        height: {
+            xs: "auto",
+            sm: "auto",
+            md: "calc(100vh - 180px)",
+        },
+        maxHeight: {
+            xs: "none",
+            md: "calc(100vh - 180px)",
+        },
+        overflowY: "auto",
+        overflowX: "hidden",
         border: "1px solid #E2E8F0",
         p: 2,
         borderRadius: "14px",
@@ -14,6 +22,7 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
         flexShrink: 0,
     },
+
     rightSideMain: {
         bgcolor: "#FFFFFF",
         boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
@@ -21,14 +30,19 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         px: { xs: 2, sm: 3 },
         py: 2,
         borderRadius: "14px",
-        width: '100%',
-
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        height: {
+            xs: "auto",
+            md: "calc(100vh - 180px)",
+        },
     },
+
     rightSide: {
         flex: 1,
         minWidth: 0,
-        height: { xs: "auto", md: "49.7vh", xl: '58vh', },
-        maxHeight: { xs: "none", md: "55.7vh", xl: '58vh' },
+        minHeight: 0,
         overflowY: "auto",
         overflowX: "hidden",
         scrollbarGutter: "stable",
@@ -62,13 +76,6 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         //     boxShadow: "none",
         // },
     },
-    scrollArea: {
-        flex: 1,
-        overflowY: "auto",
-        overflowX: "hidden",
-        pr: 1,
-        scrollbarGutter: "stable",
-    },
     dateFieldGrid: {
         overflow: "visible",
         position: "relative",
@@ -78,4 +85,29 @@ export const ClientStyles: Record<string, SxProps<Theme>> = {
         color: "#3E4947",
         fontSize: 22,
     },
+
+    mainHeightRes: {
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+    },
+    subHeightRes: {
+        flex: 1,
+        overflowY: "auto",
+        overflowX: "hidden",
+        pr: 1,
+        minHeight: 0,
+    },
+    bottomFixed: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 2,
+        mt: 2,
+        pt: 2,
+        borderTop: "1px solid #E2E8F0",
+        backgroundColor: "#fff",
+        flexShrink: 0,
+    }
 };

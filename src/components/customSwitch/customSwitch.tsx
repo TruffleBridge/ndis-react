@@ -116,7 +116,7 @@ export const CustomSwitch: React.FC<CustomSwitchProps> = ({
         <FormControlLabel
             sx={{ m: 0, ...sxProps }}
             labelPlacement="start"
-            label={label && <FormLabel label={label} sxText={{ fontSize: 14, fontWeight: 600 }} />}
+            label={label && <FormLabel label={label} sxText={{ fontSize: 14, fontWeight: 600, textAlign: 'left' }} />}
             control={
                 <Switch
                     checked={checked}

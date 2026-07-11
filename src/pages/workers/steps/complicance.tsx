@@ -1,6 +1,5 @@
 import {
     Box,
-    Typography,
     Grid,
     Button,
 } from "@mui/material";
@@ -61,22 +60,6 @@ const Compliance = ({
                 height: "100%",
             }}
         >
-            <Box
-                sx={{
-                    mb: 1,
-                    flexShrink: 0,
-                    textAlign: "left",
-                }}
-            >
-                <Typography sx={WorkerStyles.title}>
-                    Compliance and Verifications
-                </Typography>
-
-                <Typography sx={WorkerStyles.subtitle}>
-                    Just the basics - take about 30 seconds
-                    to set up a secure identity
-                </Typography>
-            </Box>
 
             <Box
                 sx={{

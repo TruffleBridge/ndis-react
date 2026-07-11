@@ -1,6 +1,5 @@
 import {
     Box,
-    Typography,
     Grid,
     Button,
 } from "@mui/material";
@@ -42,25 +41,8 @@ const SupportService = ({
     };
 
     return (
-        <Box>
-            <Box sx={{ minHeight: "290px" }}>
-
-                <Box
-                    sx={{
-                        textAlign: "left",
-                        mb: 1.3,
-                    }}
-                >
-                    <Typography sx={WorkerStyles.title}>
-                        Support Services
-                    </Typography>
-
-                    <Typography sx={WorkerStyles.subtitle}>
-                        Just the basics - take about
-                        30 seconds to set up a secure
-                        identity
-                    </Typography>
-                </Box>
+        <Box sx={WorkerStyles.mainHeightRes}>
+            <Box sx={WorkerStyles.subHeightRes}>
 
                 <Grid container spacing={2}>
 
@@ -174,15 +156,7 @@ const SupportService = ({
                 </Grid>
             </Box>
 
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mt: 2,
-                    borderTop: "1px solid #E2E8F0",
-                    pt: "13px",
-                }}
-            >
+            <Box sx={WorkerStyles.bottomFixed}>
                 <Button
                     sx={{
                         ...WorkerStyles.nextCta,
