@@ -65,7 +65,6 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                 autoComplete="off"
                 slotProps={{
                     input: {
-                        readOnly: isView,
                         startAdornment: startAdornment && (
                             <InputAdornment position="start">
                                 {startAdornment}
@@ -86,25 +85,25 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                     "& .MuiOutlinedInput-root": {
                         ...style,
                         height,
-                        boxShadow: isView ? 'none' : "0px 1px 2px 0px #1018280D",
+                        boxShadow: "0px 1px 2px 0px #1018280D",
                         backgroundColor: disabled
                             ? "#F5F5F5"
                             : "#FFFFFF",
                         "& fieldset": {
-                            border: isView ? 'none' : '1px solid',
+                            border: '1px solid',
                             borderWidth: '1.4px',
                             borderColor: "#D0D5DD",
                             "&.MuiOutlinedInput-notchedOutline": {
-                                borderColor: isView ? 'none' : "#D0D5DD",
+                                // borderColor: "#D0D5DD",
                             }
                         },
 
                         "&:hover fieldset": {
-                            borderColor: "#D0D5DD",
+                            borderColor: errors ? '#d32f2f' : "#D0D5DD",
                         },
 
                         "&.Mui-focused fieldset": {
-                            borderColor: "#086D63",
+                            borderColor: errors ? '#d32f2f' : "#086D63",
                         },
                     },
                     "& input": {
@@ -120,7 +119,6 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                     },
                     "& .MuiOutlinedInput-input": {
                         py: 0,
-                        ...isView && { p: 0 }
                     },
 
                     ...sx,

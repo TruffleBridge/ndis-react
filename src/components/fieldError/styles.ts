@@ -4,6 +4,7 @@ export const styles = {
     alignItems: "center",
     gap: 0.5,
     mt: 0.5,
+    pl: 0.4
   },
 
   icon: {

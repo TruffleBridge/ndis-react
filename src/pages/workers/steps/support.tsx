@@ -1,66 +1,46 @@
-import {
-    Box,
-    Grid,
-    Button,
-} from "@mui/material";
-
+import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { AutocompleteField } from "../../../components";
-
 import { WorkerStyles } from "../styles";
-import type { SupportInfo } from "../utils/types";
+import { useWorkerStore } from "../../../store/useWorker";
+import type { Option } from "../../../types/worker";
 
 interface SupportProps {
-    data: SupportInfo;
-    setData: React.Dispatch<
-        React.SetStateAction<SupportInfo>
-    >;
-    isView: boolean;
+    isView?: boolean;
     handlePrev?: () => void;
     handleNext?: () => void;
 }
 
-const SupportService = ({
-    data,
-    setData,
-    isView,
-    handlePrev,
-    handleNext,
-}: SupportProps) => {
+const SupportService = ({ isView, handlePrev, handleNext }: SupportProps) => {
+    const data = useWorkerStore((s) => s.supportInfo);
+    const setField = useWorkerStore((s) => s.setSupportField);
+    const goToNextStep = useWorkerStore((s) => s.goToNextStep);
 
-    const updateField = (
-        key: keyof SupportInfo,
-        value: any
-    ) => {
-        setData((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
+    const onNext = () => {
+        if (isView) {
+            handleNext?.();
+            return;
+        }
+        const valid = goToNextStep("support");
+        if (valid) handleNext?.();
     };
 
     return (
         <Box sx={WorkerStyles.mainHeightRes}>
             <Box sx={WorkerStyles.subHeightRes}>
-
                 <Grid container spacing={2}>
-
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <AutocompleteField
                             label="Help in Home"
                             value={data.helpInHome}
                             options={[]}
+                            multiple
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "helpInHome",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("helpInHome", value as Option[])}
                         />
                     </Grid>
 
@@ -71,14 +51,8 @@ const SupportService = ({
                             options={[]}
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "socialAssistance",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("socialAssistance", value as Option[])}
                         />
                     </Grid>
 
@@ -89,14 +63,8 @@ const SupportService = ({
                             options={[]}
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "mentorLifeSkills",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("mentorLifeSkills", value as Option[])}
                         />
                     </Grid>
 
@@ -107,16 +75,11 @@ const SupportService = ({
                             options={[]}
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "travelTransport",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("travelTransport", value as Option[])}
                         />
                     </Grid>
+
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <AutocompleteField
                             label="Personal Care"
@@ -124,14 +87,8 @@ const SupportService = ({
                             options={[]}
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "personalCare",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("personalCare", value as Option[])}
                         />
                     </Grid>
 
@@ -142,17 +99,10 @@ const SupportService = ({
                             options={[]}
                             placeholder="Select"
                             readOnly={isView}
-                            // disabled={isView}
                             isView={isView}
-                            onChange={(value) =>
-                                updateField(
-                                    "healthWellBeing",
-                                    value
-                                )
-                            }
+                            onChange={(value) => setField("healthWellBeing", value as Option[])}
                         />
                     </Grid>
-
                 </Grid>
             </Box>
 
@@ -165,24 +115,13 @@ const SupportService = ({
                         fontWeight: 500,
                         border: "1px solid #E2E8F0",
                     }}
-                    startIcon={
-                        <ArrowBackOutlinedIcon sx={{ width: 18, height: 18, color: '#222124' }} />
-                    }
+                    startIcon={<ArrowBackOutlinedIcon sx={{ width: 18, height: 18, color: "#222124" }} />}
                     onClick={handlePrev}
                 >
                     Prev
                 </Button>
 
-                <Button
-                    sx={WorkerStyles.nextCta}
-                    endIcon={
-                        <ArrowForwardOutlined
-                            sx={{ fontSize: 12 }}
-                        />
-                    }
-                    onClick={handleNext}
-                //   disabled={isView}
-                >
+                <Button sx={WorkerStyles.nextCta} endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />} onClick={onNext}>
                     Next
                 </Button>
             </Box>

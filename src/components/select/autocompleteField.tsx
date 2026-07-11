@@ -4,7 +4,7 @@ import {
     TextField,
     Autocomplete,
 } from "@mui/material";
-import type { AutocompleteProps } from "@mui/material"
+import type { AutocompleteProps } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 
 import { FormLabel, FieldError } from "../../components";
@@ -19,7 +19,7 @@ interface SelectFieldProps
     extends Omit<
         AutocompleteProps<
             AutocompleteOption,
-            false,
+            boolean,
             false,
             false
         >,
@@ -31,14 +31,17 @@ interface SelectFieldProps
         | "isOptionEqualToValue"
     > {
     label: string;
-    value: AutocompleteOption | null;
+    value: AutocompleteOption | AutocompleteOption[] | null;
     options: AutocompleteOption[];
-    onChange: (value: AutocompleteOption | null) => void;
+    onChange: (
+        value: AutocompleteOption | AutocompleteOption[] | null
+    ) => void;
     placeholder?: string;
     required?: boolean;
     optional?: boolean;
     error?: string;
     isView?: boolean;
+    multiple?: boolean;
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({
@@ -51,6 +54,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
     optional,
     error,
     isView = false,
+    multiple = false,
     ...rest
 }) => {
     return (
@@ -59,10 +63,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
                 label={label}
                 required={required}
                 optional={optional}
-                sxText={{ fontWeight: 600, fontSize: '14px' }}
+                sxText={{ fontWeight: 600, fontSize: "14px" }}
             />
 
             <Autocomplete
+                multiple={multiple}
                 value={value}
                 options={options}
                 onChange={(_, newValue) => onChange(newValue)}

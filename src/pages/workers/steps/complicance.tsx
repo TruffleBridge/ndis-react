@@ -1,110 +1,84 @@
-import {
-    Box,
-    Grid,
-    Button,
-} from "@mui/material";
+import { Box, Grid, Button } from "@mui/material";
 
-import {
-    DateField,
-    InputTextField,
-    SectionCard,
-    UploadVariant2,
-    UploadVariant3,
-} from "../../../components";
+import { DateField, InputTextField, SectionCard, UploadVariant2, UploadVariant3 } from "../../../components";
 
-import {
-    ArrowForwardOutlined,
-} from "@mui/icons-material";
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import { ArrowForwardOutlined } from "@mui/icons-material";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 
 import { WorkerStyles } from "../styles";
 import { ClientStyles } from "../../clients/styles";
-import type { ComplianceInfo } from "../utils/types";
 import dayjs from "dayjs";
+import { useWorkerStore } from "../../../store/useWorker";
+import type { ComplianceInfo } from "../../../types/worker";
+import { useUploadStore } from "../../../store/useUpload";
 
 interface ComplianceProps {
-    data: ComplianceInfo;
-    setData: React.Dispatch<
-        React.SetStateAction<ComplianceInfo>
-    >;
-    isView: boolean;
+    isView?: boolean;
     handlePrev?: () => void;
     handleSubmit?: () => void;
 }
 
-const Compliance = ({
-    data,
-    setData,
-    isView,
-    handlePrev,
-    handleSubmit,
-}: ComplianceProps) => {
+const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
+    const data = useWorkerStore((s) => s.complianceInfo);
+    const setField = useWorkerStore((s) => s.setComplianceField);
+    // const errors = useWorkerStore((s) => s.errors.compliance);
+    const goToNextStep = useWorkerStore((s) => s.goToNextStep);
+    const isSubmitting = useWorkerStore((s) => s.isSubmitting);
+    const uploadDocument = useUploadStore((s) => s.uploadDocument);
+    const uploadErrors = useUploadStore((s) => s.uploadErrors)
 
-    const updateField = (
-        key: keyof ComplianceInfo,
-        value: any
-    ) => {
-        setData((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
+    // One handler shared by every UploadVariant2/3 field below.
+    const handleUpload = async (field: keyof ComplianceInfo, file: any) => {
+        const files = file?.file
+        if (!files) {
+            setField(field, null);
+            return;
+        }
+        const uploaded = await uploadDocument(file, file?.documentType ?? '', field);
+        if (uploaded) setField(field, {
+            ...file,
+            url: uploaded?.url,
+        });
+    }
+
+
+    const onSubmit = async () => {
+        if (isView) {
+            handleSubmit?.();
+            return;
+        }
+        // Compliance is the last step - validate before firing the real submit.
+        const valid = goToNextStep("compliance");
+        if (valid) handleSubmit?.();
     };
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-            }}
-        >
-
-            <Box
-                sx={{
-                    flex: 1,
-                    overflowY: "auto",
-                    pr: 1,
-                }}
-            >
-
+        <Box sx={WorkerStyles.mainHeightRes}>
+            <Box sx={WorkerStyles.subHeightRes}>
                 <SectionCard title="Verifications">
-
                     <Grid container spacing={2}>
-
                         <Grid size={{ xs: 12 }}>
                             <UploadVariant2
                                 label="NDIS Certificate of Registration"
                                 sublabel="Mandatory for all registered providers"
-                                value={data?.ndisCertificate && data?.ndisCertificate}
-                                // isView={isView}
-                                onChange={(file) =>
-                                    updateField(
-                                        "ndisCertificate",
-                                        file
-                                    )
-                                }
+                                value={data.ndisCertificate}
+                                disabled={isView}
+                                errors={uploadErrors?.ndisCertificate}
+                                onChange={(file) => handleUpload("ndisCertificate", file ? { ...file, documentType: "NDIS Certificate of Registration" } : null)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
                             <UploadVariant2
-                                icon={
-                                    <RuleOutlinedIcon
-                                        sx={ClientStyles.svgSx}
-                                    />
-                                }
+                                icon={<RuleOutlinedIcon sx={ClientStyles.svgSx} />}
                                 label="Screening Check Upload"
                                 sublabel="Latest audit documents"
-                                value={data?.screeningCheck && data?.screeningCheck}
-                                // isView={isView}
-                                onChange={(file) =>
-                                    updateField(
-                                        "screeningCheck",
-                                        file
-                                    )
-                                }
+                                value={data.screeningCheck}
+                                disabled={isView}
+                                errors={uploadErrors?.screeningCheck}
+                                onChange={(file) => handleUpload("screeningCheck", file ? { ...file, documentType: "Screening Check Upload" } : null)}
                             />
                         </Grid>
 
@@ -112,14 +86,11 @@ const Compliance = ({
                             <UploadVariant2
                                 label="Orientation Certificate Upload"
                                 sublabel="Mandatory for all registered providers"
-                                value={data?.orientationCertificate && data?.orientationCertificate}
-                                // isView={isView}
-                                onChange={(file) =>
-                                    updateField(
-                                        "orientationCertificate",
-                                        file
-                                    )
-                                }
+                                value={data.orientationCertificate}
+                                disabled={isView}
+                                // loading={uploadingKeys.orientationCertificate}
+                                errors={uploadErrors?.orientationCertificate}
+                                onChange={(file) => handleUpload("orientationCertificate", file ? { ...file, documentType: "Orientation Certificate Upload" } : null)}
                             />
                         </Grid>
 
@@ -127,50 +98,33 @@ const Compliance = ({
                             <UploadVariant2
                                 label="Right To Work"
                                 sublabel="Mandatory for all registered providers"
-                                value={data?.rightToWork && data?.rightToWork}
-                                // isView={isView}
-                                onChange={(file) =>
-                                    updateField(
-                                        "rightToWork",
-                                        file
-                                    )
-                                }
+                                value={data.rightToWork}
+                                disabled={isView}
+                                errors={uploadErrors?.rightToWork}
+                                onChange={(file) => handleUpload("rightToWork", file ? { ...file, documentType: "Right To Work" } : null)}
                             />
                         </Grid>
-
                     </Grid>
-
                 </SectionCard>
 
                 <SectionCard title="Identity & Legal">
-
                     <Grid container spacing={2}>
-
                         <Grid size={{ xs: 12, md: 6 }}>
                             <InputTextField
                                 label="Driving License Number"
                                 value={data.drivingLicenseNumber}
                                 placeholder="Enter driving license"
                                 isView={isView}
-                                onChange={(value) =>
-                                    updateField(
-                                        "drivingLicenseNumber",
-                                        value
-                                    )
-                                }
+                                onChange={(value) => setField("drivingLicenseNumber", value)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
                             <DateField
                                 label="Driving License Expiry"
-                                value={dayjs(data.drivingLicenseExpiry)}
-                                isView={isView}
+                                value={data.drivingLicenseExpiry ? dayjs(data.drivingLicenseExpiry) : null}
                                 onChange={(value) =>
-                                    updateField(
-                                        "drivingLicenseExpiry",
-                                        value
-                                    )
+                                    setField("drivingLicenseExpiry", value ? value.format("YYYY-MM-DD") : null)
                                 }
                             />
                         </Grid>
@@ -179,12 +133,8 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Frontside Upload"
                                 value={data.drivingFront}
-                                onChange={(file) =>
-                                    updateField("drivingFront", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("drivingFront", null)
-                                // }
+                                // loading={uploadingKeys.drivingFront}
+                                onChange={(file) => handleUpload("drivingFront", file)}
                             />
                         </Grid>
 
@@ -192,52 +142,38 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Backside Upload"
                                 value={data.drivingBack}
-                                onChange={(file) =>
-                                    updateField("drivingBack", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("drivingBack", null)
-                                // }
+                                // loading={uploadingKeys.drivingBack}
+                                onChange={(file) => handleUpload("drivingBack", file)}
                             />
                         </Grid>
-
                     </Grid>
                 </SectionCard>
 
                 <SectionCard title="Police Verification">
                     <Grid container spacing={2}>
-
                         <Grid size={{ xs: 12, md: 4 }}>
                             <InputTextField
                                 label="National Police Check Number"
                                 value={data.policeNumber}
                                 placeholder="Enter national police"
                                 isView={isView}
-                                onChange={(value) =>
-                                    updateField("policeNumber", value)
-                                }
+                                onChange={(value) => setField("policeNumber", value)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
                             <DateField
                                 label="Issue Date"
-                                value={dayjs(data.policeIssueDate)}
-                                isView={isView}
-                                onChange={(value) =>
-                                    updateField("policeIssueDate", value)
-                                }
+                                value={data.policeIssueDate ? dayjs(data.policeIssueDate) : null}
+                                onChange={(value) => setField("policeIssueDate", value ? value.format("YYYY-MM-DD") : null)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
                             <DateField
                                 label="Expiry Date"
-                                value={dayjs(data.policeExpiryDate)}
-                                isView={isView}
-                                onChange={(value) =>
-                                    updateField("policeExpiryDate", value)
-                                }
+                                value={data.policeExpiryDate ? dayjs(data.policeExpiryDate) : null}
+                                onChange={(value) => setField("policeExpiryDate", value ? value.format("YYYY-MM-DD") : null)}
                             />
                         </Grid>
 
@@ -245,41 +181,30 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.policeCertificate}
-                                onChange={(file) =>
-                                    updateField("policeCertificate", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("policeCertificate", null)
-                                // }
+                                // loading={uploadingKeys.policeCertificate}
+                                onChange={(file) => handleUpload("policeCertificate", file)}
                             />
                         </Grid>
-
                     </Grid>
                 </SectionCard>
 
                 <SectionCard title="Working with Children">
                     <Grid container spacing={2}>
-
                         <Grid size={{ xs: 12, md: 6 }}>
                             <InputTextField
                                 label="Blue Card Number"
                                 value={data.blueCardNumber}
                                 placeholder="Enter blue card number"
                                 isView={isView}
-                                onChange={(value) =>
-                                    updateField("blueCardNumber", value)
-                                }
+                                onChange={(value) => setField("blueCardNumber", value)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
                             <DateField
                                 label="Expiry Date"
-                                value={dayjs(data.blueCardExpiry)}
-                                isView={isView}
-                                onChange={(value) =>
-                                    updateField("blueCardExpiry", value)
-                                }
+                                value={data.blueCardExpiry ? dayjs(data.blueCardExpiry) : null}
+                                onChange={(value) => setField("blueCardExpiry", value ? value.format("YYYY-MM-DD") : null)}
                             />
                         </Grid>
 
@@ -287,17 +212,13 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.blueCardCertificate}
-                                onChange={(file) =>
-                                    updateField("blueCardCertificate", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("blueCardCertificate", null)
-                                // }
+                                // loading={uploadingKeys.blueCardCertificate}
+                                onChange={(file) => handleUpload("blueCardCertificate", file)}
                             />
                         </Grid>
-
                     </Grid>
                 </SectionCard>
+
                 <SectionCard title="First Aid">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
@@ -306,20 +227,15 @@ const Compliance = ({
                                 placeholder="Enter certificate number"
                                 value={data.firstAidCertificateNumber}
                                 isView={isView}
-                                onChange={(value) =>
-                                    updateField("firstAidCertificateNumber", value)
-                                }
+                                onChange={(value) => setField("firstAidCertificateNumber", value)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
                             <DateField
                                 label="Expiry Date"
-                                value={dayjs(data.firstAidExpiry)}
-                                isView={isView}
-                                onChange={(value) =>
-                                    updateField("firstAidExpiry", value)
-                                }
+                                value={data.firstAidExpiry ? dayjs(data.firstAidExpiry) : null}
+                                onChange={(value) => setField("firstAidExpiry", value ? value.format("YYYY-MM-DD") : null)}
                             />
                         </Grid>
 
@@ -327,12 +243,8 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.firstAidCertificate}
-                                onChange={(file) =>
-                                    updateField("firstAidCertificate", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("firstAidCertificate", null)
-                                // }
+                                // loading={uploadingKeys.firstAidCertificate}
+                                onChange={(file) => handleUpload("firstAidCertificate", file)}
                             />
                         </Grid>
                     </Grid>
@@ -346,20 +258,15 @@ const Compliance = ({
                                 placeholder="Enter certificate number"
                                 value={data.cprCertificateNumber}
                                 isView={isView}
-                                onChange={(value) =>
-                                    updateField("cprCertificateNumber", value)
-                                }
+                                onChange={(value) => setField("cprCertificateNumber", value)}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
                             <DateField
                                 label="Expiry Date"
-                                value={dayjs(data.cprExpiry)}
-                                isView={isView}
-                                onChange={(value) =>
-                                    updateField("cprExpiry", value)
-                                }
+                                value={data.cprExpiry ? dayjs(data.cprExpiry) : null}
+                                onChange={(value) => setField("cprExpiry", value ? value.format("YYYY-MM-DD") : null)}
                             />
                         </Grid>
 
@@ -367,30 +274,15 @@ const Compliance = ({
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.cprCertificate}
-                                onChange={(file) =>
-                                    updateField("cprCertificate", file)
-                                }
-                                // onRemove={() =>
-                                //     updateField("cprCertificate", null)
-                                // }
+                                // loading={uploadingKeys.cprCertificate}
+                                onChange={(file) => handleUpload("cprCertificate", file)}
                             />
                         </Grid>
                     </Grid>
                 </SectionCard>
-
             </Box>
 
-            <Box
-                sx={{
-                    flexShrink: 0,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #E2E8F0",
-                    pt: 2,
-                    mt: 2,
-                    bgcolor: "#fff",
-                }}
-            >
+            <Box sx={WorkerStyles.bottomFixed}>
                 <Button
                     sx={{
                         ...WorkerStyles.nextCta,
@@ -399,9 +291,7 @@ const Compliance = ({
                         fontWeight: 500,
                         border: "1px solid #E2E8F0",
                     }}
-                    startIcon={
-                        <ArrowBackOutlinedIcon sx={{ width: 18, height: 18, color: '#222124' }} />
-                    }
+                    startIcon={<ArrowBackOutlinedIcon sx={{ width: 18, height: 18, color: "#222124" }} />}
                     onClick={handlePrev}
                 >
                     Prev
@@ -409,13 +299,11 @@ const Compliance = ({
 
                 <Button
                     sx={WorkerStyles.nextCta}
-                    endIcon={
-                        <ArrowForwardOutlined sx={{ fontSize: 12 }} />
-                    }
-                    onClick={handleSubmit}
-                // disabled={isView}
+                    endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />}
+                    onClick={onSubmit}
+                    disabled={isSubmitting}
                 >
-                    {isView ? "Close" : "Submit"}
+                    {isView ? "Close" : isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
             </Box>
         </Box>

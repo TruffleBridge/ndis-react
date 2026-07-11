@@ -83,7 +83,6 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                         {isView ? getViewFunction('Date of Birth', dayjs(personalData.dob).format('YYYY-MM-DD'), 'plain') : <DateField
                             label="Date of Birth"
                             value={personalData.dob ? dayjs(personalData.dob) : null}
-                            isView={isView}
                             disableFuture
                             minDate={dayjs("1900-01-01")}
                             maxDate={dayjs(new Date())}

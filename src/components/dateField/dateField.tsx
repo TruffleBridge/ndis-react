@@ -21,7 +21,6 @@ interface DateFieldProps extends DatePickerProps {
     disablePast?: boolean;
     disableFuture?: boolean;
     error?: string;
-    isView?: boolean;
     referenceDate?: Dayjs;
     openToYear?: 'day' | 'month' | 'year'
 }
@@ -37,7 +36,6 @@ const DateField: React.FC<DateFieldProps> = ({
     disablePast,
     disableFuture,
     error,
-    isView = false,
     openToYear,
     referenceDate
 }) => {
@@ -65,7 +63,6 @@ const DateField: React.FC<DateFieldProps> = ({
                     desktopModeMediaQuery="@media (min-width: 0px)"
                     slotProps={{
                         textField: {
-                            readOnly: isView,
                             fullWidth: true,
                             error: !!error,
                             onClick: () => setOpen(true),
@@ -75,7 +72,7 @@ const DateField: React.FC<DateFieldProps> = ({
                                 </InputAdornment>
                             ),
                             sx: {
-                                ...styles.input(error, isView),
+                                ...styles.input(error),
                                 "& .MuiPickersSectionList-root span": {
                                     color: isValidDate ? '#111827' : "#7F7F7F",
                                 }
