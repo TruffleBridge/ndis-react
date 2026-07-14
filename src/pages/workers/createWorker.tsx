@@ -8,13 +8,13 @@ import SupportServices from "./steps/support";
 import Qualification from "./steps/qualification";
 import Compliance from "./steps/complicance";
 
-import { WorkerIcon } from "../../assets";
-import { CircularProgressWithLabel, CustomModal, PageHeader } from "../../components";
+import { WorkerIcon } from "@/assets";
+import { CircularProgressWithLabel, CustomModal, Loading, PageHeader } from "@/components";
 import { WorkerStyles } from "./styles";
-import { progressValue } from "../../utils/helper";
+import { progressValue } from "@/utils/helper";
 import { getHeader, getSubHeader } from "./utils/constants";
-import { useWorkerStore } from "../../store/useWorker";
-import type { StepId, WorkerFormNavState, FormMode } from "../../types/worker";
+import { useWorkerStore } from "@/store/useWorker";
+import type { StepId, WorkerFormNavState, FormMode } from "@/types/worker";
 
 const steps = [
     { id: "basic", label: "Basic Info" },
@@ -38,6 +38,7 @@ const WorkerPage = () => {
     const submitForm = useWorkerStore((s) => s.submitForm);
     const submitSuccess = useWorkerStore((s) => s.submitSuccess);
     const closeSubmitSuccess = useWorkerStore((s) => s.closeSubmitSuccess);
+    const isFormLoading = useWorkerStore((s) => s.isFormLoading);
 
     // Loads the right record for edit/view (getProfile) or resets to blanks
     // for create - runs once whenever mode/id changes.
@@ -102,6 +103,7 @@ const WorkerPage = () => {
 
     return (
         <Box sx={{ height: "100%" }}>
+            {isFormLoading && <Loading />}
             <PageHeader
                 icon={<WorkerIcon color="#3A3838" />}
                 title={mode === "create" ? "Add New Worker" : mode === "edit" ? "Edit Worker" : "View Worker"}
@@ -117,7 +119,7 @@ const WorkerPage = () => {
                             return (
                                 <Box
                                     key={step.id}
-                                    onClick={() => goToStep(step.id as StepId)}
+                                    // onClick={() => goToStep(step.id as StepId)}
                                     sx={{
                                         p: 1.3,
                                         mt: "0 !important",

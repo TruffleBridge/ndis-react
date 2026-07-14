@@ -1,5 +1,5 @@
 import { Box, Chip, Typography } from "@mui/material";
-import { FormLabel } from "../components";
+import { FormLabel } from "@/components";
 
 type ViewValue =
     | string

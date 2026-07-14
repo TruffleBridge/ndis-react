@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getApiRequest } from "../api/api";
+import { getApiRequest } from "@/api/api";
 
 const DEFAULT_LIMIT = 5;
 

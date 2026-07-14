@@ -3,12 +3,12 @@ import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
-import { AutocompleteField } from "../../../components";
+import { AutocompleteField } from "@/components";
 import { WorkerStyles } from "../styles";
-import { useWorkerStore } from "../../../store/useWorker";
-import { useLookupStore } from "../../../store/useMasterAPI";
-import type { Option } from "../../../types/worker";
-import { getViewFunction } from "../../../utils/viewfunction";
+import { useWorkerStore } from "@/store/useWorker";
+import { useLookupStore } from "@/store/useMasterAPI";
+import type { Option } from "@/types/worker";
+import { getViewFunction } from "@/utils/viewfunction";
 
 interface SupportProps {
     isView?: boolean;

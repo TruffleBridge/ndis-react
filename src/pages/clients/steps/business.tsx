@@ -2,12 +2,12 @@ import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
-import { InputTextField, SectionCard } from "../../../components";
+import { InputTextField, SectionCard } from "@/components";
 import { ClientStyles } from "../styles";
-import { CompanyHomeIcon, CompanyIcon, LocationIcon, LocationIcon1 } from "../../../assets";
-import { useClientStore } from "../../../store/useClient";
-import { getViewFunction } from "../../../utils/viewfunction";
-import { onlyNumbers } from "../../../utils/helper";
+import { CompanyHomeIcon, CompanyIcon, LocationIcon, LocationIcon1 } from "@/assets";
+import { useClientStore } from "@/store/useClient";
+import { getViewFunction } from "@/utils/viewfunction";
+import { onlyNumbers } from "@/utils/helper";
 
 interface BusinessProps {
     isView?: boolean;

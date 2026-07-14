@@ -1,17 +1,17 @@
 import { Box, Grid, Button } from "@mui/material";
 
-import { AutocompleteField, InputTextField, SectionCard, UploadVariant1 } from "../../../components";
+import { AutocompleteField, InputTextField, SectionCard, UploadVariant1 } from "@/components";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { WorkerStyles } from "../styles";
-import { useWorkerStore } from "../../../store/useWorker";
-import type { Option } from "../../../types/worker";
-import { useUploadStore } from "../../../store/useUpload";
-import { useLookupStore } from "../../../store/useMasterAPI";
+import { useWorkerStore } from "@/store/useWorker";
+import type { Option } from "@/types/worker";
+import { useUploadStore } from "@/store/useUpload";
+import { useLookupStore } from "@/store/useMasterAPI";
 import { useEffect } from "react";
-import { getViewFunction } from "../../../utils/viewfunction";
+import { getViewFunction } from "@/utils/viewfunction";
 
 interface QualificationProps {
     isView?: boolean;

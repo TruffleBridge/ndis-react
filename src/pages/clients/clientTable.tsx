@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { DeleteIcon } from "../../assets";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
+import { DeleteIcon } from "@/assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
-import type { Client, ClientFormNavState } from "../../types/client";
-import { useClientStore } from "../../store/useClient";
+import type { Client, ClientFormNavState } from "@/types/client";
+import { useClientStore } from "@/store/useClient";
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 
 const CLIENT_STATUS_STYLES = {

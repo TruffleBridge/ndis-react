@@ -5,7 +5,7 @@ import {
     getApiRequest,
     createApiRequest,
     updateApiRequest,
-} from "../api/api";
+} from "@/api/api";
 
 import type {
     Worker,
@@ -17,7 +17,7 @@ import type {
     FormMode,
     FormErrors,
     StepId,
-} from "../types/worker";
+} from "@/types/worker";
 import { getMimeType } from "../utils/helper";
 
 // ---------------------------------------------------------------------------
@@ -616,7 +616,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
                     gender: (u.gender ?? "").toLowerCase(),
                     idProof: u.idProof ?? null,
                     primaryLanguage: bio.primaryLanguageId
-                        ? { label: bio.primaryLanguage?.name ?? "", value: String(bio.primaryLanguageId) }
+                        ? { label: bio.primaryLanguage?.name ?? "", value: bio?.primaryLanguage?.id ?? String(bio.primaryLanguageId) }
                         : { label: "", value: "" },
                     experience: bio.yearsOfExperience?.toString() ?? "",
                     employmentStatus: bio.currentEmploymentStatus
@@ -633,8 +633,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
                 supportInfo: mapServiceCategoriesToSupportInfo(u.supportServices ?? []),
                 qualificationInfo: {
                     ...getDefaultQualificationInfo(),
-                    qualificationType: bio.qualificationId
-                        ? { label: "", value: String(bio.qualificationId) }
+                    qualificationType: bio.qualification?.id
+                        ? { label: bio?.qualification?.name, value: bio.qualification?.id ?? String(bio.qualificationId) }
                         : { label: "", value: "" },
                     degreeName: bio.degree ?? "",
                     institution: bio.institute ?? "",

@@ -33,11 +33,11 @@ import {
 } from "chart.js";
 
 import { Line, Bar } from "react-chartjs-2";
-import { CalendarIcon, CardGraph, SparkleIcon } from "../../assets";
+import { CalendarIcon, CardGraph, SparkleIcon } from "@/assets";
 import { buttonStyle, dashboardStyles as S } from "./styles";
-import { type ChatMessage } from "../../components";
+import { type ChatMessage } from "@/components";
 import { useMemo, useState } from "react";
-import { VirtualAssistantPopover } from "../../components/askAI";
+import { VirtualAssistantPopover } from "@/components/askAI";
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { FileDownloadOutlined } from "@mui/icons-material";
 

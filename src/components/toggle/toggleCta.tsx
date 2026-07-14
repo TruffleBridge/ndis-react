@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material";
-import FieldError from "../fieldError/fieldError";
+import FieldError from "@/components/fieldError/fieldError";
 
 interface Option {
     label: string;

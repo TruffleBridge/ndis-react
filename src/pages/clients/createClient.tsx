@@ -6,12 +6,12 @@ import { ArrowForwardIosOutlined } from "@mui/icons-material";
 import PersonalInformation from "./steps/personal";
 import BusinessStep from "./steps/business";
 import DocumentRegisterStep from "./steps/documentRegister";
-import { ClientIcon } from "../../assets";
-import { CircularProgressWithLabel, CustomModal, Loading, PageHeader } from "../../components";
+import { ClientIcon } from "@/assets";
+import { CircularProgressWithLabel, CustomModal, Loading, PageHeader } from "@/components";
 import { ClientStyles } from "./styles";
 import { FORM_STEPS, getHeader, getSubHeader, progressValue } from "./utils/constants";
-import { useClientStore } from "../../store/useClient";
-import type { ClientFormNavState, FormMode, StepId } from "../../types/client";
+import { useClientStore } from "@/store/useClient";
+import type { ClientFormNavState, FormMode, StepId } from "@/types/client";
 
 const ClientFormPage = () => {
     const navigate = useNavigate();

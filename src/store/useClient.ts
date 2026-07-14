@@ -6,7 +6,7 @@ import {
     createApiRequest,
     // updateApiRequest,
     updateApiRequest,
-} from "../api/api";
+} from "@/api/api";
 
 import type {
     Client,
@@ -17,9 +17,9 @@ import type {
     FormMode,
     FormErrors,
     StepId,
-} from "../types/client";
+} from "@/types/client";
 import dayjs from "dayjs";
-import { DOCUMENT_FIELDS } from "../pages/clients/utils/constants";
+import { DOCUMENT_FIELDS } from "@/pages/clients/utils/constants";
 
 // ---------------------------------------------------------------------------
 // Endpoints - swap these placeholders for the real ones. Kept in one place

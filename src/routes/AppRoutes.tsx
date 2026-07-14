@@ -1,24 +1,24 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { lazy } from "react";
-import MainLayout from '../layouts/MainLayout';
+import MainLayout from '@/layouts/MainLayout';
 
 
 
 
-const Home = lazy(() => import("../pages/dashboard/Home"));
-const Verification = lazy(() => import("../pages/verificationQueue/Verification"));
-const Workers = lazy(() => import("../pages/workers/workerTable"));
-const Clients = lazy(() => import("../pages/clients/clientTable"));
-const Jobs = lazy(() => import("../pages/jobs/Jobs"));
-const Bookings = lazy(() => import("../pages/booking/Bookings"));
-const Budget = lazy(() => import("../pages/budget/Budget"));
-const RolesPermission = lazy(() => import("../pages/roleAndPermission/RolesPermission"));
-const Rewards = lazy(() => import("../pages/reward/Rewards"));
-const Subscription = lazy(() => import("../pages/subscription/Subscription"));
-const AddNewWorkerPage = lazy(() => import("../pages/workers/createWorker"));
-const AddNewClientPage = lazy(() => import("../pages/clients/createClient"));
-const AddNewRolesPage = lazy(() => import("../pages/roleAndPermission/createRoles"));
+const Home = lazy(() => import("@/pages/dashboard/Home"));
+const Verification = lazy(() => import("@/pages/verificationQueue/Verification"));
+const Workers = lazy(() => import("@/pages/workers/workerTable"));
+const Clients = lazy(() => import("@/pages/clients/clientTable"));
+const Jobs = lazy(() => import("@/pages/jobs/Jobs"));
+const Bookings = lazy(() => import("@/pages/booking/Bookings"));
+const Budget = lazy(() => import("@/pages/budget/Budget"));
+const RolesPermission = lazy(() => import("@/pages/roleAndPermission/RolesPermission"));
+const Rewards = lazy(() => import("@/pages/reward/Rewards"));
+const Subscription = lazy(() => import("@/pages/subscription/Subscription"));
+const AddNewWorkerPage = lazy(() => import("@/pages/workers/createWorker"));
+const AddNewClientPage = lazy(() => import("@/pages/clients/createClient"));
+const AddNewRolesPage = lazy(() => import("@/pages/roleAndPermission/createRoles"));
 
 const AppRoutes: React.FC = () => {
   return (

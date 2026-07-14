@@ -21,13 +21,13 @@ import {
   HomeIcon,
   SubscriptionIcon,
   RewardIcon,
-} from "../../assets/index";
-import { sidebarStyles as S } from "../topNavbar/styles";
+} from "@/assets/index";
+import { sidebarStyles as S } from "@/components/topNavbar/styles";
 import {
   NAV_ITEMS,
   isNavItemActive,
   type NavIconRenderer,
-} from "../../constants/navigation";
+} from "@/constants/navigation";
 
 export const COLLAPSED_WIDTH = 72;
 export const EXPANDED_WIDTH = 248;

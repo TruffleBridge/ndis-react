@@ -1,6 +1,6 @@
 import React from "react";
 import { Switch, FormControlLabel, Box, Typography, type SxProps, type Theme } from "@mui/material";
-import FormLabel from "../formLabel/formLabel";
+import FormLabel from "@/components/formLabel/formLabel";
 
 export interface SwitchItem {
     label: string;

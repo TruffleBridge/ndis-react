@@ -7,8 +7,8 @@ import {
     type Theme,
 } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
-import FieldError from "../fieldError/fieldError";
-import FormLabel from "../formLabel/formLabel";
+import FieldError from "@/components/fieldError/fieldError";
+import FormLabel from "@/components/formLabel/formLabel";
 
 interface InputTextFieldProps extends Omit<TextFieldProps, "onChange"> {
     label?: string;

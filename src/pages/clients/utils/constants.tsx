@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import AssuredWorkloadOutlinedIcon from "@mui/icons-material/AssuredWorkloadOutlined";
-import { PolicyIcon, WorkerIcon } from "../../../assets";
+import { PolicyIcon, WorkerIcon } from "@/assets";
 
 // Step 1: Personal Information constants
 export const GENDER_OPTIONS = [

@@ -12,8 +12,8 @@ import { styled } from "@mui/material/styles";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import { DeleteIcon, FileDownloadIcon } from "../../assets";
-import FieldError from "../fieldError/fieldError";
+import { DeleteIcon, FileDownloadIcon } from "@/assets";
+import FieldError from "@/components/fieldError/fieldError";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -372,7 +372,7 @@ export function UploadVariant2({
     value,
     onChange,
     disabled = false,
-    errors = ''
+    errors = "",
 }: Variant2Props) {
     const [error, setError] = useState<string | null>(null);
 
@@ -389,83 +389,185 @@ export function UploadVariant2({
         [onChange]
     );
 
-    const { trigger, inputElement } = useFileInput(ACCEPTED_EXTENSIONS, handleFile);
+    const { trigger, inputElement } = useFileInput(
+        ACCEPTED_EXTENSIONS,
+        handleFile
+    );
 
     return (
-        <Box>
+        <Box sx={{ width: "100%" }}>
             {!disabled && inputElement}
 
             <Paper
                 variant="outlined"
-                sx={{ display: "flex", alignItems: "center", px: 2, py: 1.5, borderRadius: 2, borderColor: "#D2D5DB", mb: 1 }}
+                sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    borderColor: "#D2D5DB",
+                    mb: 1,
+                }}
             >
+                {/* Icon */}
                 <Box
                     sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 1.5,
-                        backgroundColor: FILE_BG,
+                        width: 48,
+                        height: 48,
+                        borderRadius: 2,
+                        bgcolor: FILE_BG,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        mr: 2,
                         flexShrink: 0,
                     }}
                 >
-                    {icon ? icon : <DescriptionOutlinedIcon sx={{ color: "#3E4947", fontSize: 20 }} />}
+                    {icon ? (
+                        icon
+                    ) : (
+                        <DescriptionOutlinedIcon
+                            sx={{
+                                color: "#3E4947",
+                                fontSize: 24,
+                            }}
+                        />
+                    )}
                 </Box>
 
-                <Box sx={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 16, color: LABEL_COLOR }}>
+                {/* Label */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        width: "100%",
+                        minWidth: 0,
+                        textAlign: 'left'
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: {
+                                xs: 15,
+                                sm: 16,
+                            },
+                            color: LABEL_COLOR,
+                        }}
+                    >
                         {label}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: SUB_COLOR, fontSize: 12, fontWeight: 400 }}>
+
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: SUB_COLOR,
+                            fontSize: 12,
+                        }}
+                    >
                         {sublabel}
                     </Typography>
                 </Box>
 
-                {value ?
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Box sx={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                {value ? (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: {
+                                xs: "row",
+                                // sm: "row",
+                            },
+                            alignItems: {
+                                xs: "stretch",
+                                sm: "left",
+                            },
+                            gap: 1,
+                            width: {
+                                xs: "100%",
+                                sm: "auto",
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                minWidth: 0,
+                                flex: 1,
+                                textAlign: 'left'
+                            }}
+                        >
                             <Typography
                                 variant="body2"
-                                sx={{ fontWeight: 600, color: LABEL_COLOR, lineHeight: 1.4, wordBreak: "break-word" }}
+                                sx={{
+                                    fontWeight: 600,
+                                    color: LABEL_COLOR,
+                                    wordBreak: "break-word",
+                                }}
                             >
                                 {value.name}
                             </Typography>
 
-                            <Typography variant="caption" sx={{ color: SUB_COLOR, textTransform: "uppercase", letterSpacing: 0.3 }}>
-                                {`Uploaded ${formatDate(value.uploadedAt)} • ${formatSize(value.size)}`}
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: SUB_COLOR,
+                                    display: "block",
+                                }}
+                            >
+                                {`Uploaded ${formatDate(
+                                    value.uploadedAt
+                                )} • ${formatSize(value.size)}`}
                             </Typography>
                         </Box>
 
-                        {/* Hide the delete action entirely in disabled/View mode */}
                         {!disabled && (
                             <IconButton
-                                size="medium"
                                 onClick={() => onChange(null)}
-                                sx={{ color: DANGER, flexShrink: 0 }}
+                                sx={{
+                                    color: DANGER,
+                                    alignSelf: {
+                                        xs: "flex-end",
+                                        sm: "center",
+                                    },
+                                }}
                             >
-                                <DeleteIcon fontSize="small" />
+                                <DeleteIcon />
                             </IconButton>
                         )}
                     </Box>
-                    : <UploadButton variant="outlined" startIcon={<FileDownloadIcon />} onClick={trigger} disabled={disabled}>
+                ) : (
+                    <UploadButton
+                        variant="outlined"
+                        startIcon={<FileDownloadIcon />}
+                        onClick={trigger}
+                        disabled={disabled}
+                        sx={{
+                            width: {
+                                xs: "100%",
+                                sm: "auto",
+                            },
+                            minWidth: {
+                                sm: 120,
+                            },
+                        }}
+                    >
                         Upload
-                    </UploadButton>}
+                    </UploadButton>
+                )}
             </Paper>
 
             {error && (
-                <Alert severity="error" sx={{ mb: 1, borderRadius: 2 }} onClose={() => setError(null)}>
+                <Alert
+                    severity="error"
+                    sx={{
+                        mb: 1,
+                        borderRadius: 2,
+                    }}
+                    onClose={() => setError(null)}
+                >
                     {error}
                 </Alert>
             )}
 
-            {/* {value && (
-                <Box sx={{ mb: 1 }}>
-                    <FileRow uploadedFile={value} onRemove={() => onChange(null)} disabled={disabled} />
-                </Box>
-            )} */}
             <FieldError message={errors} />
         </Box>
     );
@@ -498,18 +600,18 @@ export function UploadVariant3({ label, value, onChange, disabled = false }: Var
             {!disabled && inputElement}
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{label}</Typography>
+                <Typography sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 14 }, textAlign: 'left', }}>{label}</Typography>
 
                 {value ? <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                    <Box sx={{ flex: 1, minWidth: 0, textAlign: "left", width: 'max-content' }}>
                         <Typography
                             variant="body2"
-                            sx={{ fontWeight: 600, color: LABEL_COLOR, lineHeight: 1.4, wordBreak: "break-word" }}
+                            sx={{ fontWeight: 600, color: LABEL_COLOR, fontSize: { xs: 11, sm: 14 }, lineHeight: 1.4, wordBreak: "break-word" }}
                         >
                             {value.name}
                         </Typography>
 
-                        <Typography variant="caption" sx={{ color: SUB_COLOR, textTransform: "uppercase", letterSpacing: 0.3 }}>
+                        <Typography variant="caption" sx={{ color: SUB_COLOR, textTransform: "uppercase", fontSize: { xs: 12, sm: 14 }, letterSpacing: 0.3 }}>
                             {`Uploaded ${formatDate(value.uploadedAt)} • ${formatSize(value.size)}`}
                         </Typography>
                     </Box>
@@ -530,13 +632,15 @@ export function UploadVariant3({ label, value, onChange, disabled = false }: Var
                     </UploadButton>}
             </Box>
 
-            {error && (
-                <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>
-                    {error}
-                </Alert>
-            )}
+            {
+                error && (
+                    <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>
+                        {error}
+                    </Alert>
+                )
+            }
 
             {/* {value && <FileRow uploadedFile={value} onRemove={() => onChange(null)} disabled={disabled} />} */}
-        </Paper>
+        </Paper >
     );
 }

@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { createApiRequest } from "../api/api";
+import { createApiRequest } from "@/api/api";
 import type {
     VerificationQueueItem, VerificationQueuePayload
-} from "../types/verificationQueue";
+} from "@/types/verificationQueue";
 
 interface VerificationQueueStore {
     loading: boolean;

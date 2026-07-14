@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, InputAdornment } from "@mui/material";
-import { FormLabel, FieldError } from "../../components";
+import { FormLabel, FieldError } from "@/components";
 import { styles } from "./styles";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -8,7 +8,7 @@ import { DatePicker, type DatePickerProps } from "@mui/x-date-pickers/DatePicker
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import type { Dayjs } from "dayjs";
-import { CalendarInputIcon } from "../../assets";
+import { CalendarInputIcon } from "@/assets";
 
 interface DateFieldProps extends DatePickerProps {
     label: string;

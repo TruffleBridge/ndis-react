@@ -13,10 +13,10 @@ import {
   type ColumnDef,
   type ColumnState,
   type RowAction,
-} from "../../components";
-import { useVerificationQueueStore } from "../../store/useVerification";
+} from "@/components";
+import { useVerificationQueueStore } from "@/store/useVerification";
 import dayjs from "dayjs";
-import { formatStatus } from "../../utils/menuUtils";
+import { formatStatus } from "@/utils/menuUtils";
 import { cta, VerifyStyles } from "./style";
 
 interface VerificationRow {

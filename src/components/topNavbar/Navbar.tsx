@@ -12,11 +12,11 @@ import {
   NotificationIcon,
   SearchIcon,
   CollapseIcon,
-} from "../../assets/index";
-import { InputTextField } from "../input/textField";
+} from "@/assets/index";
+import { InputTextField } from "@/components/input/textField";
 import { AIInsightsPopover } from "../popover";
 import { navbarStyles as S } from "./styles";
-import { getNavTitle } from "../../constants/navigation";
+import { getNavTitle } from "@/constants/navigation";
 
 export interface TopNavbarProps {
   sidebarOpen: boolean;

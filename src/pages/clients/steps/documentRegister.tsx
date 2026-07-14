@@ -2,12 +2,12 @@ import { Box, Grid, Button } from "@mui/material";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
-import { FormLabel } from "../../../components";
-import { UploadVariant2 } from "../../../components/newFileUpload/FileUpload";
+import { FormLabel } from "@/components";
+import { UploadVariant2 } from "@/components/newFileUpload/FileUpload";
 import { ClientStyles } from "../styles";
 import { DOCUMENT_FIELDS } from "../utils/constants";
-import { useClientStore } from "../../../store/useClient";
-import { useUploadStore } from "../../../store/useUpload";
+import { useClientStore } from "@/store/useClient";
+import { useUploadStore } from "@/store/useUpload";
 
 interface DocumentRegisterProps {
     isView?: boolean;

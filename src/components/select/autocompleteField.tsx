@@ -4,7 +4,7 @@ import type { MenuListProps } from "react-select";
 import { Box, Chip } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 
-import { FormLabel, FieldError } from "../../components";
+import { FormLabel, FieldError } from "@/components";
 import { styles, getSelectStyles } from "./styles";
 
 export interface AutocompleteOption {

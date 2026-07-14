@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { DeleteIcon, MoreCircleIcon, CircleTickIcon } from "../../assets";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
+import { DeleteIcon, MoreCircleIcon, CircleTickIcon } from "@/assets";
 import { useNavigate } from "react-router-dom";
 import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
-import type { Worker, WorkerFormNavState } from "../../types/worker";
-import { useWorkerStore } from "../../store/useWorker";
+import type { Worker, WorkerFormNavState } from "@/types/worker";
+import { useWorkerStore } from "@/store/useWorker";
 
 const STATUS_STYLES = {
   ACTIVE: { backgroundColor: "#D9F7E5", color: "#07AB48" },

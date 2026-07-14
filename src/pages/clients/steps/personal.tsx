@@ -3,14 +3,14 @@ import { ArrowForwardOutlined } from "@mui/icons-material";
 import dayjs, { type Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
 
-import { DateField, InputTextField, ToggleGroup } from "../../../components";
-import { UploadVariant1 } from "../../../components/newFileUpload/FileUpload";
+import { DateField, InputTextField, ToggleGroup } from "@/components";
+import { UploadVariant1 } from "@/components/newFileUpload/FileUpload";
 import { ClientStyles } from "../styles";
 import { GENDER_OPTIONS } from "../utils/constants";
-import { useClientStore } from "../../../store/useClient";
-import { useUploadStore } from "../../../store/useUpload";
-import { getViewFunction } from "../../../utils/viewfunction";
-import { onlyNumbers } from "../../../utils/helper";
+import { useClientStore } from "@/store/useClient";
+import { useUploadStore } from "@/store/useUpload";
+import { getViewFunction } from "@/utils/viewfunction";
+import { onlyNumbers } from "@/utils/helper";
 
 interface PersonalProps {
     isView?: boolean;

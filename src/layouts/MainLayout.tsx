@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Box, useMediaQuery } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import { SideNavbar, TopNavbar } from "../components";
+import { SideNavbar, TopNavbar } from "@/components";
 import { layoutStyles as S } from "./styles";
-import { MOBILE_NAV_QUERY } from "../constants/breakpoints";
+import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
 
 const COLLAPSED_WIDTH = 72;
 

@@ -7,18 +7,18 @@ import {
     SectionCard,
     ToggleGroup,
     UploadVariant1,
-} from "../../../components";
+} from "@/components";
 import { WorkerStyles } from "../styles";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-import { useWorkerStore } from "../../../store/useWorker";
-import type { Option } from "../../../types/worker";
-import { useUploadStore } from "../../../store/useUpload";
-import { getViewFunction } from "../../../utils/viewfunction";
-import { onlyNumbers } from "../../../utils/helper";
+import { useWorkerStore } from "@/store/useWorker";
+import type { Option } from "@/types/worker";
+import { useUploadStore } from "@/store/useUpload";
+import { getViewFunction } from "@/utils/viewfunction";
+import { onlyNumbers } from "@/utils/helper";
 import { useEffect } from "react";
-import { useLookupStore } from "../../../store/useMasterAPI";
+import { useLookupStore } from "@/store/useMasterAPI";
 
 const genderOptions = [
     { label: "Male", value: "male" },

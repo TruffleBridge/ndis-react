@@ -10,10 +10,10 @@ import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import { WorkerStyles } from "../styles";
 import { ClientStyles } from "../../clients/styles";
 import dayjs from "dayjs";
-import { useWorkerStore } from "../../../store/useWorker";
-import type { ComplianceInfo } from "../../../types/worker";
-import { useUploadStore } from "../../../store/useUpload";
-import { getViewFunction } from "../../../utils/viewfunction";
+import { useWorkerStore } from "@/store/useWorker";
+import type { ComplianceInfo } from "@/types/worker";
+import { useUploadStore } from "@/store/useUpload";
+import { getViewFunction } from "@/utils/viewfunction";
 
 interface ComplianceProps {
     isView?: boolean;

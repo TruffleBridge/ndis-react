@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { ClientDocument } from "../types/client";
-import { createApiRequest } from "../api/api";
+import type { ClientDocument } from "@/types/client";
+import { createApiRequest } from "@/api/api";
 
 interface UploadStore {
     uploadDocument: (file: File, documentType: string, fieldKey: string) => Promise<ClientDocument | null>;
