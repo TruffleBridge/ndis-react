@@ -175,7 +175,10 @@ const WorkerPage = () => {
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Dashboard"
-                onBack={() => navigate('/workers')}
+                onBack={() => {
+                    closeSubmitSuccess
+                    navigate('/workers')
+                }}
                 onPrimary={handleModalPrimary}
             />
         </Box>
