@@ -9,7 +9,7 @@ import {
 
 import type {
     Worker,
-    UploadedDoc,
+    // UploadedDoc,
     PersonalInfo,
     SupportInfo,
     QualificationInfo,
@@ -18,6 +18,7 @@ import type {
     FormErrors,
     StepId,
 } from "../types/worker";
+import { getMimeType } from "../utils/helper";
 
 // ---------------------------------------------------------------------------
 // Endpoints
@@ -91,7 +92,7 @@ const SUPPORT_CATEGORY_NAME_TO_KEY: Record<string, keyof SupportInfo> = {
     "Mentor & Life Skills": "mentorLifeSkills",
     "Travel & Transport": "travelTransport",
     "Personal Care": "personalCare",
-    "Health & Wellbeing": "healthWellBeing",
+    "Health Well Being": "healthWellBeing",
 };
 
 // ---------------------------------------------------------------------------
@@ -116,9 +117,9 @@ const getDefaultPersonalInfo = (): PersonalInfo => ({
     isNonSmoker: false,
     isOwnVehicle: false,
     isEmergencyShift: false,
-    primaryLanguage: { label: '', value: '' },
+    primaryLanguage: null,
     experience: "",
-    employmentStatus: { label: '', value: '' },
+    employmentStatus: null,
     availableForNewClients: false,
 });
 
@@ -132,7 +133,7 @@ const getDefaultSupportInfo = (): SupportInfo => ({
 });
 
 const getDefaultQualificationInfo = (): QualificationInfo => ({
-    qualificationType: { label: '', value: '' },
+    qualificationType: null,
     degreeName: "",
     institution: "",
     yearsCompleted: "",
@@ -177,26 +178,134 @@ const STEP_ORDER: StepId[] = ["basic", "support", "qual", "compliance"];
 const toGenderEnum = (gender: string) => (gender ? gender.toUpperCase().replace(/-/g, "_") : "");
 
 const buildDocuments = (compliance: ComplianceInfo) => {
-    const entries: Array<{ label: string; file: UploadedDoc | null }> = [
-        { label: "NDIS Certificate of Registration", file: compliance.ndisCertificate },
-        { label: "Screening Check Upload", file: compliance.screeningCheck },
-        { label: "Orientation Certificate Upload", file: compliance.orientationCertificate },
-        { label: "Right To Work", file: compliance.rightToWork },
-        { label: "Driving License - Front", file: compliance.drivingFront },
-        { label: "Driving License - Back", file: compliance.drivingBack },
-        { label: "Police Check Certificate", file: compliance.policeCertificate },
-        { label: "Blue Card Certificate", file: compliance.blueCardCertificate },
-        { label: "First Aid Certificate", file: compliance.firstAidCertificate },
-        { label: "CPR Certificate", file: compliance.cprCertificate },
-    ];
+    const documents: any[] = [];
 
-    return entries
-        .filter((entry) => !!entry.file)
-        .map((entry) => ({
-            documentType: entry.label,
-            documentTypeId: DOCUMENT_TYPE_IDS[entry.label] ?? 0,
-            documentUrls: [entry.file],
-        }));
+    const pushDocument = (
+        documentType: string,
+        file: any,
+        extra: Record<string, any> = {}
+    ) => {
+        if (!file) return;
+
+        documents.push({
+            documentType,
+            ...extra,
+            document: [
+                {
+                    name: file.name,
+                    url: file.url,
+                    size: file.size,
+                    type: file.type ? file.type : getMimeType(file?.name),
+                },
+            ],
+        });
+    };
+
+    // NDIS
+    pushDocument(
+        "NDIS Certificate of Registration",
+        compliance.ndisCertificate
+    );
+
+    // Screening Check
+    pushDocument(
+        "Screening check upload",
+        compliance.screeningCheck
+    );
+
+    // Orientation
+    pushDocument(
+        "Orientation certificate upload",
+        compliance.orientationCertificate
+    );
+
+    // Right To Work
+    pushDocument(
+        "Rights to work",
+        compliance.rightToWork
+    );
+
+    // Police Check
+    pushDocument(
+        "Police Verification",
+        compliance.policeCertificate,
+        {
+            referenceNumber: compliance.policeNumber,
+            startDate: compliance.policeIssueDate,
+            expiryDate: compliance.policeExpiryDate,
+        }
+    );
+
+    // Blue Card
+    pushDocument(
+        "Working with Children",
+        compliance.blueCardCertificate,
+        {
+            referenceNumber: compliance.blueCardNumber,
+            expiryDate: compliance.blueCardExpiry,
+        }
+    );
+
+    // First Aid
+    pushDocument(
+        "First Aid",
+        compliance.firstAidCertificate,
+        {
+            referenceNumber:
+                compliance.firstAidCertificateNumber,
+            expiryDate: compliance.firstAidExpiry,
+        }
+    );
+
+    // CPR
+    pushDocument(
+        "CPR",
+        compliance.cprCertificate,
+        {
+            referenceNumber:
+                compliance.cprCertificateNumber,
+            expiryDate: compliance.cprExpiry,
+        }
+    );
+
+    // Driving License (Front + Back in same object)
+    if (
+        compliance.drivingFront ||
+        compliance.drivingBack
+    ) {
+        const drivingDocs = [];
+
+        if (compliance.drivingFront) {
+            drivingDocs.push({
+                name: compliance.drivingFront.name,
+                url: compliance.drivingFront.url,
+                size: compliance.drivingFront.size,
+                type: compliance.drivingFront?.file?.type ? compliance.drivingFront.file?.type : getMimeType(compliance.drivingFront?.name),
+                documentSide: "Front side",
+            });
+        }
+
+        if (compliance.drivingBack) {
+            drivingDocs.push({
+                name: compliance.drivingBack.name,
+                url: compliance.drivingBack.url,
+                size: compliance.drivingBack.size,
+                type: compliance.drivingBack.file?.type ? compliance.drivingBack.file?.type : getMimeType(compliance.drivingBack.name),
+                documentSide: "Back side",
+            });
+        }
+
+        documents.push({
+            documentType: "Identify & Legal",
+            referenceNumber:
+                compliance.drivingLicenseNumber,
+            expiryDate:
+                compliance.drivingLicenseExpiry,
+            document: drivingDocs,
+        });
+    }
+
+    return documents;
 };
 
 const buildSupportServices = (support: SupportInfo) =>
@@ -206,6 +315,7 @@ const buildSupportServices = (support: SupportInfo) =>
             (support[key] as Array<{ label: string; value: string }>).map((item) => ({
                 serviceCategoryId: SERVICE_CATEGORY_IDS[key],
                 serviceId: Number(item.value),
+                name: item?.label
             }))
         );
 
@@ -220,7 +330,7 @@ const buildRegisterPayload = (
     firstName: personal.firstName,
     lastName: personal.lastName,
     email: personal.email,
-    ...(personal.password ? { password: personal.password } : {}),
+    password: 'Test@123',
     phoneNumber: personal.mobile,
     countryCode: personal.countryCode,
     type: ACCOUNT_TYPE,
@@ -236,7 +346,7 @@ const buildRegisterPayload = (
     documents: buildDocuments(compliance),
     userBio: {
         yearsOfExperience: Number(personal.experience) || 0,
-        newClientAvailability: personal.availableForNewClients,
+        newClientAvailability: personal.availableForNewClients ?? false,
         primaryLanguageId: personal.primaryLanguage?.value ? Number(personal.primaryLanguage.value) : null,
         currentEmploymentStatus: personal.employmentStatus?.value ?? null,
         qualificationId: qualification.qualificationType?.value ? Number(qualification.qualificationType.value) : null,
@@ -255,19 +365,19 @@ const buildRegisterPayload = (
     // TODO: these fields aren't in the sample payload schema yet - confirm the
     // exact keys your backend wants for driving/police/blue-card/first-aid/CPR
     // numbers + expiry dates, then move them into the right place above.
-    complianceDetails: {
-        drivingLicenseNumber: compliance.drivingLicenseNumber,
-        drivingLicenseExpiry: compliance.drivingLicenseExpiry,
-        policeNumber: compliance.policeNumber,
-        policeIssueDate: compliance.policeIssueDate,
-        policeExpiryDate: compliance.policeExpiryDate,
-        blueCardNumber: compliance.blueCardNumber,
-        blueCardExpiry: compliance.blueCardExpiry,
-        firstAidCertificateNumber: compliance.firstAidCertificateNumber,
-        firstAidExpiry: compliance.firstAidExpiry,
-        cprCertificateNumber: compliance.cprCertificateNumber,
-        cprExpiry: compliance.cprExpiry,
-    },
+    // complianceDetails: {
+    //     drivingLicenseNumber: compliance.drivingLicenseNumber,
+    //     drivingLicenseExpiry: compliance.drivingLicenseExpiry,
+    //     policeNumber: compliance.policeNumber,
+    //     policeIssueDate: compliance.policeIssueDate,
+    //     policeExpiryDate: compliance.policeExpiryDate,
+    //     blueCardNumber: compliance.blueCardNumber,
+    //     blueCardExpiry: compliance.blueCardExpiry,
+    //     firstAidCertificateNumber: compliance.firstAidCertificateNumber,
+    //     firstAidExpiry: compliance.firstAidExpiry,
+    //     cprCertificateNumber: compliance.cprCertificateNumber,
+    //     cprExpiry: compliance.cprExpiry,
+    // },
 });
 
 // ---------------------------------------------------------------------------
@@ -309,16 +419,20 @@ const mapDocumentsToCompliance = (docs: any[] = []): ComplianceInfo => {
 };
 
 // user.serviceCategories[] -> SupportInfo
-const mapServiceCategoriesToSupportInfo = (categories: any[] = []): SupportInfo => {
+const mapServiceCategoriesToSupportInfo = (
+    categories: Record<string, any[]> = {}
+): SupportInfo => {
     const result = getDefaultSupportInfo();
 
-    categories.forEach((entry) => {
-        const key = SUPPORT_CATEGORY_NAME_TO_KEY[entry?.serviceCategory?.name];
+    Object.entries(categories).forEach(([categoryName, services]) => {
+        const key = SUPPORT_CATEGORY_NAME_TO_KEY[categoryName];
         if (!key) return;
-        result[key] = [
-            ...(result[key] ?? []),
-            { label: entry.service?.name ?? "", value: String(entry.id) },
-        ];
+
+        result[key] = services.map((service) => ({
+            label: service.name,
+            value: String(service.id),
+            serviceCategoryId: service?.serviceCategoryId
+        }));
     });
 
     return result;
@@ -513,7 +627,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
                         bio.isEmergencyShift ? "emergencyShift" : null,
                     ].filter(Boolean) as string[],
                 },
-                supportInfo: mapServiceCategoriesToSupportInfo(u.serviceCategories ?? []),
+                supportInfo: mapServiceCategoriesToSupportInfo(u.supportServices ?? []),
                 qualificationInfo: {
                     ...getDefaultQualificationInfo(),
                     qualificationType: bio.qualificationId
@@ -560,7 +674,6 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             errors: { ...state.errors, compliance: { ...state.errors.compliance, [field]: undefined } },
         })),
 
-    // ============================ COMMON UPLOAD API ============================
 
     // =============================== VALIDATION ===============================
     validatePersonalStep: () => {
@@ -587,8 +700,42 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
 
     // No mandatory fields in this step today - kept as a hook point for future rules.
     validateSupportStep: () => {
-        set((state) => ({ errors: { ...state.errors, support: {} } }));
-        return true;
+        const { supportInfo } = get();
+
+        const errors: FormErrors["support"] = {};
+
+        if (!supportInfo.healthWellBeing?.length) {
+            errors.healthWellBeing = "Health & Wellbeing is required";
+        }
+
+        if (!supportInfo.helpInHome?.length) {
+            errors.helpInHome = "Help in Home is required";
+        }
+
+        if (!supportInfo.mentorLifeSkills?.length) {
+            errors.mentorLifeSkills = "Mentor & Life Skills is required";
+        }
+
+        if (!supportInfo.personalCare?.length) {
+            errors.personalCare = "Personal Care is required";
+        }
+
+        if (!supportInfo.socialAssistance?.length) {
+            errors.socialAssistance = "Social Assistance is required";
+        }
+
+        if (!supportInfo.travelTransport?.length) {
+            errors.travelTransport = "Travel & Transport is required";
+        }
+
+        set((state) => ({
+            errors: {
+                ...state.errors,
+                support: errors,
+            },
+        }));
+
+        return Object.keys(errors).length === 0;
     },
 
     validateQualificationStep: () => {
@@ -642,7 +789,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             qualificationInfo,
             complianceInfo
         );
-
+        console.log(payload, 'payload submit');
         try {
             if (mode === "edit" && workerId != null) {
                 await updateApiRequest(ENDPOINTS.update, payload);

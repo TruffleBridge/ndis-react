@@ -7,6 +7,7 @@ import { ClientStyles } from "../styles";
 import { CompanyHomeIcon, CompanyIcon, LocationIcon, LocationIcon1 } from "../../../assets";
 import { useClientStore } from "../../../store/useClient";
 import { getViewFunction } from "../../../utils/viewfunction";
+import { onlyNumbers } from "../../../utils/helper";
 
 interface BusinessProps {
     isView?: boolean;
@@ -64,8 +65,8 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     error={!!errors.abn}
                                     errors={errors.abn}
                                     onChange={(e) => {
-                                        if (/^\d*$/.test(e) && e?.length !== 12) {
-                                            setBusinessField("abn", e)
+                                        if (e?.length !== 12) {
+                                            setBusinessField("abn", onlyNumbers(e))
                                         }
                                     }
                                     }
@@ -82,8 +83,8 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     error={!!errors.acn}
                                     errors={errors.acn}
                                     onChange={(e) => {
-                                        if (/^\d*$/.test(e) && e?.length !== 10) {
-                                            setBusinessField("acn", e)
+                                        if (e?.length !== 10) {
+                                            setBusinessField("acn", onlyNumbers(e))
                                         }
                                     }}
                                     slotProps={{ htmlInput: { maxLength: 9 } }}
@@ -139,9 +140,7 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     value={businessData?.postalCode}
                                     isView={isView}
                                     onChange={(e) => {
-                                        if (/^\d*$/.test(e)) {
-                                            setBusinessField("postalCode", e)
-                                        }
+                                        setBusinessField("postalCode", onlyNumbers(e))
                                     }
                                     }
                                 />}

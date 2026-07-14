@@ -3,6 +3,8 @@ export type FormMode = "create" | "edit" | "view";
 export interface Option {
     label: string;
     value: string
+    serviceCategoryId?: number;
+
 }
 
 export interface WorkerFormNavState {
@@ -40,9 +42,9 @@ export interface PersonalInfo {
     isNonSmoker: boolean;
     isOwnVehicle: boolean;
     isEmergencyShift: boolean;
-    primaryLanguage: Option;
+    primaryLanguage: Option | null;
     experience: string;
-    employmentStatus: Option;
+    employmentStatus: Option | null;
     availableForNewClients: boolean;
 }
 
@@ -55,7 +57,7 @@ export interface SupportInfo {
     healthWellBeing: Option[];
 }
 export interface QualificationInfo {
-    qualificationType: Option;
+    qualificationType: Option | null;
     degreeName: string;
     institution: string;
     yearsCompleted: string;

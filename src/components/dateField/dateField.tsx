@@ -45,7 +45,7 @@ const DateField: React.FC<DateFieldProps> = ({
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box sx={styles.root}>
-                <FormLabel label={label} required={required} optional={optional} />
+                <FormLabel label={label} sxText={{ fontWeight: 600 }} required={required} optional={optional} />
 
                 <DatePicker
                     open={open}

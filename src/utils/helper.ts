@@ -36,3 +36,32 @@ export const progressValue = (activeStep: string, isCompleted?: boolean) => {
     }[step] ?? 0
   );
 };
+
+export const onlyNumbers = (value: string): string => {
+  return value.replace(/\D/g, "");
+};
+
+
+export const getMimeType = (fileName: string) => {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+
+  switch (extension) {
+    case "pdf":
+      return "application/pdf";
+    case "png":
+      return "image/png";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "gif":
+      return "image/gif";
+    case "webp":
+      return "image/webp";
+    case "doc":
+      return "application/msword";
+    case "docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    default:
+      return "application/octet-stream";
+  }
+};

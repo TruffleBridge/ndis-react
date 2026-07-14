@@ -10,6 +10,9 @@ import dayjs from "dayjs";
 import { useWorkerStore } from "../../../store/useWorker";
 import type { Option } from "../../../types/worker";
 import { useUploadStore } from "../../../store/useUpload";
+import { useLookupStore } from "../../../store/useMasterAPI";
+import { useEffect } from "react";
+import { getViewFunction } from "../../../utils/viewfunction";
 
 interface QualificationProps {
     isView?: boolean;
@@ -26,6 +29,10 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
     const certificateUploadError = useUploadStore((s) => s.uploadErrors.certificate);
     // const isUploadingCertificate = useWorkerStore((s) => s.uploadingKeys.certificate);
 
+    const qualifications = useLookupStore((s) => s.qualifications);
+    const queryQualifications = useLookupStore((s) => s.queryQualifications);
+    const getQualificationOptions = useLookupStore((s) => s.getQualificationOptions);
+
     const onNext = () => {
         if (isView) {
             handleNext?.();
@@ -37,6 +44,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
 
 
     const handleUpload = async (file: any) => {
+        debugger;
         const files = file?.file
         if (!files) {
             setField("certificate", null);
@@ -51,52 +59,62 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
         });
     }
 
+    useEffect(() => {
+        if (!isView) { queryQualifications({ reset: true }); }
+    }, []);
+
     return (
         <Box sx={WorkerStyles.mainHeightRes}>
             <Box sx={WorkerStyles.subHeightRes}>
                 <SectionCard title="Education">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <AutocompleteField
-                                label="Qualification Type"
-                                value={data.qualificationType}
-                                options={[]}
-                                placeholder="Select"
-                                readOnly={isView}
-                                isView={isView}
-                                error={errors.qualificationType}
-                                onChange={(value) => setField("qualificationType", value as Option)}
-                            />
+                            {isView ? getViewFunction('Qualification Type', data?.qualificationType?.label, 'plain') :
+                                <AutocompleteField
+                                    label="Qualification Type"
+                                    value={data.qualificationType}
+                                    options={getQualificationOptions()}
+                                    placeholder="Select"
+                                    error={errors.qualificationType}
+                                    onChange={(value) => setField("qualificationType", value as Option)}
+                                    onSearch={(search) => queryQualifications({ search })}
+                                    onLoadMore={() => queryQualifications()}
+                                    hasMore={qualifications.hasMore}
+                                    loadingMore={qualifications.loading}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <InputTextField
-                                label="Degree Name"
-                                placeholder="Enter degree name"
-                                value={data.degreeName}
-                                isView={isView}
-                                onChange={(value) => setField("degreeName", value)}
-                            />
+                            {isView ? getViewFunction('Degree Name', data?.degreeName, 'plain') :
+                                <InputTextField
+                                    label="Degree Name"
+                                    placeholder="Enter degree name"
+                                    value={data.degreeName}
+                                    isView={isView}
+                                    onChange={(value) => setField("degreeName", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <InputTextField
-                                label="Institution"
-                                placeholder="Enter institution"
-                                value={data.institution}
-                                isView={isView}
-                                onChange={(value) => setField("institution", value)}
-                            />
+                            {isView ? getViewFunction('Institution', data?.institution, 'plain') :
+                                <InputTextField
+                                    label="Institution"
+                                    placeholder="Enter institution"
+                                    value={data.institution}
+                                    isView={isView}
+                                    onChange={(value) => setField("institution", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <InputTextField
-                                label="Years Completed"
-                                placeholder="Enter years"
-                                value={data.yearsCompleted}
-                                isView={isView}
-                                onChange={(value) => setField("yearsCompleted", value)}
-                            />
+                            {isView ? getViewFunction('Years Completed', data?.yearsCompleted, 'plain') :
+                                <InputTextField
+                                    label="Years Completed"
+                                    placeholder="Enter years"
+                                    value={data.yearsCompleted}
+                                    isView={isView}
+                                    onChange={(value) => setField("yearsCompleted", value)}
+                                />}
                         </Grid>
                     </Grid>
                 </SectionCard>
@@ -104,33 +122,37 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                 <SectionCard title="Certifications">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                            <InputTextField
-                                label="Certification Name"
-                                placeholder="Enter certification name"
-                                value={data.certificationName}
-                                isView={isView}
-                                onChange={(value) => setField("certificationName", value)}
-                            />
+                            {isView ? getViewFunction('Certification Name', data?.certificationName, 'plain') :
+                                <InputTextField
+                                    label="Certification Name"
+                                    placeholder="Enter certification name"
+                                    value={data.certificationName}
+                                    isView={isView}
+                                    onChange={(value) => setField("certificationName", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                            <InputTextField
-                                label="Certification Number"
-                                placeholder="Enter certification number"
-                                value={data.certificationNumber}
-                                isView={isView}
-                                onChange={(value) => setField("certificationNumber", value)}
-                            />
+                            {isView ? getViewFunction('Certification Number', data?.certificationNumber, 'plain') :
+                                <InputTextField
+                                    label="Certification Number"
+                                    placeholder="Enter certification number"
+                                    value={data.certificationNumber}
+                                    isView={isView}
+                                    onChange={(value) => setField("certificationNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                            <DateField
-                                label="Certification Expiry"
-                                value={data.certificationExpiry ? dayjs(data.certificationExpiry) : null}
-                                onChange={(value) =>
-                                    setField("certificationExpiry", value ? value.format("YYYY-MM-DD") : null)
-                                }
-                            />
+                            {isView ? getViewFunction('Certification Expiry', dayjs(data.certificationExpiry).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Certification Expiry"
+                                    value={data.certificationExpiry ? dayjs(data.certificationExpiry) : null}
+                                    disablePast
+                                    onChange={(value) =>
+                                        setField("certificationExpiry", value ? value.format("YYYY-MM-DD") : null)
+                                    }
+                                />}
                         </Grid>
                     </Grid>
                 </SectionCard>

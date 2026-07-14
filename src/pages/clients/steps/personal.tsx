@@ -10,6 +10,7 @@ import { GENDER_OPTIONS } from "../utils/constants";
 import { useClientStore } from "../../../store/useClient";
 import { useUploadStore } from "../../../store/useUpload";
 import { getViewFunction } from "../../../utils/viewfunction";
+import { onlyNumbers } from "../../../utils/helper";
 
 interface PersonalProps {
     isView?: boolean;
@@ -106,7 +107,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 required
                                 error={!!errors.mobile}
                                 errors={errors.mobile}
-                                onChange={(e) => setPersonalField("mobile", e)}
+                                onChange={(e) => setPersonalField("mobile", onlyNumbers(e))}
                             />}
                     </Grid>
 

@@ -158,7 +158,7 @@ const WorkerPage = () => {
                             subtitle={getSubHeader && getSubHeader(activeStep)}
                         />
 
-                        <CircularProgressWithLabel value={progressValue(activeStep)} />
+                        {!isView && <CircularProgressWithLabel value={progressValue(activeStep)} />}
                     </Box>
                     <Box sx={WorkerStyles.rightSide}>{renderRightSide()}</Box>
                 </Box>
@@ -172,7 +172,7 @@ const WorkerPage = () => {
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Dashboard"
-                onBack={closeSubmitSuccess}
+                onBack={() => navigate('/workers')}
                 onPrimary={handleModalPrimary}
             />
         </Box>

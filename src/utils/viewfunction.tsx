@@ -48,9 +48,15 @@ export const getViewFunction = (
                             key={index}
                             label={item}
                             sx={{
-                                color: "#3E4947",
-                                fontSize: "12px",
-                                fontWeight: 500,
+                                color: "#222214",
+                                '& .MuiChip-label': {
+                                    fontSize: 11,
+                                    fontWeight: 400
+                                },
+                                '&.MuiChip-root': {
+                                    svg: { fontSize: 14 },
+                                    height: "26px"
+                                },
                                 backgroundColor: "#F2F4F4",
                                 border: '1px solid #BEC9C6'
                             }}

@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { useWorkerStore } from "../../../store/useWorker";
 import type { ComplianceInfo } from "../../../types/worker";
 import { useUploadStore } from "../../../store/useUpload";
+import { getViewFunction } from "../../../utils/viewfunction";
 
 interface ComplianceProps {
     isView?: boolean;
@@ -31,12 +32,13 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
 
     // One handler shared by every UploadVariant2/3 field below.
     const handleUpload = async (field: keyof ComplianceInfo, file: any) => {
+        debugger;
         const files = file?.file
         if (!files) {
             setField(field, null);
             return;
         }
-        const uploaded = await uploadDocument(file, file?.documentType ?? '', field);
+        const uploaded = await uploadDocument(files, file?.documentType ?? '', field);
         if (uploaded) setField(field, {
             ...file,
             url: uploaded?.url,
@@ -110,23 +112,26 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
                 <SectionCard title="Identity & Legal">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="Driving License Number"
-                                value={data.drivingLicenseNumber}
-                                placeholder="Enter driving license"
-                                isView={isView}
-                                onChange={(value) => setField("drivingLicenseNumber", value)}
-                            />
+                            {isView ? getViewFunction('Driving License Number', dayjs(data.drivingLicenseNumber).format("YYYY-MM-DD"), 'plain') :
+                                <InputTextField
+                                    label="Driving License Number"
+                                    value={data.drivingLicenseNumber}
+                                    placeholder="Enter driving license"
+                                    isView={isView}
+                                    onChange={(value) => setField("drivingLicenseNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <DateField
-                                label="Driving License Expiry"
-                                value={data.drivingLicenseExpiry ? dayjs(data.drivingLicenseExpiry) : null}
-                                onChange={(value) =>
-                                    setField("drivingLicenseExpiry", value ? value.format("YYYY-MM-DD") : null)
-                                }
-                            />
+                            {isView ? getViewFunction('Driving License Expiry', dayjs(data.drivingLicenseExpiry).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Driving License Expiry"
+                                    disablePast
+                                    value={data.drivingLicenseExpiry ? dayjs(data.drivingLicenseExpiry) : null}
+                                    onChange={(value) =>
+                                        setField("drivingLicenseExpiry", value ? value.format("YYYY-MM-DD") : null)
+                                    }
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
@@ -152,29 +157,38 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
                 <SectionCard title="Police Verification">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <InputTextField
-                                label="National Police Check Number"
-                                value={data.policeNumber}
-                                placeholder="Enter national police"
-                                isView={isView}
-                                onChange={(value) => setField("policeNumber", value)}
-                            />
+                            {isView ? getViewFunction("National Police Check Number", data.policeNumber, 'plain') :
+                                <InputTextField
+                                    label="National Police Check Number"
+                                    value={data.policeNumber}
+                                    placeholder="Enter national police"
+                                    isView={isView}
+                                    onChange={(value) => setField("policeNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <DateField
-                                label="Issue Date"
-                                value={data.policeIssueDate ? dayjs(data.policeIssueDate) : null}
-                                onChange={(value) => setField("policeIssueDate", value ? value.format("YYYY-MM-DD") : null)}
-                            />
+                            {isView ? getViewFunction('Issue Date', dayjs(data.policeIssueDate).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Issue Date"
+                                    minDate={dayjs().startOf("year")}
+                                    value={data.policeIssueDate ? dayjs(data.policeIssueDate) : null}
+                                    onChange={(value) => setField("policeIssueDate", value ? value.format("YYYY-MM-DD") : null)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <DateField
-                                label="Expiry Date"
-                                value={data.policeExpiryDate ? dayjs(data.policeExpiryDate) : null}
-                                onChange={(value) => setField("policeExpiryDate", value ? value.format("YYYY-MM-DD") : null)}
-                            />
+                            {isView ? getViewFunction('Expiry Date', dayjs(data.policeExpiryDate).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Expiry Date"
+                                    minDate={
+                                        data.policeIssueDate
+                                            ? dayjs(data.policeIssueDate)
+                                            : undefined
+                                    }
+                                    value={data.policeExpiryDate ? dayjs(data.policeExpiryDate) : null}
+                                    onChange={(value) => setField("policeExpiryDate", value ? value.format("YYYY-MM-DD") : null)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
@@ -191,21 +205,24 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
                 <SectionCard title="Working with Children">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="Blue Card Number"
-                                value={data.blueCardNumber}
-                                placeholder="Enter blue card number"
-                                isView={isView}
-                                onChange={(value) => setField("blueCardNumber", value)}
-                            />
+                            {isView ? getViewFunction('Blue Card Number', data.blueCardNumber, 'plain') :
+                                <InputTextField
+                                    label="Blue Card Number"
+                                    value={data.blueCardNumber}
+                                    placeholder="Enter blue card number"
+                                    isView={isView}
+                                    onChange={(value) => setField("blueCardNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <DateField
-                                label="Expiry Date"
-                                value={data.blueCardExpiry ? dayjs(data.blueCardExpiry) : null}
-                                onChange={(value) => setField("blueCardExpiry", value ? value.format("YYYY-MM-DD") : null)}
-                            />
+                            {isView ? getViewFunction('Expiry Date', dayjs(data.blueCardExpiry).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Expiry Date"
+                                    disablePast
+                                    value={data.blueCardExpiry ? dayjs(data.blueCardExpiry) : null}
+                                    onChange={(value) => setField("blueCardExpiry", value ? value.format("YYYY-MM-DD") : null)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
@@ -222,21 +239,24 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
                 <SectionCard title="First Aid">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="Certificate Number"
-                                placeholder="Enter certificate number"
-                                value={data.firstAidCertificateNumber}
-                                isView={isView}
-                                onChange={(value) => setField("firstAidCertificateNumber", value)}
-                            />
+                            {isView ? getViewFunction('Certificate Number', data.firstAidCertificateNumber, 'plain') :
+                                <InputTextField
+                                    label="Certificate Number"
+                                    placeholder="Enter certificate number"
+                                    value={data.firstAidCertificateNumber}
+                                    isView={isView}
+                                    onChange={(value) => setField("firstAidCertificateNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <DateField
-                                label="Expiry Date"
-                                value={data.firstAidExpiry ? dayjs(data.firstAidExpiry) : null}
-                                onChange={(value) => setField("firstAidExpiry", value ? value.format("YYYY-MM-DD") : null)}
-                            />
+                            {isView ? getViewFunction('Expiry Date', dayjs(data.firstAidExpiry).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    label="Expiry Date"
+                                    disablePast
+                                    value={data.firstAidExpiry ? dayjs(data.firstAidExpiry) : null}
+                                    onChange={(value) => setField("firstAidExpiry", value ? value.format("YYYY-MM-DD") : null)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
@@ -253,21 +273,24 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
                 <SectionCard title="CPR">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <InputTextField
-                                label="Certificate Number"
-                                placeholder="Enter certificate number"
-                                value={data.cprCertificateNumber}
-                                isView={isView}
-                                onChange={(value) => setField("cprCertificateNumber", value)}
-                            />
+                            {isView ? getViewFunction('Certificate Number', data.cprCertificateNumber, 'plain') :
+                                <InputTextField
+                                    label="Certificate Number"
+                                    placeholder="Enter certificate number"
+                                    value={data.cprCertificateNumber}
+                                    isView={isView}
+                                    onChange={(value) => setField("cprCertificateNumber", value)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <DateField
-                                label="Expiry Date"
-                                value={data.cprExpiry ? dayjs(data.cprExpiry) : null}
-                                onChange={(value) => setField("cprExpiry", value ? value.format("YYYY-MM-DD") : null)}
-                            />
+                            {isView ? getViewFunction('Expiry Date', dayjs(data.cprExpiry).format("YYYY-MM-DD"), 'plain') :
+                                <DateField
+                                    disablePast
+                                    label="Expiry Date"
+                                    value={data.cprExpiry ? dayjs(data.cprExpiry) : null}
+                                    onChange={(value) => setField("cprExpiry", value ? value.format("YYYY-MM-DD") : null)}
+                                />}
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>

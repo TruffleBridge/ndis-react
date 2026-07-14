@@ -16,6 +16,9 @@ import { useWorkerStore } from "../../../store/useWorker";
 import type { Option } from "../../../types/worker";
 import { useUploadStore } from "../../../store/useUpload";
 import { getViewFunction } from "../../../utils/viewfunction";
+import { onlyNumbers } from "../../../utils/helper";
+import { useEffect } from "react";
+import { useLookupStore } from "../../../store/useMasterAPI";
 
 const genderOptions = [
     { label: "Male", value: "male" },
@@ -44,6 +47,10 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
     const goToNextStep = useWorkerStore((s) => s.goToNextStep);
     const uploadDocument = useUploadStore((s) => s.uploadDocument);
     const idProofUploadError = useUploadStore((s) => s.uploadErrors.idProofFile);
+
+    // const languages = useLookupStore((s) => s.languages);
+    const fetchLanguages = useLookupStore((s) => s.fetchLanguages);
+    const getLanguageOptions = useLookupStore((s) => s.getLanguageOptions);
 
     const onNext = () => {
         if (isView) {
@@ -94,8 +101,10 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
             value: data.preferences.includes("emergencyShift")
         },
     ];
-    console.log(errors, 'errors');
 
+    useEffect(() => {
+        if (!isView) { fetchLanguages(); }
+    }, []);
 
     return (
         <Box sx={WorkerStyles.mainHeightRes}>
@@ -124,7 +133,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }} sx={WorkerStyles.dateFieldGrid}>
-                        {isView ? getViewFunction('Date of Birth', data?.lastName, 'plain') :
+                        {isView ? getViewFunction('Date of Birth', dayjs(data?.dateOfBirth).format('DD-MM-YYYY'), 'plain') :
                             <DateField
                                 label="Date of Birth"
                                 value={data.dateOfBirth ? dayjs(data.dateOfBirth) : null}
@@ -144,7 +153,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 placeholder="+61 400 000 000"
                                 value={data.mobile}
                                 errors={errors.mobile}
-                                onChange={(value) => setField("mobile", value)}
+                                onChange={(value) => setField("mobile", onlyNumbers(value))}
                             />}
                     </Grid>
 
@@ -198,7 +207,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 label="Postal Code"
                                 placeholder="Enter postal code"
                                 value={data.postalCode}
-                                onChange={(value) => setField("postalCode", value)}
+                                onChange={(value) => setField("postalCode", onlyNumbers(value))}
                             />}
                     </Grid>
 
@@ -243,12 +252,15 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 {isView ? getViewFunction('Primary Language', data?.primaryLanguage?.label, 'plain') :
                                     <AutocompleteField
                                         label="Primary Language"
-                                        value={data?.primaryLanguage ?? { label: '', value: '' }}
-                                        options={[]}
+                                        value={data?.primaryLanguage}
+                                        options={getLanguageOptions()}
                                         placeholder="Select"
                                         required
                                         error={errors.primaryLanguage}
                                         onChange={(value) => setField("primaryLanguage", value as Option)}
+                                    // onLoadMore={() => fetchLanguages()}
+                                    // hasMore={languages.hasMore}
+                                    // loadingMore={languages.loading}
                                     />}
                             </Grid>
 
@@ -260,7 +272,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                         value={data?.experience}
                                         required
                                         errors={errors.experience}
-                                        onChange={(value) => setField("experience", value)}
+                                        onChange={(value) => setField("experience", onlyNumbers(value))}
                                     />}
                             </Grid>
 
@@ -269,7 +281,16 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                     <AutocompleteField
                                         label="Current Employment Status"
                                         value={data?.employmentStatus}
-                                        options={[]}
+                                        options={[
+                                            {
+                                                label: 'Yes',
+                                                value: 'yes'
+                                            },
+                                            {
+                                                label: 'No',
+                                                value: 'no'
+                                            }
+                                        ]}
                                         placeholder="Select"
                                         onChange={(value) => setField("employmentStatus", value as Option)}
                                     />}
