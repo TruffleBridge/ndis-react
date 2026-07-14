@@ -46,34 +46,14 @@ const SERVICE_CATEGORY_IDS: Record<keyof SupportInfo, number> = {
     healthWellBeing: 6,
 };
 
-// TODO: these ids are placeholders too - map to your real document-type table.
-// NOTE: added "Public Liability Insurance": 11 based on documentTypeId 3 seen
-// in the sample getProfile response (id 3 there is just that record's own
-// document-type row id, not necessarily "3" globally - confirm with backend).
-const DOCUMENT_TYPE_IDS: Record<string, number> = {
-    "NDIS Certificate of Registration": 1,
-    "Screening Check Upload": 2,
-    "Orientation Certificate Upload": 3,
-    "Right To Work": 4,
-    "Driving License - Front": 5,
-    "Driving License - Back": 6,
-    "Police Check Certificate": 7,
-    "Blue Card Certificate": 8,
-    "First Aid Certificate": 9,
-    "CPR Certificate": 10,
-    "Public Liability Insurance": 11,
-};
-
 // Reverse lookup used when reading userDocuments back from getProfile ->
 // maps a documentType.name to the ComplianceInfo field it belongs to.
-// TODO: "Public Liability Insurance" has no ComplianceInfo field yet -
-// add one (e.g. publicLiabilityCertificate) if this document is required
 // in the compliance step, otherwise it will be silently ignored below.
 const DOCUMENT_LABEL_TO_FIELD: Partial<Record<string, keyof ComplianceInfo>> = {
     "NDIS Certificate of Registration": "ndisCertificate",
     "Screening Check Upload": "screeningCheck",
     "Orientation Certificate Upload": "orientationCertificate",
-    "Right To Work": "rightToWork",
+    "Rights To Work": "rightToWork",
     "Driving License - Front": "drivingFront",
     "Driving License - Back": "drivingBack",
     "Police Check Certificate": "policeCertificate",
@@ -190,7 +170,7 @@ const buildDocuments = (compliance: ComplianceInfo) => {
         documents.push({
             documentType,
             ...extra,
-            document: [
+            documentUrls: [
                 {
                     name: file.name,
                     url: file.url,
@@ -301,7 +281,7 @@ const buildDocuments = (compliance: ComplianceInfo) => {
                 compliance.drivingLicenseNumber,
             expiryDate:
                 compliance.drivingLicenseExpiry,
-            document: drivingDocs,
+            documentUrls: drivingDocs,
         });
     }
 
@@ -340,7 +320,7 @@ const buildRegisterPayload = (
         street1: personal.address,
         suburb: personal.suburb,
         state: personal.state,
-        zipcode: personal.postalCode,
+        zipCode: personal.postalCode,
     },
     idProof: personal.idProof,
     documents: buildDocuments(compliance),
@@ -392,27 +372,50 @@ const mapDocumentsToCompliance = (docs: any[] = []): ComplianceInfo => {
 
     docs.forEach((doc) => {
         const label = doc?.documentType?.name;
-        const field = label ? DOCUMENT_LABEL_TO_FIELD[label] : undefined;
-        if (field) {
-            (result as any)[field] = doc.documentUrls?.[0] ?? null;
-        }
+        docs.forEach((doc) => {
+            const label = doc?.documentType?.name?.toLowerCase();
 
-        // A few document types also carry a reference number / expiry that map
-        // to separate scalar fields in ComplianceInfo rather than the file field.
-        if (label === "Police Check Certificate") {
+            const field = Object.entries(DOCUMENT_LABEL_TO_FIELD)
+                .find(([key]) => key.toLowerCase() === label)?.[1];
+
+            if (field) {
+                (result as any)[field] = doc.documentUrls?.[0]
+                    ? { ...doc.documentUrls[0], uploadedAt: doc.documentUrls?.[0] ? doc.documentUrls?.[0]?.createdAt : doc.createdAt }
+                    : null;
+            }
+        });
+
+        if (label === "Police Verification") {
             result.policeNumber = doc.referenceNumber ?? "";
             result.policeIssueDate = doc.startDate ?? null;
             result.policeExpiryDate = doc.expiryDate ?? null;
+            result.policeCertificate = doc.documentUrls[0] ?? null;
         }
-        if (label === "Blue Card Certificate") {
+
+        if (label === "Identify & Legal") {
+            result.drivingLicenseNumber = doc.referenceNumber ?? "";
+            result.drivingLicenseExpiry = doc.expiryDate ?? null;
+            result.drivingFront = doc.documentUrls?.[0] ?? null;
+            result.drivingBack = doc.documentUrls?.[1] ?? null;
+        }
+
+        if (label === "Working with Children") {
             result.blueCardNumber = doc.referenceNumber ?? "";
             result.blueCardExpiry = doc.expiryDate ?? null;
+            result.blueCardCertificate = doc.documentUrls[0] ?? null;
         }
-        // TODO: driving license number/expiry, first aid number/expiry and CPR
-        // number/expiry currently come from userBio (certificationNumber /
-        // certificationDocuments cover only ONE certificate, not five) or may
-        // need their own userDocuments entries - confirm with backend which
-        // source of truth to read these five sets of number+expiry from.
+
+        if (label === "First Aid") {
+            result.firstAidCertificateNumber = doc.referenceNumber ?? "";
+            result.firstAidExpiry = doc.expiryDate ?? null;
+            result.firstAidCertificate = doc.documentUrls[0] ?? null;
+        }
+
+        if (label === "CPR") {
+            result.cprCertificateNumber = doc.referenceNumber ?? "";
+            result.cprCertificate = doc.documentUrls[0] ?? null;
+            result.cprExpiry = doc.expiryDate ?? null;
+        }
     });
 
     return result;
@@ -540,7 +543,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         set({ status: val }),
     updateWorkerStatus: async (id, status) => {
         try {
-            await updateApiRequest(ENDPOINTS.updateStatus, { userId: id, status });
+            await updateApiRequest(ENDPOINTS.updateStatus, { userId: id, status: status === 'ACTIVE' ? "ACTIVE" : "INACTIVE" });
             set((state) => ({
                 workers: state.workers.map((w) => (w.id === id ? { ...w, status } : w)),
             }));
@@ -789,7 +792,6 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             qualificationInfo,
             complianceInfo
         );
-        console.log(payload, 'payload submit');
         try {
             if (mode === "edit" && workerId != null) {
                 await updateApiRequest(ENDPOINTS.update, payload);

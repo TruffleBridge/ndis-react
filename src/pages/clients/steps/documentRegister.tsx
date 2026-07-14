@@ -21,9 +21,6 @@ interface DocumentRegisterProps {
  * Renders every document upload by looping over DOCUMENT_FIELDS, split into
  * "mandatory" and "recommended" sections exactly like before - but now reads
  * from and writes into useClientStore instead of local/parent props.
- *
- * Each uploaded file gets `documentType` set to that field's label before
- * being saved into the store, exactly as required.
  */
 const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: DocumentRegisterProps) => {
     const documentData = useClientStore((s) => s.documentData);
@@ -55,11 +52,11 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
             return;
         }
         // Actually uploads to /api/uploads/, stamps documentType
-        // = "ID Proof" on the response, then saves it into the store.
         const uploaded = await uploadDocument(files, "ID Proof", "idProofFile");
         if (uploaded) setDocumentField(field, {
             ...file,
             url: uploaded?.url,
+            uploadedAt: uploaded?.uploadedAt
         });
     }
 

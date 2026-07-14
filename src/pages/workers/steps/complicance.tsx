@@ -19,9 +19,10 @@ interface ComplianceProps {
     isView?: boolean;
     handlePrev?: () => void;
     handleSubmit?: () => void;
+    mode?: boolean
 }
 
-const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
+const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps) => {
     const data = useWorkerStore((s) => s.complianceInfo);
     const setField = useWorkerStore((s) => s.setComplianceField);
     // const errors = useWorkerStore((s) => s.errors.compliance);
@@ -32,7 +33,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
 
     // One handler shared by every UploadVariant2/3 field below.
     const handleUpload = async (field: keyof ComplianceInfo, file: any) => {
-        debugger;
         const files = file?.file
         if (!files) {
             setField(field, null);
@@ -42,6 +42,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
         if (uploaded) setField(field, {
             ...file,
             url: uploaded?.url,
+            uploadedAt: uploaded?.uploadedAt
         });
     }
 
@@ -98,12 +99,12 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
 
                         <Grid size={{ xs: 12 }}>
                             <UploadVariant2
-                                label="Right To Work"
+                                label="Rights To Work"
                                 sublabel="Mandatory for all registered providers"
                                 value={data.rightToWork}
                                 disabled={isView}
                                 errors={uploadErrors?.rightToWork}
-                                onChange={(file) => handleUpload("rightToWork", file ? { ...file, documentType: "Right To Work" } : null)}
+                                onChange={(file) => handleUpload("rightToWork", file ? { ...file, documentType: "Rights To Work" } : null)}
                             />
                         </Grid>
                     </Grid>
@@ -322,11 +323,11 @@ const Compliance = ({ isView, handlePrev, handleSubmit }: ComplianceProps) => {
 
                 <Button
                     sx={WorkerStyles.nextCta}
-                    endIcon={<ArrowForwardOutlined sx={{ fontSize: 12 }} />}
+                    endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
                     onClick={onSubmit}
                     disabled={isSubmitting}
                 >
-                    {isView ? "Close" : isSubmitting ? "Submitting..." : "Submit"}
+                    {isView ? "Close" : mode ? "Update" : isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
             </Box>
         </Box>

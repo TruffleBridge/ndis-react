@@ -1,12 +1,11 @@
 import { Box, Grid, Button } from "@mui/material";
 
-import { AutocompleteField, DateField, InputTextField, SectionCard, UploadVariant1 } from "../../../components";
+import { AutocompleteField, InputTextField, SectionCard, UploadVariant1 } from "../../../components";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 import { WorkerStyles } from "../styles";
-import dayjs from "dayjs";
 import { useWorkerStore } from "../../../store/useWorker";
 import type { Option } from "../../../types/worker";
 import { useUploadStore } from "../../../store/useUpload";
@@ -44,7 +43,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
 
 
     const handleUpload = async (file: any) => {
-        debugger;
         const files = file?.file
         if (!files) {
             setField("certificate", null);
@@ -56,6 +54,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
         if (uploaded) setField("certificate", {
             ...file,
             url: uploaded?.url,
+            uploadedAt: uploaded?.uploadedAt
         });
     }
 
@@ -121,7 +120,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
 
                 <SectionCard title="Certifications">
                     <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             {isView ? getViewFunction('Certification Name', data?.certificationName, 'plain') :
                                 <InputTextField
                                     label="Certification Name"
@@ -132,7 +131,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                 />}
                         </Grid>
 
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                             {isView ? getViewFunction('Certification Number', data?.certificationNumber, 'plain') :
                                 <InputTextField
                                     label="Certification Number"
@@ -143,7 +142,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                 />}
                         </Grid>
 
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {/* <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                             {isView ? getViewFunction('Certification Expiry', dayjs(data.certificationExpiry).format("YYYY-MM-DD"), 'plain') :
                                 <DateField
                                     label="Certification Expiry"
@@ -153,7 +152,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                         setField("certificationExpiry", value ? value.format("YYYY-MM-DD") : null)
                                     }
                                 />}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 </SectionCard>
 

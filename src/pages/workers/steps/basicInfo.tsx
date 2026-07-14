@@ -69,11 +69,11 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
             return;
         }
         // Actually uploads to /api/uploads/, stamps documentType
-        // = "ID Proof" on the response, then saves it into the store.
         const uploaded = await uploadDocument(files, 'Upload ID Proof', "idProof");
         if (uploaded) setField("idProof", {
             ...file,
             url: uploaded?.url,
+            uploadedAt: uploaded?.uploadedAt
         });
     }
     const preferences = [

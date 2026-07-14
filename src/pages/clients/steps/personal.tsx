@@ -22,10 +22,6 @@ interface PersonalProps {
  * setPersonalField, and `isView` disables every field. Create / Edit / View
  * all reuse this exact component - the store already has the right data
  * loaded for whichever mode ClientFormPage booted into.
- *
- * `dob` is stored as a plain string in form state so the state stays
- * serializable/JSON-friendly. DateField works in `Dayjs` objects though, so
- * we convert on the way in and out.
  */
 const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
     const navigate = useNavigate();
@@ -54,11 +50,11 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
             return;
         }
         // Actually uploads to /api/uploads/, stamps documentType
-        // = "ID Proof" on the response, then saves it into the store.
         const uploaded = await uploadDocument(files, "ID Proof", "idProofFile");
         if (uploaded) setPersonalField("idProofFile", {
             ...file,
             url: uploaded?.url,
+            uploadedAt: uploaded?.uploadedAt
         });
     }
 

@@ -249,7 +249,7 @@ export default function WorkersTable() {
         onBack={handleClose}
         onPrimary={handleStatueChange}
         title={values?.name}
-        description={stateModal === 'delete' ? 'Are you sure you want to delete this client?' : `Your account status is now ${values?.status}`}
+        description={stateModal === 'delete' ? 'Are you sure you want to delete this worker?' : `Your account status is now ${values?.status}`}
       />
     </Box>
   );

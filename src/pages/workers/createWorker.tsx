@@ -89,6 +89,7 @@ const WorkerPage = () => {
                 return (
                     <Compliance
                         isView={isView}
+                        mode={mode === "edit"}
                         handlePrev={() => goToStep("qual")}
                         handleSubmit={handleSubmit}
                     />
