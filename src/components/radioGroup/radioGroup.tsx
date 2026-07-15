@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Typography, RadioGroup, FormControlLabel, Radio } from "@mui/material";
-import FieldError from "../fieldError/fieldError";
+import FieldError from "@/components/fieldError/fieldError";
 import { styles } from "./styles";
-import { CheckBoxIcon, CheckedBoxIcon } from "../../assets";
+import { CheckBoxIcon, CheckedBoxIcon } from "@/assets";
 
 interface RadioOption {
     value: string;

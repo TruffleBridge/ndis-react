@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import ErrorOutlineOutlined from "@mui/icons-material/ErrorOutlineOutlined";
 import { styles } from "./styles";
 
 interface FieldErrorProps {
@@ -12,7 +11,7 @@ const FieldError: React.FC<FieldErrorProps> = ({ message }) => {
 
   return (
     <Box sx={styles.container}>
-      <ErrorOutlineOutlined sx={styles.icon} />
+      {/* <ErrorOutlineOutlined sx={styles.icon} /> */}
       <Typography sx={styles.text}>
         {message}
       </Typography>

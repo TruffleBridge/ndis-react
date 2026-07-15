@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, OutlinedInput } from "@mui/material";
-import { FieldError, FormLabel } from "../../components";
+import { FieldError, FormLabel } from "@/components";
 import { styles } from "./styles";
 
 interface TextareaFieldProps {

@@ -9,7 +9,7 @@ export const styles = {
     overflow: "visible",
   },
 
-  input: (error?: string, isView?: boolean) => ({
+  input: (error?: string) => ({
     width: "100%",
 
     // PICKER ROOT (DatePicker input)
@@ -29,19 +29,20 @@ export const styles = {
 
     // HOVER BORDER (FIXED ✔)
     "& .MuiPickersOutlinedInput-root:hover > fieldset": {
-      borderColor: "#D0D5DD",
+      borderColor: error ? "#d32f2f" : "#D0D5DD",
     },
 
     // FOCUS BORDER
     "& .MuiPickersOutlinedInput-root.Mui-focused > fieldset": {
-      borderColor: error ? "#EF4444" : "#D0D5DD",
-      borderWidth: "1.5px",
+      borderColor: error ? "#d32f2f" : "#D0D5DD",
+      borderWidth: "1.4px",
     },
 
     // ERROR OVERRIDE (non-focus)
     ...(error && {
       "& .MuiPickersOutlinedInput-root > fieldset": {
         borderColor: "#EF4444",
+        borderWidth: "1.4px",
       },
     }),
 
@@ -63,17 +64,6 @@ export const styles = {
       padding: "4px",
       display: "none", // ✔ hide icon in view mode
     },
-
-    // VIEW MODE (read-only look)
-    ...(isView && {
-      "& .MuiPickersOutlinedInput-root": {
-        padding: 0,
-        pointerEvents: "none",
-      },
-      "& .MuiPickersOutlinedInput-root > fieldset": {
-        border: "none",
-      },
-    }),
   }),
 
   popper: {

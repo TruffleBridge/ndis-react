@@ -4,6 +4,7 @@ export const styles = {
     alignItems: "center",
     gap: 0.5,
     mt: 0.5,
+    pl: 0.4
   },
 
   icon: {
@@ -12,7 +13,7 @@ export const styles = {
   },
 
   text: {
-    fontSize: "11px",
+    fontSize: "12px",
     color: "#EF4444",
   },
 };

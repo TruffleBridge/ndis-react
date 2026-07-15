@@ -1,16 +1,16 @@
 import React from "react";
 import { Box, InputAdornment } from "@mui/material";
-import { FormLabel, FieldError } from "../../components";
+import { FormLabel, FieldError } from "@/components";
 import { styles } from "./styles";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, type DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import type { Dayjs } from "dayjs";
-import { CalendarInputIcon } from "../../assets";
+import { CalendarInputIcon } from "@/assets";
 
-interface DateFieldProps {
+interface DateFieldProps extends DatePickerProps {
     label: string;
     value: Dayjs | null;
     onChange: (value: Dayjs | null) => void;
@@ -21,7 +21,8 @@ interface DateFieldProps {
     disablePast?: boolean;
     disableFuture?: boolean;
     error?: string;
-    isView?: boolean;
+    referenceDate?: Dayjs;
+    openToYear?: 'day' | 'month' | 'year'
 }
 
 const DateField: React.FC<DateFieldProps> = ({
@@ -35,7 +36,8 @@ const DateField: React.FC<DateFieldProps> = ({
     disablePast,
     disableFuture,
     error,
-    isView = false
+    openToYear,
+    referenceDate
 }) => {
     const [open, setOpen] = React.useState(false);
     const isValidDate = value?.isValid?.();
@@ -43,7 +45,7 @@ const DateField: React.FC<DateFieldProps> = ({
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box sx={styles.root}>
-                <FormLabel label={label} required={required} optional={optional} />
+                <FormLabel label={label} sxText={{ fontWeight: 600 }} required={required} optional={optional} />
 
                 <DatePicker
                     open={open}
@@ -53,13 +55,14 @@ const DateField: React.FC<DateFieldProps> = ({
                     onChange={onChange}
                     format="MM/DD/YYYY"
                     minDate={minDate}
+                    openTo={openToYear}
+                    referenceDate={referenceDate}
                     maxDate={maxDate}
                     disablePast={disablePast}
                     disableFuture={disableFuture}
                     desktopModeMediaQuery="@media (min-width: 0px)"
                     slotProps={{
                         textField: {
-                            readOnly: isView,
                             fullWidth: true,
                             error: !!error,
                             onClick: () => setOpen(true),
@@ -69,7 +72,7 @@ const DateField: React.FC<DateFieldProps> = ({
                                 </InputAdornment>
                             ),
                             sx: {
-                                ...styles.input(error, isView),
+                                ...styles.input(error),
                                 "& .MuiPickersSectionList-root span": {
                                     color: isValidDate ? '#111827' : "#7F7F7F",
                                 }

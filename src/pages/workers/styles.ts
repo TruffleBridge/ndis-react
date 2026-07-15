@@ -2,11 +2,19 @@ import type { SxProps, Theme } from "@mui/material";
 
 export const WorkerStyles: Record<string, SxProps<Theme>> = {
     sideMenu: {
-        width: { xs: "100%", md: 240 },
+        width: { xs: "100%", md: 260 },
         minWidth: { md: 240 },
-        height: { xs: "auto", md: "68vh" },
-        maxHeight: { xs: "none", md: "68vh" },
-        overflow: "hidden",
+        height: {
+            xs: "auto",
+            sm: "auto",
+            md: "calc(100vh - 180px)",
+        },
+        maxHeight: {
+            xs: "none",
+            md: "calc(100vh - 180px)",
+        },
+        overflowY: "auto",
+        overflowX: "hidden",
         border: "1px solid #E2E8F0",
         p: 2,
         borderRadius: "14px",
@@ -14,19 +22,29 @@ export const WorkerStyles: Record<string, SxProps<Theme>> = {
         boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
         flexShrink: 0,
     },
-    rightSide: {
-        flex: 1,
-        minWidth: 0,
-        height: { xs: "auto", md: "68vh" },
-        maxHeight: { xs: "none", md: "68vh" },
-        overflowY: "auto",
-        overflowX: "hidden",
+
+    rightSideMain: {
+        bgcolor: "#FFFFFF",
+        boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
         border: "1px solid #E2E8F0",
         px: { xs: 2, sm: 3 },
         py: 2,
         borderRadius: "14px",
-        bgcolor: "#FFFFFF",
-        boxShadow: "0px 8px 24px rgba(11,124,119,0.08)",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        height: {
+            xs: "auto",
+            md: "calc(100vh - 180px)",
+        },
+    },
+
+    rightSide: {
+        flex: 1,
+        minWidth: 0,
+        minHeight: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
         scrollbarGutter: "stable",
     },
     formLayout: {
@@ -41,7 +59,7 @@ export const WorkerStyles: Record<string, SxProps<Theme>> = {
     nextCta: {
         fontSize: "14px",
         fontWeight: 600,
-        bgcolor: (theme: Theme) => theme.palette.primary.main,
+        bgcolor: 'primary.main',
         color: "#FFFFFF",
         borderRadius: "8px",
         px: 2.5,
@@ -50,32 +68,42 @@ export const WorkerStyles: Record<string, SxProps<Theme>> = {
         height: 42,
         boxShadow: "none",
         minWidth: "130px",
-        "&:hover": {
-            bgcolor: (theme: Theme) => theme.palette.primary.dark,
-            boxShadow: "none",
-        },
+        '&.Mui-disabled': {
+            backgroundColor: 'currentColor',
+        }
+        // "&:hover": {
+        //     bgcolor: (theme: Theme) => theme.palette.primary.dark,
+        //     boxShadow: "none",
+        // },
     },
-    title: {
-        fontSize: { xs: "16px", sm: "18px" },
-        fontWeight: 600,
-        color: "#1E293B",
-    },
-    subtitle: {
-        fontSize: { xs: "13px", sm: "14px" },
-        color: "#64748B",
-        mt: "2px",
-        mb: 2,
-    },
-    scrollArea: {
-        flex: 1,
-        overflowY: "auto",
-        overflowX: "hidden",
-        pr: 1,
-        scrollbarGutter: "stable",
-    },
+
     dateFieldGrid: {
         overflow: "visible",
         position: "relative",
         zIndex: 1,
     },
+    mainHeightRes: {
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+    },
+    subHeightRes: {
+        flex: 1,
+        overflowY: "auto",
+        overflowX: "hidden",
+        pr: 1,
+        minHeight: 0,
+    },
+    bottomFixed: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 2,
+        mt: 2,
+        pt: 2,
+        borderTop: "1px solid #E2E8F0",
+        backgroundColor: "#fff",
+        flexShrink: 0,
+    }
 };

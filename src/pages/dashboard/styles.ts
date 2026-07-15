@@ -1,7 +1,7 @@
 import type { SxProps, Theme } from "@mui/material";
 import { ABOVE_MOBILE_NAV_QUERY } from "../../constants/breakpoints";
 
-const BRAND = "#086D63";
+const BRAND = "primary.main";
 const BORDER = "#ECEFF5";
 const TEXT_MUTED = "#7F7F7F";
 const TEXT_DARK = "#000000";

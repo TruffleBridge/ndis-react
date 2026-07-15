@@ -1,6 +1,6 @@
 import React from "react";
 import { Switch, FormControlLabel, Box, Typography, type SxProps, type Theme } from "@mui/material";
-import FormLabel from "../formLabel/formLabel";
+import FormLabel from "@/components/formLabel/formLabel";
 
 export interface SwitchItem {
     label: string;
@@ -45,7 +45,7 @@ export const CustomSwitch: React.FC<CustomSwitchProps> = ({
                 color: "#fff",
 
                 "& + .MuiSwitch-track": {
-                    bgcolor: "#0B7C77",
+                    bgcolor: "primary.main",
                     opacity: 1,
                 },
             },
@@ -116,7 +116,7 @@ export const CustomSwitch: React.FC<CustomSwitchProps> = ({
         <FormControlLabel
             sx={{ m: 0, ...sxProps }}
             labelPlacement="start"
-            label={label && <FormLabel label={label} sxText={{ fontSize: 14, fontWeight: 600 }} />}
+            label={label && <FormLabel label={label} sxText={{ fontSize: 14, fontWeight: 600, textAlign: 'left' }} />}
             control={
                 <Switch
                     checked={checked}

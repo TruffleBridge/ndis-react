@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowForwardIosOutlined } from "@mui/icons-material";
@@ -8,18 +8,13 @@ import SupportServices from "./steps/support";
 import Qualification from "./steps/qualification";
 import Compliance from "./steps/complicance";
 
-import { WorkerIcon } from "../../assets";
-import { CustomModal, PageHeader } from "../../components";
+import { WorkerIcon } from "@/assets";
+import { CircularProgressWithLabel, CustomModal, Loading, PageHeader } from "@/components";
 import { WorkerStyles } from "./styles";
-
-import {
-    defaultPersonalInfo,
-    defaultSupportInfo,
-    defaultQualificationInfo,
-    defaultComplianceInfo,
-} from "./utils/defaultData";
-
-import { workerDummy } from "./utils/dummyData";
+import { progressValue } from "@/utils/helper";
+import { getHeader, getSubHeader } from "./utils/constants";
+import { useWorkerStore } from "@/store/useWorker";
+import type { StepId, WorkerFormNavState, FormMode } from "@/types/worker";
 
 const steps = [
     { id: "basic", label: "Basic Info" },
@@ -32,119 +27,77 @@ const WorkerPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [open, setOpen] = useState(false);
-    const [activeStep, setActiveStep] = useState("basic");
+    const navState = (location.state as WorkerFormNavState | null) ?? { mode: "create" as FormMode };
+    const { mode, workerId = null } = navState;
+    const isView = mode === "view";
 
-    const [mode, setMode] = useState<"create" | "edit" | "view">("create");
-    const [isView, setIsView] = useState(false);
+    const activeStep = useWorkerStore((s) => s.activeStep);
+    const setActiveStep = useWorkerStore((s) => s.setActiveStep);
+    const initForm = useWorkerStore((s) => s.initForm);
+    const resetForm = useWorkerStore((s) => s.resetForm);
+    const submitForm = useWorkerStore((s) => s.submitForm);
+    const submitSuccess = useWorkerStore((s) => s.submitSuccess);
+    const closeSubmitSuccess = useWorkerStore((s) => s.closeSubmitSuccess);
+    const isFormLoading = useWorkerStore((s) => s.isFormLoading);
 
-    const [personalInfo, setPersonalInfo] = useState(defaultPersonalInfo);
-
-    const [supportInfo, setSupportInfo] = useState(defaultSupportInfo);
-
-    const [qualificationInfo, setQualificationInfo] = useState(
-        defaultQualificationInfo
-    );
-
-    const [complianceInfo, setComplianceInfo] = useState(
-        defaultComplianceInfo
-    );
-
+    // Loads the right record for edit/view (getProfile) or resets to blanks
+    // for create - runs once whenever mode/id changes.
     useEffect(() => {
-        const currentMode =
-            location.state?.mode || "create";
+        initForm(mode, workerId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mode, workerId]);
 
-        setMode(currentMode);
+    const goToStep = (step: StepId) => setActiveStep(step);
 
-        if (currentMode === "create") {
-            resetForm();
+    const handleSubmit = async () => {
+        if (isView) {
+            navigate("/workers");
             return;
         }
-
-        setPersonalInfo(workerDummy.personalInfo);
-        setSupportInfo(workerDummy.supportInfo);
-        setQualificationInfo(workerDummy.qualificationInfo);
-        setComplianceInfo(workerDummy.complianceInfo);
-
-        if (currentMode === "view") {
-            setIsView(true);
-        } else {
-            setIsView(false);
-        }
-    }, []);
-
-    const resetForm = () => {
-        setPersonalInfo(defaultPersonalInfo);
-        setSupportInfo(defaultSupportInfo);
-        setQualificationInfo(defaultQualificationInfo);
-        setComplianceInfo(defaultComplianceInfo);
-
-        setActiveStep("basic");
-        setIsView(false);
+        await submitForm();
     };
 
-    const handleSubmit = () => {
-        const payload = {
-            personalInfo,
-            supportInfo,
-            qualificationInfo,
-            complianceInfo,
-        };
-
-        console.log("Payload", payload);
-        setOpen(true);
+    const handleModalPrimary = () => {
+        closeSubmitSuccess();
         resetForm();
-
-        // navigate("/workers");
+        navigate("/");
     };
 
-    //   const handleCancel = () => {
-    //     resetForm();
-
-    //     navigate("/workers");
-    //   };
+    const handleModalBackPrimary = () => {
+        closeSubmitSuccess();
+        resetForm();
+        navigate("/workers");
+    };
 
     const renderRightSide = () => {
         switch (activeStep) {
             case "basic":
-                return (
-                    <PersonalInformation
-                        data={personalInfo}
-                        setData={setPersonalInfo}
-                        isView={isView}
-                        handleNext={() => setActiveStep("support")}
-                    />
-                );
+                return <PersonalInformation isView={isView} handleNext={() => goToStep("support")} />;
 
             case "support":
                 return (
                     <SupportServices
-                        data={supportInfo}
-                        setData={setSupportInfo}
                         isView={isView}
-                        handlePrev={() => setActiveStep("basic")}
-                        handleNext={() => setActiveStep("qual")}
+                        handlePrev={() => goToStep("basic")}
+                        handleNext={() => goToStep("qual")}
                     />
                 );
 
             case "qual":
                 return (
                     <Qualification
-                        data={qualificationInfo}
-                        setData={setQualificationInfo}
                         isView={isView}
-                        handlePrev={() => setActiveStep("support")}
-                        handleNext={() => setActiveStep("compliance")}
+                        handlePrev={() => goToStep("support")}
+                        handleNext={() => goToStep("compliance")}
                     />
                 );
 
             case "compliance":
                 return (
                     <Compliance
-                        data={complianceInfo}
-                        setData={setComplianceInfo}
                         isView={isView}
-                        handlePrev={() => setActiveStep("qual")}
+                        mode={mode === "edit"}
+                        handlePrev={() => goToStep("qual")}
                         handleSubmit={handleSubmit}
                     />
                 );
@@ -155,26 +108,16 @@ const WorkerPage = () => {
     };
 
     return (
-        <Box>
+        <Box sx={{ height: "100%" }}>
+            {isFormLoading && <Loading />}
             <PageHeader
                 icon={<WorkerIcon color="#3A3838" />}
-                title={
-                    mode === "create"
-                        ? "Add New Worker"
-                        : mode === "edit"
-                            ? "Edit Worker"
-                            : "View Worker"
-                }
+                title={mode === "create" ? "Add New Worker" : mode === "edit" ? "Edit Worker" : "View Worker"}
                 subtitle="Create Role"
             />
             <Box sx={WorkerStyles.formLayout}>
-
                 {/* LEFT SIDEBAR */}
-                <Paper
-                    elevation={0}
-                    sx={WorkerStyles.sideMenu}
-                >
-
+                <Paper elevation={0} sx={WorkerStyles.sideMenu}>
                     <Stack spacing={1}>
                         {steps.map((step) => {
                             const isActive = activeStep === step.id;
@@ -182,7 +125,7 @@ const WorkerPage = () => {
                             return (
                                 <Box
                                     key={step.id}
-                                    onClick={() => setActiveStep(step.id)}
+                                    // onClick={() => goToStep(step.id as StepId)}
                                     sx={{
                                         p: 1.3,
                                         mt: "0 !important",
@@ -191,13 +134,11 @@ const WorkerPage = () => {
                                         borderLeft: isActive ? "4px solid" : "4px solid transparent",
                                         borderLeftColor: isActive ? "primary.main" : "transparent",
                                         transition: "0.2s",
-                                        display: 'flex',
+                                        display: "flex",
                                         gap: 1,
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        "&:hover": {
-                                            bgcolor: "#f5f5f5",
-                                        },
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        "&:hover": { bgcolor: "#f5f5f5" },
                                     }}
                                 >
                                     <Typography
@@ -205,12 +146,12 @@ const WorkerPage = () => {
                                             fontWeight: isActive ? 600 : 500,
                                             fontSize: 13,
                                             color: isActive ? "#1E293B" : "#64748B",
-                                            textAlign: isActive ? "left" : 'start',
+                                            textAlign: isActive ? "left" : "start",
                                         }}
                                     >
                                         {step.label}
                                     </Typography>
-                                    <ArrowForwardIosOutlined sx={{ fontSize: 18, color: '#94A3B8' }} />
+                                    <ArrowForwardIosOutlined sx={{ fontSize: 18, color: "#94A3B8" }} />
                                 </Box>
                             );
                         })}
@@ -218,24 +159,30 @@ const WorkerPage = () => {
                 </Paper>
 
                 {/* RIGHT SIDE */}
-                <Box
-                    sx={WorkerStyles.rightSide}
-                >
-                    {renderRightSide()}
+                <Box sx={WorkerStyles.rightSideMain}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: "10px" }}>
+                        <PageHeader
+                            mainSx={{ boxShadow: "none", border: "none", p: 0 }}
+                            title={getHeader && getHeader(activeStep)}
+                            subtitle={getSubHeader && getSubHeader(activeStep)}
+                        />
+
+                        {!isView && <CircularProgressWithLabel value={progressValue(activeStep)} />}
+                    </Box>
+                    <Box sx={WorkerStyles.rightSide}>{renderRightSide()}</Box>
                 </Box>
             </Box>
 
-
             <CustomModal
-                open={open}
-                onClose={() => setOpen(false)}
+                open={submitSuccess}
+                onClose={closeSubmitSuccess}
                 type="success"
-                title="Worker Created Successfully"
+                title={mode === "edit" ? "Worker Successfully Updated!" : "Worker Created Successfully"}
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Dashboard"
-                onBack={() => setOpen(false)}
-                onPrimary={() => navigate("/")}
+                onBack={handleModalBackPrimary}
+                onPrimary={handleModalPrimary}
             />
         </Box>
     );

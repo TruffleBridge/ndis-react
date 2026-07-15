@@ -13,7 +13,7 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
-import { RoleCheckedboxIcon, RolesCheckboxIcon } from "../../assets";
+import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
 
 export interface PermissionRow {
     module: string;

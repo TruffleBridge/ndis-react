@@ -1,199 +1,339 @@
-import { Avatar, Box, Chip, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { useState } from "react";
-import { DeleteIcon } from "../../assets";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
+import { DeleteIcon } from "@/assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
-import type { ClientFormNavState } from "./utils/types";
-
-interface Client {
-    id: number;
-    clientId: string;
-    avatar?: string;
-    clientName: string;
-    email: string;
-    supportType: string;
-    assignedWorker: string;
-    activeJobs: number;
-    location: string;
-    fundingType: string;
-    clientStatus: "Active" | "Inactive" | "Pending";
-
-    [key: string]: unknown;
-}
+import type { Client, ClientFormNavState } from "@/types/client";
+import { useClientStore } from "@/store/useClient";
+import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 
 const CLIENT_STATUS_STYLES = {
-    Active: {
+    ACTIVE: {
         backgroundColor: "#D9F7E5",
         color: "#07AB48",
     },
-    Inactive: {
+    IN_ACTIVE: {
         backgroundColor: "#ECEFF1",
         color: "#34485F",
     },
-    Pending: {
+    PENDING: {
         backgroundColor: "#FDF0F0",
         color: "#A11A1A",
     },
 };
 
-const INITIAL_CLIENTS: Client[] = [
-    {
-        id: 1,
-        clientId: "CL-1042",
-        clientName: "Jane Cooper",
-        email: "lanasteiner@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Lana Steiner",
-        activeJobs: 2,
-        location: "Sydney",
-        fundingType: "NDIS / Private",
-        clientStatus: "Active",
-    },
-    {
-        id: 2,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    {
-        id: 3,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    {
-        id: 4,
-        clientId: "CL-1443",
-        clientName: "Phoenix Baker",
-        email: "phoenixbaker@gmail.com",
-        supportType: "Personal Care",
-        assignedWorker: "Phoenix Baker",
-        activeJobs: 2,
-        location: "Melbourne",
-        fundingType: "Plan Managed",
-        clientStatus: "Pending",
-    },
-    // ...remaining rows unchanged from the original list
-];
-
-const CLIENT_COLUMNS: ColumnDef<Client>[] = [
-    { headerName: "Client ID", field: "clientId" },
-    {
-        headerName: "Client Name",
-        field: "clientName",
-        render: (_value, row) => (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src="https://i.pravatar.cc/150" />
-                <Typography>{row.clientName}</Typography>
-            </Box>
-        ),
-    },
-    { headerName: "Email Address", field: "email" },
-    { headerName: "Support Type", field: "supportType" },
-    { headerName: "Assigned Worker", field: "assignedWorker" },
-    { headerName: "Active Jobs", field: "activeJobs" },
-    { headerName: "Location", field: "location" },
-    { headerName: "Funding Type", field: "fundingType" },
-    {
-        headerName: "Client Status",
-        field: "clientStatus",
-        render: (value) => {
-            const style = CLIENT_STATUS_STYLES[value as keyof typeof CLIENT_STATUS_STYLES];
-            return (
-                <Chip
-                    label={value as string}
-                    size="small"
-                    sx={{ ...style, height: 24, borderRadius: "999px", fontWeight: 500, fontSize: "12px" }}
-                />
-            );
-        },
-    },
-];
 
 function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
     return cols.map((col) => ({ key: col.headerName, visible: true }));
 }
 
 export default function ClientTable() {
-    const [clients] = useState<Client[]>(INITIAL_CLIENTS);
-    const [searchValue, setSearchValue] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(CLIENT_COLUMNS));
     const navigate = useNavigate();
+    const [stateModal, setStateModal] = useState(false);
+    const [values, setValues] = useState<any>();
+    const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
+    const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
+    const ROWS_PER_PAGE = 10;
 
-    const ROWS_PER_PAGE = 5;
 
-    const filteredClients = clients.filter(
-        (client) =>
-            client.clientName.toLowerCase().includes(searchValue.toLowerCase()) ||
-            client.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-            client.clientId.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    // All data + list actions now live in the store (getTableApi under the hood).
+    const clients = useClientStore((s) => s.clients);
+    const clientsLoading = useClientStore((s) => s.clientsLoading);
+    const searchValue = useClientStore((s) => s.searchValue);
+    const currentPage = useClientStore((s) => s.currentPage);
+    const totalPages = useClientStore((s) => s.totalPages);
+    const fetchClients = useClientStore((s) => s.fetchClients);
+    const setSearchValue = useClientStore((s) => s.setSearchValue);
+    const setCurrentPage = useClientStore((s) => s.setCurrentPage);
+    const deleteStatus = useClientStore((s) => s.deleteStatus);
+    const status = useClientStore((s) => s.status);
+    const updateState = useClientStore((s) => s.updateState);
+    const getStatusUpdate = useClientStore((s) => s.getStatusUpdate);
+    const resetForm = useClientStore((s) => s.resetForm);
 
-    const paginatedClients = filteredClients.slice(
-        (currentPage - 1) * ROWS_PER_PAGE,
-        currentPage * ROWS_PER_PAGE
-    );
 
-    const totalPages = Math.ceil(filteredClients.length / ROWS_PER_PAGE);
+    // Refetch whenever search text or page changes.
+    useEffect(() => {
+        fetchClients();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchValue, currentPage]);
 
     // Single helper so Edit/View/Create all navigate the same way - only the
-    // nav state differs. ClientFormPage reads this state to decide what mode
-    // to boot into and which mock record (if any) to load.
+
     const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
 
-    const rowActions: RowAction<Client>[] = [
+    const CLIENT_COLUMNS: ColumnDef<Client>[] = [
+        { headerName: "Client ID", field: "clientId" },
         {
-            label: "Edit",
-            icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
-            onClick: (row) => goToForm({ mode: "edit", clientId: row.id }),
+            headerName: "Client Name",
+            field: "clientName",
+            render: (_value, row) => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src={row.avatar}>
+                        {row?.clientName[0]}
+                    </Avatar>
+                    <Typography>{row?.clientName}</Typography>
+                </Box>
+            ),
         },
+        { headerName: "Email Address", field: "email" },
         {
-            label: "View",
-            icon: <VisibilityOutlinedIcon sx={{ fontSize: 14, color: "#7F7F7F" }} />,
-            onClick: (row) => goToForm({ mode: "view", clientId: row.id }),
+            headerName: "Support Type",
+            field: "supportTypes",
+            render: (_value, row) => {
+                const supportTypes: any = row.supportType ?? [];
+
+                const displayTypes = supportTypes?.length > 0 ? supportTypes?.slice(0, 1) : supportTypes?.slice(0, 1).join(',');
+                const extraCount = supportTypes?.length - 1;
+
+                return (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                fontSize: "13px",
+                                color: "#222214",
+                            }}
+                        >
+                            {displayTypes}
+                        </Typography>
+
+                        {extraCount > 0 && (
+                            <Typography
+                                sx={{
+                                    fontSize: "13px",
+                                    color: "primary.main",
+                                    cursor: "pointer",
+                                    fontWeight: 600,
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSupportTypeClick(e, supportTypes);
+                                }}
+                            >
+                                +{extraCount}
+                            </Typography>
+                        )}
+                    </Box>
+                );
+            },
         },
+        { headerName: "Assigned Worker", field: "assignedWorker" },
+        { headerName: "Active Jobs", field: "activeJobs" },
+        { headerName: "Location", field: "location" },
+        { headerName: "Funding Type", field: "fundingType" },
         {
-            label: "Delete",
-            icon: <DeleteIcon height={13} width={11} />,
-            sx: { color: "#7F7F7F" },
-            onClick: (row) => console.log("Delete", row),
+            headerName: "Client Status",
+            field: "clientStatus",
+            render: (value) => {
+                const style = CLIENT_STATUS_STYLES[value as keyof typeof CLIENT_STATUS_STYLES];
+                return (
+                    <Chip
+                        label={value as string}
+                        size="small"
+                        sx={{ ...style, height: 24, borderRadius: "999px", fontWeight: 500, fontSize: "12px" }}
+                    />
+                );
+            },
         },
     ];
+    const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(CLIENT_COLUMNS));
+
+
+    const handleSupportTypeClick = (
+        event: React.MouseEvent<HTMLElement>,
+        types: string[]
+    ) => {
+        setSupportAnchor(event.currentTarget);
+        setSelectedSupportTypes(types);
+    };
+
+    const handleCloseSupport = () => {
+        setSupportAnchor(null);
+        setSelectedSupportTypes([]);
+    };
+
+    // mapped data
+    const tableData = clients.map((item: any) => {
+        return {
+            id: item.id,
+            clientId: "CL-" + item?.clientId,
+            avatar: item?.profilePicture,
+            clientName: item?.firstName,
+            email: item?.email,
+            supportType: item?.supportTypes?.length ? item?.supportTypes : '-',
+            assignedWorker: item?.assignedWorkers?.length ? item?.assignedWorkers : '-',
+            activeJobs: item?.activeJobsCount ?? '-',
+            location: item?.jobLocations?.length ? item?.jobLocations : '-',
+            fundingType: item?.fundingType,
+            clientStatus: item?.status,
+        }
+    })
+
+    const getRowActions = (row: Client): RowAction<Client>[] => [
+        {
+            label: "Status",
+            icon: (
+                <AutorenewOutlinedIcon
+                    sx={{
+                        fontSize: 14,
+                        color: "#7F7F7F",
+                    }}
+                />
+            ),
+            onClick: () => {
+                updateState?.('delete', false)
+                setValues(row);
+                setStateModal(true);
+            },
+        },
+        ...(row?.clientStatus === "ACTIVE"
+            ? [
+                {
+                    label: "Edit",
+                    icon: (
+                        <EditOutlined
+                            sx={{
+                                fontSize: 14,
+                                color: "#7F7F7F",
+                            }}
+                        />
+                    ),
+                    onClick: () =>
+                        goToForm({
+                            mode: "edit",
+                            clientId: row.id,
+                        }),
+                },
+            ]
+            : []),
+
+        {
+            label: "View",
+            icon: (
+                <VisibilityOutlinedIcon
+                    sx={{
+                        fontSize: 14,
+                        color: "#7F7F7F",
+                    }}
+                />
+            ),
+            onClick: () =>
+                goToForm({
+                    mode: "view",
+                    clientId: row.id,
+                }),
+        },
+
+        ...(row?.clientStatus === "ACTIVE"
+            ? [
+                {
+                    label: "Delete",
+                    icon: <DeleteIcon height={13} width={11} />,
+                    sx: {
+                        color: "#7F7F7F",
+                    },
+                    onClick: () => {
+                        updateState?.('delete', true)
+                        setValues(row);
+                        setStateModal(true)
+                    },
+                },
+            ]
+            : []),
+    ];
+
+    const handleStatueChange = async () => {
+        const res = await getStatusUpdate(values?.id)
+        if (res) {
+            setStateModal(false);
+            updateState?.('delete', false)
+            updateState?.('status', false)
+            fetchClients();
+        }
+    }
+
+    const handleClose = () => {
+        setStateModal(false)
+        updateState?.('status', false)
+        updateState?.("delete", false);
+    };
 
     return (
         <Box>
+            {clientsLoading && <Loading />}
             <TableComponent
-                rows={paginatedClients}
+                rows={tableData}
                 columns={CLIENT_COLUMNS}
-                rowActions={rowActions}
-                totalPages={totalPages}
+                rowActions={getRowActions}
+                totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
                 currentPage={currentPage}
+                noData="No client records found"
+                noDataSubTitle="There is no data available to display at the moment."
+                isLoading={clientsLoading}
                 searchValue={searchValue}
-                searchPlaceholder="Search here..."
+                searchPlaceholder="Search ClientId, Client name"
                 columnStates={columnStates}
                 onColumnStatesChange={setColumnStates}
-                onSearch={(v) => { setSearchValue(v); setCurrentPage(1); }}
+                onSearch={setSearchValue}
                 onPageChange={setCurrentPage}
                 onExportData={() => console.log("Export")}
                 onFilter={() => console.log("Filter")}
                 customLabel="Add Client"
-                onCustomChange={() => goToForm({ mode: "create" })}
+                onCustomChange={() => {
+                    resetForm();
+                    goToForm({ mode: "create" })
+                }}
             />
+            <CustomModal
+                open={stateModal}
+                onClose={handleClose}
+                type="warning"
+                showIcon={true}
+                showStatusSwitch={!deleteStatus}
+                onStatusChange={(e) => updateState?.('status', e)}
+                status={status}
+                backText={deleteStatus ? "cancel" : ''}
+                primaryText="Confirm"
+                onBack={handleClose}
+                onPrimary={handleStatueChange}
+                title={values?.clientName}
+                description={deleteStatus ? 'Are you sure you want to delete this client?' : `Your account status is now ${values?.clientStatus}`}
+            />
+            <Menu
+                anchorEl={supportAnchor}
+                open={Boolean(supportAnchor)}
+                onClose={handleCloseSupport}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            borderRadius: "10px",
+                            p: 0.3,
+                        },
+                    },
+                }}
+            >
+                {selectedSupportTypes?.map((type, index) => (
+                    <MenuItem key={index}>
+                        <Typography
+                            sx={{
+                                fontSize: "12px",
+                                color: "#222214",
+                                cursor: "pointer",
+                                fontWeight: 400,
+                            }}>
+                            {type}
+                        </Typography>
+                    </MenuItem>
+                ))}
+            </Menu>
         </Box>
     );
 }

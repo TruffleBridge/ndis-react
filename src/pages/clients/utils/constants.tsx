@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import RuleOutlinedIcon from "@mui/icons-material/RuleOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import AssuredWorkloadOutlinedIcon from "@mui/icons-material/AssuredWorkloadOutlined";
-import { PolicyIcon, WorkerIcon } from "../../../assets";
+import { PolicyIcon, WorkerIcon } from "@/assets";
 
 // Step 1: Personal Information constants
 export const GENDER_OPTIONS = [
@@ -26,8 +26,8 @@ export interface DocumentFieldConfig {
 
 export const DOCUMENT_FIELDS: DocumentFieldConfig[] = [
     { key: "ndisCertificate", label: "NDIS Certificate of Registration", sublabel: "Mandatory for all registered providers", section: "mandatory" },
-    { key: "ndisAudit", label: "NDIS Audit Certificate", sublabel: "Latest audit documents", icon: <RuleOutlinedIcon  htmlColor="#3E4947"  />, section: "mandatory" },
-    { key: "publicLiabilityInsurance", label: "Public Liability Insurance", sublabel: "Mandatory for all registered providers", icon: <ShieldOutlinedIcon  htmlColor="#3E4947"  />, section: "mandatory" },
+    { key: "ndisAudit", label: "NDIS Audit Certificate", sublabel: "Latest audit documents", icon: <RuleOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
+    { key: "publicLiabilityInsurance", label: "Public Liability Insurance", sublabel: "Mandatory for all registered providers", icon: <ShieldOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
     { key: "personalIndemnityInsurance", label: "Personal Indemnity Insurance", sublabel: "Mandatory for all registered providers", icon: <AssuredWorkloadOutlinedIcon htmlColor="#3E4947" />, section: "mandatory" },
     { key: "workersCompInsurance", label: "Workers Compensation Insurance", sublabel: "Mandatory for all registered providers", icon: <WorkerIcon color="#3E4947" />, section: "mandatory" },
     { key: "incidentManagementPolicy", label: "Incident Management Policy", sublabel: "Mandatory for all registered providers", icon: <PolicyIcon />, section: "mandatory" },
@@ -46,3 +46,35 @@ export const FORM_STEPS = [
     { id: "business", label: "NDIS Business" },
     { id: "document", label: "Document Registration" },
 ] as const;
+
+export const progressValue = (activeStep: string) =>
+({
+    info: 0,
+    business: 50,
+    document: 100,
+}[activeStep] ?? 0);
+
+export const getHeader = (activeStep: string) => {
+    switch (activeStep) {
+        case "info":
+            return 'Personal Information';
+        case "business":
+            return 'NDIS Business';
+        case "document":
+            return 'Document Registration';
+        default:
+            return null;
+    }
+}
+export const getSubHeader = (activeStep: string) => {
+    switch (activeStep) {
+        case "info":
+            return 'Just the basics - take about 30 seconds to set up a secure identity';
+        case "business":
+            return 'Please provide the official registered business name as it appears on your NDIS provider registration documents';
+        case "document":
+            return 'Please upload the official registered documents for the NDIS provider business registration';
+        default:
+            return null;
+    }
+}

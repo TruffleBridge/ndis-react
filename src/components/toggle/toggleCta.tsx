@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ToggleButton, ToggleButtonGroup, Typography, Box } from "@mui/material";
+import FieldError from "@/components/fieldError/fieldError";
 
 interface Option {
     label: string;
@@ -11,7 +12,8 @@ interface GenderToggleProps {
     value: string;
     options: Option[];
     onChange: (value: string) => void;
-    disabled?: boolean
+    disabled?: boolean;
+    errors?: string;
 }
 
 export const ToggleGroup = ({
@@ -19,7 +21,8 @@ export const ToggleGroup = ({
     value,
     options,
     onChange,
-    disabled
+    disabled,
+    errors
 }: GenderToggleProps) => {
     const handleChange = (
         _: React.MouseEvent<HTMLElement>,
@@ -74,9 +77,9 @@ export const ToggleGroup = ({
 
                             "&.Mui-selected": {
                                 backgroundColor: "#D4E6E5",
-                                color: "#086D63",
+                                color: "primary.main",
                                 fontWeight: 600,
-                                borderColor: "#086D63 !important",
+                                borderColor: "primary.main !important",
                             },
 
                             "&.Mui-selected:hover": {
@@ -91,13 +94,21 @@ export const ToggleGroup = ({
                             },
                             "&.MuiToggleButtonGroup-lastButton": {
                                 border: "1px solid #BEC9C6",
-                            }
+                            },
+                            '&.MuiToggleButtonGroup-middleButton.Mui-disabled': {
+                                borderLeft: '1px solid #BEC9C6'
+                            },
+                            '&.MuiToggleButtonGroup-lastButton.Mui-disabled': {
+                                borderLeft: '1px solid #BEC9C6'
+                            },
                         }}
                     >
                         {item.label}
                     </ToggleButton>
                 ))}
             </ToggleButtonGroup>
+
+            <FieldError message={errors} />
         </Box>
     );
 };

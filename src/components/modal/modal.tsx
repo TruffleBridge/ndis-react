@@ -10,24 +10,24 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import { ErrorOutlineOutlined } from "@mui/icons-material";
+import { CustomSwitch } from "../customSwitch/customSwitch";
 
 export interface CustomModalProps {
     open: boolean;
     onClose: () => void;
-
     type?: "success" | "error" | "warning" | "info";
-
     title: string;
     description?: string;
-
     showBackButton?: boolean;
     backText?: string;
     primaryText?: string;
-
     onBack?: () => void;
     onPrimary?: () => void;
-
     loading?: boolean;
+    showStatusSwitch?: boolean;
+    status?: boolean;
+    showIcon?: boolean;
+    onStatusChange?: (checked: boolean) => void;
 }
 
 const iconConfig = {
@@ -53,18 +53,30 @@ const iconConfig = {
     },
 };
 
+const style = {
+    fontSize: 14,
+    color: "#7F7F7F",
+    lineHeight: 1.7,
+    fontWeight: 400,
+    maxWidth: 500,
+    mx: "auto",
+    mb: 5,
+}
 export const CustomModal = ({
     open,
     onClose,
     type = "success",
     title,
     description,
-    showBackButton = true,
-    backText = "Back",
-    primaryText = "Continue",
+    backText = "",
+    primaryText = "",
     onBack,
     onPrimary,
     loading = false,
+    showStatusSwitch = false,
+    status = false,
+    showIcon,
+    onStatusChange = () => { },
 }: CustomModalProps) => {
     const config = iconConfig[type];
 
@@ -132,18 +144,35 @@ export const CustomModal = ({
                     </Typography>
 
                     <Typography
-                        sx={{
-                            fontSize: 14,
-                            color: "#7F7F7F",
-                            lineHeight: 1.7,
-                            fontWeight: 400,
-                            maxWidth: 500,
-                            mx: "auto",
-                            mb: 5,
-                        }}
+                        sx={style}
                     >
                         {description}
                     </Typography>
+
+                    {showStatusSwitch && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 1,
+                                mb: 4,
+                            }}
+                        >
+                            <Typography sx={{
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: "#222214",
+                            }}>
+                                {status ? "Active" : "Inactive"}
+                            </Typography>
+
+                            <CustomSwitch
+                                checked={status}
+                                onChange={(items) => onStatusChange(items)}
+                            />
+                        </Box>
+                    )}
 
                     <Box
                         sx={{
@@ -152,7 +181,7 @@ export const CustomModal = ({
                             justifyContent: 'center'
                         }}
                     >
-                        {showBackButton && (
+                        {backText && (
                             <Button
                                 fullWidth
                                 variant="outlined"
@@ -173,18 +202,18 @@ export const CustomModal = ({
                             </Button>
                         )}
 
-                        <Button
+                        {primaryText && <Button
                             fullWidth
                             disableElevation
                             variant="contained"
                             onClick={onPrimary}
                             disabled={loading}
-                            endIcon={<ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />}
+                            endIcon={(!showStatusSwitch || !showIcon && <ArrowForwardIosRoundedIcon sx={{ fontSize: 18 }} />)}
                             sx={{
                                 height: 48,
                                 borderRadius: "50px",
                                 textTransform: "none",
-                                bgcolor: "#086D63",
+                                bgcolor: "primary.main",
                                 fontWeight: 700,
                                 fontSize: 14,
                                 color: "#FFFFFF",
@@ -192,7 +221,7 @@ export const CustomModal = ({
                             }}
                         >
                             {primaryText}
-                        </Button>
+                        </Button>}
                     </Box>
                 </Box>
             </DialogContent>

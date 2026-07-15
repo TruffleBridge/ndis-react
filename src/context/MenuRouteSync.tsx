@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getNavTitle } from "../constants/navigation";
+import { getNavTitle } from "@/constants/navigation";
 import { useMenu } from "./menuContext";
 
 /** Keeps legacy menu context in sync with the current route. */

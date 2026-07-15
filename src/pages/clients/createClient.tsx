@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowForwardIosOutlined } from "@mui/icons-material";
@@ -6,139 +6,89 @@ import { ArrowForwardIosOutlined } from "@mui/icons-material";
 import PersonalInformation from "./steps/personal";
 import BusinessStep from "./steps/business";
 import DocumentRegisterStep from "./steps/documentRegister";
-import type { UploadedFile } from "../../components/newFileUpload/FileUpload";
-import { ClientIcon } from "../../assets";
-import { CustomModal, PageHeader } from "../../components";
+import { ClientIcon } from "@/assets";
+import { CircularProgressWithLabel, CustomModal, Loading, PageHeader } from "@/components";
 import { ClientStyles } from "./styles";
-import { FORM_STEPS } from "./utils/constants";
-import {
-    buildSubmitPayload,
-    getClientRecordById,
-    getDefaultBusinessData,
-    getDefaultDocumentData,
-    getDefaultPersonalData,
-    submitClientPayload,
-} from "./utils/clientformutils";
-import type {
-    BusinessFormData,
-    ClientFormNavState,
-    DocumentFormData,
-    FormMode,
-    PersonalFormData,
-} from "./utils/types";
-
+import { FORM_STEPS, getHeader, getSubHeader, progressValue } from "./utils/constants";
+import { useClientStore } from "@/store/useClient";
+import type { ClientFormNavState, FormMode, StepId } from "@/types/client";
 
 const ClientFormPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     // The table passes { mode, clientId } via navigate(path, { state }).
-    // Falling back to "create" with no id covers direct navigation to this
-    
+    // Falling back to "create" with no id covers direct navigation to this page.
     const navState = (location.state as ClientFormNavState | null) ?? { mode: "create" as FormMode };
     const { mode, clientId = null } = navState;
 
     const isView = mode === "view";
 
-    // Step + form state. Lazy useState initializers ensure the correct
-    // data (mock record for edit/view, blank defaults for create) loads
-    // exactly once on mount - no useEffect and no flash-of-empty-form.
-    const [activeStep, setActiveStep] = useState<string>("info");
+    const activeStep = useClientStore((s) => s.activeStep);
+    const setActiveStep = useClientStore((s) => s.setActiveStep);
+    const initForm = useClientStore((s) => s.initForm);
+    const resetForm = useClientStore((s) => s.resetForm);
+    const submitForm = useClientStore((s) => s.submitForm);
+    const isSubmitting = useClientStore((s) => s.isSubmitting);
+    const submitSuccess = useClientStore((s) => s.submitSuccess);
+    const closeSubmitSuccess = useClientStore((s) => s.closeSubmitSuccess);
+    const isFormLoading = useClientStore((s) => s.isFormLoading);
 
-    const [personalData, setPersonalData] = useState<PersonalFormData>(() =>
-        clientId != null ? getClientRecordById(clientId).personal : getDefaultPersonalData()
-    );
-    const [businessData, setBusinessData] = useState<BusinessFormData>(() =>
-        clientId != null ? getClientRecordById(clientId).business : getDefaultBusinessData()
-    );
-    const [documentData, setDocumentData] = useState<DocumentFormData>(() =>
-        clientId != null ? getClientRecordById(clientId).documents : getDefaultDocumentData()
-    );
-
-    const [submitModalOpen, setSubmitModalOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Generic field-level change handlers, one per child form. Each just
-    // "controlled form" pattern that lets the child components stay dumb
-    // and identical across create, edit and view.
-    const handlePersonalChange = <K extends keyof PersonalFormData>(field: K, value: PersonalFormData[K]) => {
-        setPersonalData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleBusinessChange = <K extends keyof BusinessFormData>(field: K, value: BusinessFormData[K]) => {
-        setBusinessData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleDocumentChange = (key: string, file: UploadedFile | null) => {
-        setDocumentData((prev) => ({ ...prev, [key]: file }));
-    };
-
-    // Reset - returns the whole module to its initial state. Called after
-    // a successful Submit and on Cancel, per the requirements.
-    const resetForm = () => {
-        setActiveStep("info");
-        setPersonalData(getDefaultPersonalData());
-        setBusinessData(getDefaultBusinessData());
-        setDocumentData(getDefaultDocumentData());
-    };
+    // Loads the right record for edit/view (getViewApi/getEditApi under the
+    // hood) or resets to blanks for create - runs once whenever mode/id changes.
+    useEffect(() => {
+        initForm(mode, clientId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mode, clientId]);
 
     const handleCancel = () => {
-        resetForm();
         navigate("/clients");
     };
 
     const handleSubmit = async () => {
         if (isView) return; // safety guard - view mode never submits
-
-        setIsSubmitting(true);
-        // This is the one place the 3 child forms' state gets combined into
-        // a single payload, exactly as required.
-        const payload = buildSubmitPayload(mode, clientId, personalData, businessData, documentData);
-        await submitClientPayload(payload);
-        setIsSubmitting(false);
-        setSubmitModalOpen(true);
+        await submitForm();
     };
 
     const handleModalPrimary = () => {
-        setSubmitModalOpen(false);
         resetForm();
         navigate("/");
     };
 
-    // Step renderer - each child form is fully controlled: it receives
-    // its slice of state + change handler + isView, nothing else.
+    const backCta = () => {
+        closeSubmitSuccess();
+        navigate("/clients");
+    }
+
+    const goToStep = (step: StepId) => setActiveStep(step);
+
+    // Step renderer - each child form now pulls its own slice of state
+    // straight from the store, so it only needs isView + the nav callback.
     const renderRightSide = () => {
         switch (activeStep) {
             case "info":
                 return (
                     <PersonalInformation
-                        data={personalData}
-                        onChange={handlePersonalChange}
                         isView={isView}
-                        handleNext={() => setActiveStep("business")}
-                    />
-                );
+                        handleNext={() => goToStep("business")}
+                    />);
             case "business":
                 return (
                     <BusinessStep
-                        data={businessData}
-                        onChange={handleBusinessChange}
                         isView={isView}
-                        handleNext={() => setActiveStep("document")}
-                        handlePrev={() => setActiveStep("info")}
+                        handleNext={() => goToStep("document")}
+                        handlePrev={() => goToStep("info")}
                     />
                 );
             case "document":
                 return (
                     <DocumentRegisterStep
-                        data={documentData}
-                        onChange={handleDocumentChange}
                         isView={isView}
                         isSubmitting={isSubmitting}
                         // In view mode there's nothing to persist, so the final
                         // CTA just closes the flow instead of submitting.
                         handleNext={isView ? handleCancel : handleSubmit}
-                        handlePrev={() => setActiveStep("business")}
+                        handlePrev={() => goToStep("business")}
                     />
                 );
             default:
@@ -149,61 +99,82 @@ const ClientFormPage = () => {
     const pageTitle = mode === "create" ? "Add New Client" : mode === "edit" ? "Edit Client" : "View Client";
 
     return (
-        <Box>
-            <PageHeader icon={<ClientIcon color="#3A3838" />} title={pageTitle} subtitle="Create Role" />
-            <Box sx={ClientStyles.formLayout}>
-                {/* LEFT SIDEBAR */}
-                <Paper elevation={0} sx={ClientStyles.sideMenu}>
-                    <Stack spacing={1}>
-                        {FORM_STEPS.map((step) => {
-                            const isActive = activeStep === step.id;
-                            return (
-                                <Box
-                                    key={step.id}
-                                    onClick={() => setActiveStep(step.id)}
-                                    sx={{
-                                        p: 1.3,
-                                        mt: "0 !important",
-                                        cursor: "pointer",
-                                        bgcolor: isActive ? "#F2FCFA" : "transparent",
-                                        borderLeft: isActive ? "4px solid #086D63" : "4px solid transparent",
-                                        transition: "0.2s",
-                                        display: "flex",
-                                        gap: 1,
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        "&:hover": { bgcolor: "#f5f5f5" },
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            fontWeight: isActive ? 600 : 500,
-                                            fontSize: 13,
-                                            color: isActive ? "#1E293B" : "#64748B",
-                                        }}
-                                    >
-                                        {step.label}
-                                    </Typography>
-                                    <ArrowForwardIosOutlined sx={{ fontSize: 18, color: "#94A3B8" }} />
-                                </Box>
-                            );
-                        })}
-                    </Stack>
-                </Paper>
+        <Box sx={{ height: '100%' }}>
+            {isFormLoading ?
+                <Loading />
+                :
+                <>
+                    <PageHeader icon={<ClientIcon color="#3A3838" />} title={pageTitle} subtitle="Create Role" />
+                    <Box sx={ClientStyles.formLayout}>
+                        {/* LEFT SIDEBAR */}
+                        <Paper elevation={0} sx={ClientStyles.sideMenu}>
+                            <Stack spacing={1}>
+                                {FORM_STEPS.map((step) => {
+                                    const isActive = activeStep === step.id;
+                                    return (
+                                        <Box
+                                            key={step.id}
+                                            // onClick={() => goToStep(step.id)}
+                                            sx={{
+                                                p: 1.3,
+                                                mt: "0 !important",
+                                                cursor: "pointer",
+                                                bgcolor: isActive ? "#F2FCFA" : "transparent",
+                                                borderLeft: isActive ? "4px solid" : "4px solid",
+                                                borderColor: isActive ? "primary.main" : "transparent",
+                                                transition: "0.2s",
+                                                display: "flex",
+                                                gap: 1,
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                "&:hover": { bgcolor: "#f5f5f5" },
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: isActive ? 600 : 500,
+                                                    fontSize: 13,
+                                                    color: isActive ? "#1E293B" : "#64748B",
+                                                }}
+                                            >
+                                                {step.label}
+                                            </Typography>
+                                            <ArrowForwardIosOutlined sx={{ fontSize: 18, color: "#94A3B8" }} />
+                                        </Box>
+                                    );
+                                })}
+                            </Stack>
+                        </Paper>
 
-                {/* RIGHT SIDE */}
-                <Box sx={ClientStyles.rightSide}>{renderRightSide()}</Box>
-            </Box>
+                        {/* RIGHT SIDE */}
+                        <Box sx={ClientStyles.rightSideMain}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginBottom: '10px',
+                            }}>
+                                <PageHeader mainSx={{ boxShadow: 'none', border: 'none', p: 0 }}
+                                    title={getHeader && getHeader(activeStep)}
+                                    subtitle={getSubHeader && getSubHeader(activeStep)} />
 
+                                <CircularProgressWithLabel
+                                    value={progressValue(activeStep)} />
+                            </div>
+                            <Box sx={ClientStyles.rightSide}>
+                                {renderRightSide()}
+                            </Box>
+                        </Box>
+                    </Box>
+                </>}
             <CustomModal
-                open={submitModalOpen}
-                onClose={() => setSubmitModalOpen(false)}
+                open={submitSuccess}
+                onClose={closeSubmitSuccess}
                 type="success"
-                title="Client Successfully Created!"
+                title={mode === "edit" ? "Client Successfully Updated!" : "Client Successfully Created!"}
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Go to Dashboard"
-                onBack={() => setSubmitModalOpen(false)}
+                onBack={backCta}
                 onPrimary={handleModalPrimary}
             />
         </Box>

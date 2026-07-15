@@ -18,6 +18,7 @@ declare module "@mui/material/styles" {
       300?: string;
       400?: string;
       500?: string;
+      600?: string;
     };
   }
 }
@@ -51,6 +52,7 @@ export const theme = createTheme({
       300: "#E6E6E6",
       400: "#D0D5DD",
       500: "#64748B",
+      600: PRIMARY
     },
   },
   typography: {
