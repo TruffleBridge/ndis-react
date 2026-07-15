@@ -332,7 +332,7 @@ const Dashboard = () => {
   const handleSelectOption = (label: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), fromAssistant: false, text: label },
+      { id: crypto?.randomUUID(), fromAssistant: false, text: label },
     ]);
     // TODO: call your API / next-step logic here
   };
@@ -340,7 +340,7 @@ const Dashboard = () => {
   const handleSend = (value: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), fromAssistant: false, text: value },
+      { id: crypto?.randomUUID(), fromAssistant: false, text: value },
     ]);
   };
 
