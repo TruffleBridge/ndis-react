@@ -106,8 +106,8 @@ export interface Worker {
     uploadedDocument?: string;
     location: string;
     status: "ACTIVE" | "INACTIVE";
-    police: "verified" | "pending";
-    ndis: "verified" | "pending";
+    police?: "verified" | "pending";
+    ndis?: "verified" | "pending";
     alerts: "None" | "Due" | "Expired";
     [key: string]: unknown;
 }

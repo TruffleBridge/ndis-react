@@ -25,7 +25,7 @@ interface ComplianceProps {
 const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps) => {
     const data = useWorkerStore((s) => s.complianceInfo);
     const setField = useWorkerStore((s) => s.setComplianceField);
-    // const errors = useWorkerStore((s) => s.errors.compliance);
+    const errors = useWorkerStore((s) => s.errors.compliance);
     const goToNextStep = useWorkerStore((s) => s.goToNextStep);
     const isSubmitting = useWorkerStore((s) => s.isSubmitting);
     const uploadDocument = useUploadStore((s) => s.uploadDocument);
@@ -68,7 +68,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                 sublabel="Mandatory for all registered providers"
                                 value={data.ndisCertificate}
                                 disabled={isView}
-                                errors={uploadErrors?.ndisCertificate}
+                                errors={errors?.ndisCertificate || uploadErrors?.ndisCertificate}
                                 onChange={(file) => handleUpload("ndisCertificate", file ? { ...file, documentType: "NDIS Certificate of Registration" } : null)}
                             />
                         </Grid>
@@ -80,7 +80,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                 sublabel="Latest audit documents"
                                 value={data.screeningCheck}
                                 disabled={isView}
-                                errors={uploadErrors?.screeningCheck}
+                                errors={errors?.screeningCheck || uploadErrors?.screeningCheck}
                                 onChange={(file) => handleUpload("screeningCheck", file ? { ...file, documentType: "Screening Check Upload" } : null)}
                             />
                         </Grid>
@@ -92,7 +92,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                 value={data.orientationCertificate}
                                 disabled={isView}
                                 // loading={uploadingKeys.orientationCertificate}
-                                errors={uploadErrors?.orientationCertificate}
+                                errors={errors?.orientationCertificate || uploadErrors?.orientationCertificate}
                                 onChange={(file) => handleUpload("orientationCertificate", file ? { ...file, documentType: "Orientation Certificate Upload" } : null)}
                             />
                         </Grid>
@@ -103,7 +103,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                 sublabel="Mandatory for all registered providers"
                                 value={data.rightToWork}
                                 disabled={isView}
-                                errors={uploadErrors?.rightToWork}
+                                errors={errors?.rightToWork || uploadErrors?.rightToWork}
                                 onChange={(file) => handleUpload("rightToWork", file ? { ...file, documentType: "Rights To Work" } : null)}
                             />
                         </Grid>
@@ -113,7 +113,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                 <SectionCard title="Identity & Legal">
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            {isView ? getViewFunction('Driving License Number', dayjs(data.drivingLicenseNumber).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Driving License Number', data.drivingLicenseNumber, 'plain') :
                                 <InputTextField
                                     label="Driving License Number"
                                     value={data.drivingLicenseNumber}
@@ -124,7 +124,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            {isView ? getViewFunction('Driving License Expiry', dayjs(data.drivingLicenseExpiry).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Driving License Expiry', data.drivingLicenseExpiry ? dayjs(data.drivingLicenseExpiry).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     label="Driving License Expiry"
                                     disablePast
@@ -169,7 +169,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            {isView ? getViewFunction('Issue Date', dayjs(data.policeIssueDate).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Issue Date', data.policeIssueDate ? dayjs(data.policeIssueDate).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     label="Issue Date"
                                     minDate={dayjs().startOf("year")}
@@ -179,7 +179,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            {isView ? getViewFunction('Expiry Date', dayjs(data.policeExpiryDate).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Expiry Date', data.policeExpiryDate ? dayjs(data.policeExpiryDate).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     label="Expiry Date"
                                     minDate={
@@ -217,7 +217,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            {isView ? getViewFunction('Expiry Date', dayjs(data.blueCardExpiry).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Expiry Date', data.blueCardExpiry ? dayjs(data.blueCardExpiry).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     label="Expiry Date"
                                     disablePast
@@ -251,7 +251,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            {isView ? getViewFunction('Expiry Date', dayjs(data.firstAidExpiry).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Expiry Date', data.firstAidExpiry ? dayjs(data.firstAidExpiry).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     label="Expiry Date"
                                     disablePast
@@ -285,7 +285,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 6 }}>
-                            {isView ? getViewFunction('Expiry Date', dayjs(data.cprExpiry).format("YYYY-MM-DD"), 'plain') :
+                            {isView ? getViewFunction('Expiry Date', data.cprExpiry ? dayjs(data.cprExpiry).format("YYYY-MM-DD") : '-', 'plain') :
                                 <DateField
                                     disablePast
                                     label="Expiry Date"

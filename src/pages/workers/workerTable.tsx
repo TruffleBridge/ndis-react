@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
-import { DeleteIcon, MoreCircleIcon, CircleTickIcon } from "@/assets";
+import {
+  DeleteIcon,
+  //  MoreCircleIcon, CircleTickIcon
+} from "@/assets";
 import { useNavigate } from "react-router-dom";
 import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
@@ -51,16 +54,16 @@ const WORKER_COLUMNS: ColumnDef<Worker>[] = [
       );
     },
   },
-  {
-    headerName: "Police",
-    field: "police",
-    render: (value) => (value === "verified" ? <CircleTickIcon /> : <MoreCircleIcon />),
-  },
-  {
-    headerName: "NDIS",
-    field: "ndis",
-    render: (value) => (value === "verified" ? <CircleTickIcon /> : <MoreCircleIcon />),
-  },
+  // {
+  //   headerName: "Police",
+  //   field: "police",
+  //   render: (value) => (value === "verified" ? <CircleTickIcon /> : <MoreCircleIcon />),
+  // },
+  // {
+  //   headerName: "NDIS",
+  //   field: "ndis",
+  //   render: (value) => (value === "verified" ? <CircleTickIcon /> : <MoreCircleIcon />),
+  // },
   {
     headerName: "Alerts",
     field: "alerts",
@@ -192,8 +195,8 @@ export default function WorkersTable() {
       alerts: item?.alerts ?? '-',
       location: item?.addresses?.length ? item?.addresses[0]?.street1 : '-',
       status: item?.status,
-      police: item?.police,
-      ndis: item?.ndis,
+      // police: item?.police,
+      // ndis: item?.ndis,
     }
   })
 

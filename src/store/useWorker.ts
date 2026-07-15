@@ -759,6 +759,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         if (!complianceInfo.ndisCertificate) errors.ndisCertificate = "This document is required";
         if (!complianceInfo.orientationCertificate) errors.orientationCertificate = "This document is required";
         if (!complianceInfo.rightToWork) errors.rightToWork = "This document is required";
+        if (!complianceInfo.screeningCheck) errors.screeningCheck = "This document is required";
 
         set((state) => ({ errors: { ...state.errors, compliance: errors } }));
         return Object.keys(errors).length === 0;

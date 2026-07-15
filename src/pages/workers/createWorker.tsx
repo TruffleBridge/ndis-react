@@ -63,6 +63,12 @@ const WorkerPage = () => {
         navigate("/");
     };
 
+    const handleModalBackPrimary = () => {
+        closeSubmitSuccess();
+        resetForm();
+        navigate("/workers");
+    };
+
     const renderRightSide = () => {
         switch (activeStep) {
             case "basic":
@@ -171,14 +177,11 @@ const WorkerPage = () => {
                 open={submitSuccess}
                 onClose={closeSubmitSuccess}
                 type="success"
-                title="Worker Created Successfully"
+                title={mode === "edit" ? "Worker Successfully Updated!" : "Worker Created Successfully"}
                 description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
                 backText="Back"
                 primaryText="Dashboard"
-                onBack={() => {
-                    closeSubmitSuccess
-                    navigate('/workers')
-                }}
+                onBack={handleModalBackPrimary}
                 onPrimary={handleModalPrimary}
             />
         </Box>
