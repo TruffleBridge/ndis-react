@@ -10,8 +10,8 @@ export interface JobProps {
     name: string;
     workerName: string;
     serviceType: string;
-    serviceDate: string;
-    shiftTime: string;
+    serviceDate?: string;
+    shiftTimeAndDate: string;
     location: string;
     jobStatus: string;
     paymentStatus: string;
@@ -31,7 +31,7 @@ export interface JobManagement {
     worker: Worker | null;
     serviceType: string | null;
     location: Location;
-    session: Session[];
+    session?: any;
     jobStatus: string;
     paymentStatus: string;
     bookingId?: number | null;

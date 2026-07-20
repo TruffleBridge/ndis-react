@@ -8,33 +8,27 @@ interface JobManagementState {
     loading: boolean;
     error: string | null;
 
-    fetchJobs: () => Promise<void>;
+    fetchJobs: (payload: any) => Promise<void>;
 }
-
-const formatTime = (time: string) =>
-    new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
 
 const mapJobs = (rows: JobManagement[]): JobProps[] =>
     rows.map((job) => {
-        const session = job.session[0];
 
         return {
-            jobId: job.jobId,
-            avatar: job.client.profilePicture ?? undefined,
-            name: job.client.fullName,
-            workerName: job.worker?.fullName ?? "-",
-            serviceType: job.serviceType ?? "-",
-            serviceDate: session?.serviceDate ?? "-",
-            shiftTime: session
-                ? `${formatTime(session.startTime)} - ${formatTime(session.endTime)}`
-                : "-",
-            location: `${job.location.city}, ${job.location.state}`,
-            jobStatus: job.jobStatus,
-            paymentStatus: job.paymentStatus,
+            jobId: "J" + job?.jobId,
+            avatar: job?.client.profilePicture ?? undefined,
+            name: job?.client?.fullName,
+            businessName: job?.businessName ?? '-',
+            workerName: job?.worker?.fullName ?? "-",
+            serviceType: job?.serviceType ?? "-",
+            shiftTimeAndDate: job?.session,
+            // serviceDate: session?.serviceDate ?? "-",
+            // shiftTime: session
+            //     ? `${formatTime(session.startTime)} - ${formatTime(session.endTime)}`
+            //     : "-",
+            location: `${job?.location.city}, ${job?.location.state}`,
+            jobStatus: job?.jobStatus,
+            paymentStatus: job?.paymentStatus,
         };
     });
 
@@ -44,15 +38,19 @@ export const useJobManagementStore = create<JobManagementState>((set) => ({
     loading: false,
     error: null,
 
-    fetchJobs: async () => {
+    fetchJobs: async (payload) => {
         set({ loading: true, error: null });
 
         try {
-            const res = await createApiRequest('/admin/jobManagementList', {});
+            const res = await createApiRequest('/admin/jobManagementList', {
+                "offset": payload?.offset ?? 0,
+                "limit": payload?.limit ?? 10,
+                "search": payload?.search ?? ""
+            });
 
             set({
-                jobs: mapJobs(res.data.rows),
-                totalCount: res.data.totalCount,
+                jobs: mapJobs(res?.data?.data?.rows ?? res?.data?.rows),
+                totalCount: res?.data?.data?.totalCount ?? res.data.totalCount,
                 loading: false,
             });
         } catch (error: any) {

@@ -265,6 +265,7 @@ export default function ClientTable() {
         updateState?.('status', false)
         updateState?.("delete", false);
     };
+    
 
     return (
         <Box>

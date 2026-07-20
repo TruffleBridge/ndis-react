@@ -65,3 +65,13 @@ export const getMimeType = (fileName: string) => {
       return "application/octet-stream";
   }
 };
+
+// time formatted
+export const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":");
+  const h = Number(hours);
+  const period = h >= 12 ? "PM" : "AM";
+  const formattedHour = h % 12 || 12;
+
+  return `${String(formattedHour).padStart(2, "0")}:${minutes} ${period}`;
+};
