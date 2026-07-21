@@ -8,17 +8,18 @@ import { EditOutlined } from "@mui/icons-material";
 import type { Client, ClientFormNavState } from "@/types/client";
 import { useClientStore } from "@/store/useClient";
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
+import { formatStatus } from "@/utils/menuUtils";
 
 const CLIENT_STATUS_STYLES = {
-    ACTIVE: {
+    active: {
         backgroundColor: "#D9F7E5",
         color: "#07AB48",
     },
-    IN_ACTIVE: {
+    inactive: {
         backgroundColor: "#ECEFF1",
         color: "#34485F",
     },
-    PENDING: {
+    pending: {
         backgroundColor: "#FDF0F0",
         color: "#A11A1A",
     },
@@ -133,7 +134,11 @@ export default function ClientTable() {
             headerName: "Client Status",
             field: "clientStatus",
             render: (value) => {
-                const style = CLIENT_STATUS_STYLES[value as keyof typeof CLIENT_STATUS_STYLES];
+                const key = formatStatus(value as string);
+                const style = key
+                    ? CLIENT_STATUS_STYLES[key.toLowerCase() as keyof typeof CLIENT_STATUS_STYLES]
+                    : {};
+                // const style = CLIENT_STATUS_STYLES[value as keyof typeof CLIENT_STATUS_STYLES];
                 return (
                     <Chip
                         label={value as string}
@@ -265,7 +270,7 @@ export default function ClientTable() {
         updateState?.('status', false)
         updateState?.("delete", false);
     };
-    
+
 
     return (
         <Box>

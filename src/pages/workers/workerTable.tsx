@@ -10,10 +10,11 @@ import { useNavigate } from "react-router-dom";
 import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
+import { formatStatus } from "@/utils/menuUtils";
 
 const STATUS_STYLES = {
-  ACTIVE: { backgroundColor: "#D9F7E5", color: "#07AB48" },
-  INACTIVE: { backgroundColor: "#ECEFF1", color: "#34485F" },
+  active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
+  inactive: { backgroundColor: "#ECEFF1", color: "#34485F" },
 };
 
 const ALERT_STYLES = {
@@ -44,7 +45,11 @@ const WORKER_COLUMNS: ColumnDef<Worker>[] = [
     headerName: "Status",
     field: "status",
     render: (value) => {
-      const style = STATUS_STYLES[value as keyof typeof STATUS_STYLES];
+       const key = formatStatus(value as string);
+        const style = key
+          ? STATUS_STYLES[key.toLowerCase() as keyof typeof STATUS_STYLES]
+          : {};
+      // const style = STATUS_STYLES[value as keyof typeof STATUS_STYLES];
       return (
         <Chip
           label={value as string}
