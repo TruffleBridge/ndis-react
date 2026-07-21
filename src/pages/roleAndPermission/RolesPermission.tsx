@@ -1,10 +1,18 @@
 import { Box, Chip } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { useState } from "react";
+import {
+  Loading,
+  TableComponent,
+  type ColumnDef,
+  type ColumnState,
+  type RowAction,
+} from "@/components";
+import { useEffect, useState } from "react";
 import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
+import { useRoles } from "@/store/useRoles";
+import { formatDate } from "@/utils/helper";
 
 interface RoleProps {
   id: number;
@@ -26,56 +34,10 @@ const STATUS_STYLES = {
     color: "#16A34A",
   },
   Inactive: {
-    backgroundColor: '#ECEFF1', color: '#34485F'
+    backgroundColor: "#ECEFF1",
+    color: "#34485F",
   },
 };
-
-const INITIAL_ROLES: RoleProps[] = [
-  {
-    id: 1,
-    roleName: "Super Admin",
-    accessModules: "All Modules",
-    users: 2,
-    accessLevel: "Full",
-    status: "Active",
-    startDate: "01/01/2021",
-    endDate: "11/30/2024",
-    lastUpdated: "11/30/2024",
-  },
-  {
-    id: 2,
-    roleName: "Support Coordinator",
-    accessModules: "Jobs and Clients",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Active",
-    startDate: "10/02/2021",
-    endDate: "11/22/2024",
-    lastUpdated: "11/22/2024",
-  },
-  {
-    id: 3,
-    roleName: "Operations Admin",
-    accessModules: "Jobs and Workers",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Active",
-    startDate: "07/06/2024",
-    endDate: "12/31/2024",
-    lastUpdated: "12/31/2024",
-  },
-  {
-    id: 4,
-    roleName: "Finance Admin",
-    accessModules: "Payments",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Inactive",
-    startDate: "09/04/2021",
-    endDate: "11/28/2024",
-    lastUpdated: "11/28/2024",
-  },
-];
 
 const ROLES_COLUMNS: ColumnDef<RoleProps>[] = [
   {
@@ -145,46 +107,55 @@ const ROLES_COLUMNS: ColumnDef<RoleProps>[] = [
   },
 ];
 
-// Helper: build initial ColumnState[] from a ColumnDef[]
 function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
-  return cols.map((col) => ({ key: col.headerName, visible: true }));
+  return cols.map((col) => ({
+    key: col.headerName,
+    visible: true,
+  }));
 }
 
 export default function RolesAndPermissionTable() {
-  const [roles] = useState<RoleProps[]>(INITIAL_ROLES);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // columnStates is the committed state — the table renders from this
+  const {
+    roles,
+    totalCount,
+    getRoles,
+    listLoading,
+  } = useRoles();
+
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(ROLES_COLUMNS)
   );
+
   const navigate = useNavigate();
 
   const ROWS_PER_PAGE = 5;
 
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.roleName.toLowerCase().includes(searchValue.toLowerCase()) ||
-      role.accessModules.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const handleEdit = (row: any) => {
+    navigate("/create-roles", {
+      state: {
+        id: row.id,
+        mode: "edit",
+      },
+    });
 
-  const paginatedRoles = filteredRoles.slice(
-    (currentPage - 1) * ROWS_PER_PAGE,
-    currentPage * ROWS_PER_PAGE
-  );
-
-  const totalPages = Math.ceil(filteredRoles.length / ROWS_PER_PAGE);
+  }
 
   const rowActions: RowAction<RoleProps>[] = [
     {
       label: "Edit",
       icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => console.log("Edit", row),
+      onClick: (row) => handleEdit(row),
     },
     {
       label: "View",
-      icon: <VisibilityOutlinedIcon sx={{ fontSize: 15, color: "#7F7F7F" }} />,
+      icon: (
+        <VisibilityOutlinedIcon
+          sx={{ fontSize: 15, color: "#7F7F7F" }}
+        />
+      ),
       onClick: (row) => console.log("View", row),
     },
     {
@@ -194,24 +165,66 @@ export default function RolesAndPermissionTable() {
     },
   ];
 
+  const tableRows: RoleProps[] = roles.map((item: any) => ({
+    id: item.id,
+    roleName: item.name,
+    accessModules: item.accessModules?.length
+      ? item.accessModules.join(", ")
+      : "No Modules",
+    users: item.userCount,
+    accessLevel:
+      item.accessLevel === "LIMITED"
+        ? "Limited"
+        : "Full",
+    status:
+      item.status === "ACTIVE"
+        ? "Active"
+        : "Inactive",
+    startDate: formatDate(item.startDate) ?? "-",
+    endDate: formatDate(item.endDate) ?? "-",
+    lastUpdated: formatDate(item.updatedAt) ?? "-",
+  }));
+
+  useEffect(() => {
+    getRoles({
+      search: searchValue,
+      offset: 0,
+      limit: ROWS_PER_PAGE * 1,
+    });
+  }, [
+    searchValue,
+    currentPage,
+  ]);
+
+  const totalPages = Math.ceil(
+    totalCount / ROWS_PER_PAGE
+  );
+
   return (
     <Box>
+      {listLoading && <Loading />}
+
       <TableComponent
-        rows={paginatedRoles}
+        rows={tableRows}
         columns={ROLES_COLUMNS}
         rowActions={rowActions}
         totalPages={totalPages}
         currentPage={currentPage}
         searchValue={searchValue}
-        searchPlaceholder="Search here..."
+        searchPlaceholder="Search roles here..."
+        noData="No roles records found"
+        noDataSubTitle="There is no data available to display at the moment."
         columnStates={columnStates}
-        onColumnStatesChange={setColumnStates}   // only called on "Apply"
-        onSearch={(v) => { setSearchValue(v); setCurrentPage(1); }}
+        onColumnStatesChange={setColumnStates}
+        onSearch={(v) => {
+          setSearchValue(v);
+          setCurrentPage(1);
+        }}
         onPageChange={setCurrentPage}
         onExportData={() => console.log("Export")}
         onFilter={() => console.log("Filter")}
         customLabel="Add Role"
-        onCustomChange={() => navigate('/create-roles')}
+        onCustomChange={() => navigate("/create-roles")}
         isHasAction
       />
     </Box>

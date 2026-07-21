@@ -17,6 +17,7 @@ import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
 
 export interface PermissionRow {
     module: string;
+    moduleId?: number; // maps this row back to the actual module for the API payload
     permissions: Record<string, boolean>;
 }
 
@@ -137,7 +138,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
                     <Checkbox
                         checked={isAllSelected}
-                        disabled={disabled}
+                        disabled={disabled || !permissions.length}
                         onChange={handleSelectAll}
                         size="small"
                         checkedIcon={<RoleCheckedboxIcon />}
@@ -185,10 +186,10 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
                     <TableBody>
                         {permissions.map((row, rowIndex) => (
-                            <TableRow key={row.module} hover sx={{
+                            <TableRow key={row.moduleId ?? row.module} hover sx={{
                                 "& MuiTableRow-root.MuiTableRow-hover:hover": {
                                     bgcolor: '#EEEEEE',
-                                    py:2
+                                    py: 2
                                 }
                             }}>
                                 <TableCell
@@ -251,7 +252,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                                         color: "#9CA3AF",
                                     }}
                                 >
-                                    No permissions available
+                                    Select an access module to configure permissions
                                 </TableCell>
                             </TableRow>
                         )}

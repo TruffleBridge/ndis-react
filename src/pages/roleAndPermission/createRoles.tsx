@@ -1,35 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
+    Alert,
     Box,
     Button,
+    CircularProgress,
     Divider,
     Grid,
     Typography,
 } from "@mui/material";
 import {
-    AutocompleteField, DateField,
-    InputTextField, PageHeader,
+    AutocompleteField,
+    DateField,
+    InputTextField,
+    Loading,
+    PageHeader,
     PermissionMatrix,
-} from "../../components";
-import { RoleIcon } from "../../assets";
-import { useNavigate } from "react-router-dom";
-
-// roles
-import {
-    PERMISSION_ACTIONS,
-    PERMISSION_DATA,
-} from "../../utils/permissionData";
-import type { PermissionRow } from "../../types/permission";
+} from "@/components";
+import { RoleIcon } from "@/assets";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowBackIosNewOutlined } from "@mui/icons-material";
+import { useRoles, PERMISSION_ACTIONS, STATUS_OPTIONS } from "@/store/useRoles";
+import dayjs from "dayjs";
 
 interface FormActionsProps {
     onCancel?: () => void;
     onSubmit?: () => void;
     submitLabel?: string;
+    hideSubmit?: boolean;
+    submitting?: boolean;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
-    onCancel, onSubmit, submitLabel = "CTA Label"
+    onCancel, onSubmit, submitLabel = "CTA Label", hideSubmit = false, submitting = false,
 }) => (
     <Box sx={{
         display: "flex",
@@ -64,39 +66,35 @@ const FormActions: React.FC<FormActionsProps> = ({
                     width: '33px',
                     textTransform: "none",
                     "&:hover": { bgcolor: "none" },
-                    '& .MuiButton-startIcon': {
-                        marginRight: 0
-                    }
+                    '& .MuiButton-startIcon': { marginRight: 0 }
                 }}
-            /> <span style={{
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#222124",
-                gap: 2
-            }}>{'Back'}</span></div>
-        <Button
-            variant="contained"
-            onClick={onSubmit}
-            sx={{
-                fontSize: "14px",
-                fontWeight: 600,
-                bgcolor: 'primary.main',
-                color: "#FFFFFF",
-                borderRadius: "8px",
-                px: 2.5,
-                py: "6px",
-                textTransform: "none",
-                height: 40,
-                boxShadow: "none",
-                minWidth: '130px',
-                "&:hover": { boxShadow: "none" },
-            }}
-        >
-            {submitLabel}
-        </Button>
+            /> <span style={{ fontSize: "14px", fontWeight: 600, color: "#222124", gap: 2 }}>{'Back'}</span>
+        </div>
+        {!hideSubmit && (
+            <Button
+                variant="contained"
+                onClick={onSubmit}
+                disabled={submitting}
+                sx={{
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    bgcolor: 'primary.main',
+                    color: "#FFFFFF",
+                    borderRadius: "8px",
+                    px: 2.5,
+                    py: "6px",
+                    textTransform: "none",
+                    height: 40,
+                    boxShadow: "none",
+                    minWidth: '130px',
+                    "&:hover": { boxShadow: "none" },
+                }}
+            >
+                {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : submitLabel}
+            </Button>
+        )}
     </Box>
 );
-
 
 const box = {
     mx: "auto",
@@ -106,114 +104,156 @@ const box = {
     borderRadius: "8px",
     p: "20px",
     pb: 0
-}
+};
 
 const title = {
     fontSize: "18px",
     fontWeight: 600,
     color: "#111827",
-}
+};
 
-
-
-// main page
 const AddNewRolesPage: React.FC = () => {
-
-    const [permissions, setPermissions] =
-        useState<PermissionRow[]>(PERMISSION_DATA);
-
     const navigate = useNavigate();
+    const location = useLocation();
+    const params = useParams();
 
+    const mode = location.state?.mode ?? params.mode ?? "add";
+    const roleId = Number(location.state?.id ?? params.id);
 
-    const handleSubmit = () => {
-        console.log('submitted')
+    const isEdit = mode === "edit";
+    const isView = mode === "view";
 
+    const {
+        modules,
+        form,
+        detailsLoading,
+        submitting,
+        error,
+        getModules,
+        getRoleById,
+        createRole,
+        updateRole,
+        resetRoleDetails,
+        setRoleName,
+        setStatus,
+        setStartDate,
+        setEndDate,
+        setSelectedModules,
+        setPermissions,
+        clearError,
+    } = useRoles();
+
+    // Flow 1: load modules once
+    useEffect(() => {
+        getModules();
+    }, []);
+
+    // Flow 2: clear any stale form data, then fetch role for edit/view.
+    // resetRoleDetails() wipes form + roleDetails + prefillPermissions in the store,
+    // so "add" mode always starts clean even if the store had edit-mode leftovers.
+    useEffect(() => {
+        resetRoleDetails();
+        if ((isEdit || isView) && roleId) {
+            getRoleById(roleId);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEdit, isView, roleId]);
+
+    const moduleOptions = useMemo(
+        () => modules.map((m) => ({ label: m.moduleName, value: String(m.id) })),
+        [modules]
+    );
+
+    // Flow 3: submit — store already knows form + roleDetails, page just triggers it
+    const handleSubmit = async () => {
+        const success =
+            isEdit && roleId ? await updateRole(roleId) : await createRole();
+
+        if (success) {
+            navigate("/roles-permission");
+        }
     };
+
+    const pageTitle = isView ? "View Role" : isEdit ? "Edit Role" : "Add Role";
+    const loadingDetails = (isEdit || isView) && detailsLoading;
 
     return (
         <Box>
-            {/* Page Header */}
-            <PageHeader icon={<RoleIcon color="#6B7280" />} title="Add Role" subtitle="Create Role" />
+            {loadingDetails && <Loading />}
+            <PageHeader
+                icon={<RoleIcon color="#6B7280" />}
+                title={pageTitle}
+                subtitle={isEdit ? "Edit Role" : isView ? "Role Details" : "Create Role"}
+            />
+
+            {error && (
+                <Alert severity="error" sx={{ mt: 2 }} onClose={clearError}>
+                    {error}
+                </Alert>
+            )}
 
             <Box sx={{ minHeight: "100vh", mt: 2 }}>
-
-                {/* ── Form body  */}
                 <Box sx={{ ...box, mt: 0, mb: 2 }}>
-                    {/* ── Personal Information */}
-                    <Box sx={{ height: '100%', mb: 2 }}>
-                        <Box sx={{ textAlign: 'left', mb: 1 }}>
-                            <Typography sx={title}>
-                                {"Role Info"}
-                            </Typography>
+                    <Box sx={{ height: "100%", mb: 2 }}>
+                        <Box sx={{ textAlign: "left", mb: 1 }}>
+                            <Typography sx={title}>{"Role Info"}</Typography>
                         </Box>
                         <Divider sx={{ mb: 2 }} />
 
-                        <Grid container spacing={2}>
 
-                            {/* Right Side - Form Fields (6 cols) */}
+                        <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 12 }}>
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                    <Grid size={{ xs: 12, sm: 4 }}>
                                         <InputTextField
-                                            label="Roll ID"
-                                            value={'R-123'}
-                                            fullWidth
-                                            onChange={() => { }}
-                                            required
-                                            disabled
-                                            placeholder="Enter roll ID"
-                                        />
-                                    </Grid>
-
-                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <AutocompleteField
                                             label="Roll Name"
-                                            value={{ label: '', value: '' }}
-                                            options={[]}
-                                            onChange={() => { }}
-                                            placeholder="Select roll name"
+                                            value={form.roleName}
+                                            onChange={(val: any) => setRoleName(val)}
+                                            placeholder="enter roll name"
+                                            disabled={isView}
                                         />
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                    <Grid size={{ xs: 12, sm: 4 }}>
                                         <AutocompleteField
                                             label="Access Modules"
-                                            value={{ label: '', value: '' }}
-                                            options={[]}
-                                            onChange={() => { }}
+                                            multiple
+                                            value={form.selectedModules}
+                                            options={moduleOptions}
+                                            onChange={(val: any) => setSelectedModules(val ?? [])}
                                             placeholder="Select access modules"
+                                            disabled={isView}
                                         />
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                    <Grid size={{ xs: 12, sm: 4 }}>
                                         <AutocompleteField
                                             label="Status"
-                                            value={{ label: '', value: '' }}
-                                            options={[]}
-                                            onChange={() => { }}
+                                            value={form.status}
+                                            options={STATUS_OPTIONS}
+                                            onChange={(val: any) => setStatus(val)}
                                             placeholder="Select status"
+                                            disabled={isView}
                                         />
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                         <DateField
                                             label="Start Date"
-                                            value={null}
-                                            onChange={() => { }}
+                                            value={form.startDate ? dayjs(form.startDate) : null}
+                                            onChange={(val: any) => setStartDate(val ? val.toDate() : null)}
                                             optional
-                                        // required
-                                        // error={errors.startDate}
+                                            disabled={isView}
                                         />
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                         <DateField
                                             label="End Date"
-                                            value={null}
+                                            value={form.endDate ? dayjs(form.endDate) : null}
                                             optional
-                                            onChange={() => { }}
-                                        // required
-                                        // error={errors.startDate}
+                                            onChange={(val: any) => setEndDate(val ? val.toDate() : null)}
+                                            disabled={isView}
                                         />
                                     </Grid>
                                 </Grid>
@@ -222,24 +262,24 @@ const AddNewRolesPage: React.FC = () => {
                     </Box>
                 </Box>
 
-                {/* roles permission section  */}
                 <PermissionMatrix
                     title="Core Feature Permissions"
-                    actions={PERMISSION_ACTIONS}
-                    permissions={permissions}
+                    actions={PERMISSION_ACTIONS as unknown as string[]}
+                    permissions={form.permissions}
                     onChange={setPermissions}
+                    disabled={isView}
                     mainSx={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
                 />
 
-                {/* ── Footer actions  */}
                 <FormActions
-                    onCancel={() => navigate('/roles-permission')}
+                    onCancel={() => navigate("/roles-permission")}
                     onSubmit={handleSubmit}
-                    submitLabel="Save"
+                    submitLabel={isEdit ? "Update" : "Save"}
+                    hideSubmit={isView}
+                    submitting={submitting}
                 />
             </Box>
         </Box>
-
     );
 };
 
