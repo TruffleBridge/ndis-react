@@ -29,3 +29,4 @@ export { VirtualAssistantLauncher } from "./askAI/index";
 export { NoDataFound } from "./noData/NoDataFound";
 export { Loading } from "./loading/loading";
 export { CircularProgressWithLabel } from "./circleBarWithLabel";
+export { GlobalSnackbar } from "./GlobalSnackbar";

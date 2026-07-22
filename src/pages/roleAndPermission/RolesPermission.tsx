@@ -1,6 +1,7 @@
 import { Box, Chip } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
+  CustomModal,
   Loading,
   TableComponent,
   type ColumnDef,
@@ -20,7 +21,7 @@ interface RoleProps {
   accessModules: string;
   users: number;
   accessLevel: string | "Full" | "Limited";
-  status: string | "Active" | "Inactive";
+  status: string | "Active" | "InActive";
   startDate: string;
   endDate: string;
   lastUpdated: string;
@@ -33,7 +34,7 @@ const STATUS_STYLES = {
     backgroundColor: "#DCFCE7",
     color: "#16A34A",
   },
-  Inactive: {
+  InActive: {
     backgroundColor: "#ECEFF1",
     color: "#34485F",
   },
@@ -116,13 +117,16 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
 
 export default function RolesAndPermissionTable() {
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [stateModal, setStateModal] = useState(false);
+  const [values, setValues] = useState<any>();
 
   const {
     roles,
     totalCount,
     getRoles,
     listLoading,
+    deleteRole
   } = useRoles();
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
@@ -131,13 +135,13 @@ export default function RolesAndPermissionTable() {
 
   const navigate = useNavigate();
 
-  const ROWS_PER_PAGE = 5;
+  const ROWS_PER_PAGE = 10;
 
-  const handleEdit = (row: any) => {
+  const handleEdit = (row: any, mode: string) => {
     navigate("/create-roles", {
       state: {
         id: row.id,
-        mode: "edit",
+        mode: mode,
       },
     });
 
@@ -147,7 +151,7 @@ export default function RolesAndPermissionTable() {
     {
       label: "Edit",
       icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => handleEdit(row),
+      onClick: (row) => handleEdit(row, 'edit'),
     },
     {
       label: "View",
@@ -156,12 +160,15 @@ export default function RolesAndPermissionTable() {
           sx={{ fontSize: 15, color: "#7F7F7F" }}
         />
       ),
-      onClick: (row) => console.log("View", row),
+      onClick: (row) => handleEdit(row, 'view'),
     },
     {
       label: "Delete",
       icon: <DeleteIcon width={11} height={13} />,
-      onClick: (row) => console.log("Delete", row),
+      onClick: (row) => {
+        setValues(row);
+        setStateModal(true);
+      },
     },
   ];
 
@@ -177,9 +184,9 @@ export default function RolesAndPermissionTable() {
         ? "Limited"
         : "Full",
     status:
-      item.status === "ACTIVE"
+      item.status === "Active"
         ? "Active"
-        : "Inactive",
+        : "InActive",
     startDate: formatDate(item.startDate) ?? "-",
     endDate: formatDate(item.endDate) ?? "-",
     lastUpdated: formatDate(item.updatedAt) ?? "-",
@@ -188,17 +195,31 @@ export default function RolesAndPermissionTable() {
   useEffect(() => {
     getRoles({
       search: searchValue,
-      offset: 0,
-      limit: ROWS_PER_PAGE * 1,
+      offset: currentPage ?? 0,
+      limit: ROWS_PER_PAGE,
     });
   }, [
     searchValue,
     currentPage,
   ]);
 
-  const totalPages = Math.ceil(
-    totalCount / ROWS_PER_PAGE
-  );
+  const totalPages = Math.ceil(totalCount / ROWS_PER_PAGE);
+  const handleClose = () => {
+    setStateModal(false)
+  }
+
+  const handleDelete = async () => {
+    debugger;
+    const res: any = await deleteRole(values?.id)
+    if (res) {
+      setStateModal(false)
+      getRoles({
+        search: searchValue,
+        offset: currentPage ?? 0,
+        limit: ROWS_PER_PAGE,
+      });
+    }
+  }
 
   return (
     <Box>
@@ -209,7 +230,7 @@ export default function RolesAndPermissionTable() {
         columns={ROLES_COLUMNS}
         rowActions={rowActions}
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={currentPage === 0 ? 1 : currentPage}
         searchValue={searchValue}
         searchPlaceholder="Search roles here..."
         noData="No roles records found"
@@ -218,7 +239,7 @@ export default function RolesAndPermissionTable() {
         onColumnStatesChange={setColumnStates}
         onSearch={(v) => {
           setSearchValue(v);
-          setCurrentPage(1);
+          setCurrentPage(0);
         }}
         onPageChange={setCurrentPage}
         onExportData={() => console.log("Export")}
@@ -226,6 +247,18 @@ export default function RolesAndPermissionTable() {
         customLabel="Add Role"
         onCustomChange={() => navigate("/create-roles")}
         isHasAction
+      />
+
+      <CustomModal
+        open={stateModal}
+        onClose={handleClose}
+        type="warning"
+        backText={"cancel"}
+        primaryText="Confirm"
+        onBack={handleClose}
+        onPrimary={handleDelete}
+        title={values?.roleName}
+        description={'Are you sure you want to delete this role?'}
       />
     </Box>
   );

@@ -112,7 +112,7 @@ export const navbarStyles: Record<string, SxProps<Theme>> = {
   },
 
   pageTitle: {
-    fontSize: { xs: "16px", sm: "18px" },
+    fontSize: { xs: "12px", sm: "18px" },
     fontWeight: 600,
     overflow: "hidden",
     textOverflow: "ellipsis",

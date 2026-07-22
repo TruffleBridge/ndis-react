@@ -45,10 +45,10 @@ const WORKER_COLUMNS: ColumnDef<Worker>[] = [
     headerName: "Status",
     field: "status",
     render: (value) => {
-       const key = formatStatus(value as string);
-        const style = key
-          ? STATUS_STYLES[key.toLowerCase() as keyof typeof STATUS_STYLES]
-          : {};
+      const key = formatStatus(value as string);
+      const style = key
+        ? STATUS_STYLES[key.toLowerCase() as keyof typeof STATUS_STYLES]
+        : {};
       // const style = STATUS_STYLES[value as keyof typeof STATUS_STYLES];
       return (
         <Chip
@@ -89,6 +89,9 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
   return cols.map((col) => ({ key: col.headerName, visible: true }));
 }
 
+const ROWS_PER_PAGE = 10;
+
+
 export default function WorkersTable() {
   const navigate = useNavigate();
   const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(WORKER_COLUMNS));
@@ -110,7 +113,7 @@ export default function WorkersTable() {
   const status = useWorkerStore((s) => s.status);
 
   useEffect(() => {
-    fetchWorkers();
+    fetchWorkers(ROWS_PER_PAGE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, currentPage]);
 
@@ -211,7 +214,7 @@ export default function WorkersTable() {
       setStateModal(null);
       // updateState?.('delete', false)
       // updateState?.('status', false)
-      fetchWorkers();
+      fetchWorkers(ROWS_PER_PAGE);
     }
   }
 
@@ -227,8 +230,8 @@ export default function WorkersTable() {
         rows={tableData}
         columns={WORKER_COLUMNS}
         rowActions={getRowActions}
-        totalPages={Math.ceil(totalPages / 10)}
-        currentPage={currentPage}
+        totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
+        currentPage={currentPage === 0 ? 1 : currentPage}
         // loading={workersLoading}
         searchValue={searchValue}
         noData="No Worker records found"

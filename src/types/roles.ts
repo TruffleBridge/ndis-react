@@ -44,6 +44,14 @@ export interface PermissionPayload {
     canExport: boolean;
 }
 
+export interface FormErrors {
+    roleName?: string;
+    status?: string;
+    selectedModules?: string;
+    permissions?: string;
+}
+
+
 export interface CreateRolePayload {
     name: string;
     description?: string;

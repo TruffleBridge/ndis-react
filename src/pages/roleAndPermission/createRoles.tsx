@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Alert,
     Box,
     Button,
-    CircularProgress,
     Divider,
     Grid,
     Typography,
 } from "@mui/material";
 import {
     AutocompleteField,
+    CustomModal,
     DateField,
     InputTextField,
     Loading,
@@ -21,6 +21,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowBackIosNewOutlined } from "@mui/icons-material";
 import { useRoles, PERMISSION_ACTIONS, STATUS_OPTIONS } from "@/store/useRoles";
 import dayjs from "dayjs";
+import { getViewFunction } from "@/utils/viewfunction";
 
 interface FormActionsProps {
     onCancel?: () => void;
@@ -90,7 +91,7 @@ const FormActions: React.FC<FormActionsProps> = ({
                     "&:hover": { boxShadow: "none" },
                 }}
             >
-                {submitting ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : submitLabel}
+                {submitting ? submitLabel + '...' : submitLabel}
             </Button>
         )}
     </Box>
@@ -117,6 +118,8 @@ const AddNewRolesPage: React.FC = () => {
     const location = useLocation();
     const params = useParams();
 
+    const [isSucess, setSuccussModel] = useState(false);
+
     const mode = location.state?.mode ?? params.mode ?? "add";
     const roleId = Number(location.state?.id ?? params.id);
 
@@ -141,6 +144,8 @@ const AddNewRolesPage: React.FC = () => {
         setSelectedModules,
         setPermissions,
         clearError,
+        resetForm,
+        formErrors
     } = useRoles();
 
     // Flow 1: load modules once
@@ -170,12 +175,26 @@ const AddNewRolesPage: React.FC = () => {
             isEdit && roleId ? await updateRole(roleId) : await createRole();
 
         if (success) {
-            navigate("/roles-permission");
+            setSuccussModel(true)
         }
     };
 
     const pageTitle = isView ? "View Role" : isEdit ? "Edit Role" : "Add Role";
     const loadingDetails = (isEdit || isView) && detailsLoading;
+
+    const handleModalBackPrimary = () => {
+        setSuccussModel(false)
+        resetForm();
+        navigate("/roles-permission");
+    };
+
+    const handleModalPrimary = () => {
+        setSuccussModel(false)
+        resetForm();
+        navigate("/roles-permission");
+    };
+
+    console.log(formErrors, 'formErrors');
 
     return (
         <Box>
@@ -205,56 +224,67 @@ const AddNewRolesPage: React.FC = () => {
                             <Grid size={{ xs: 12, md: 12 }}>
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, sm: 4 }}>
-                                        <InputTextField
-                                            label="Roll Name"
-                                            value={form.roleName}
-                                            onChange={(val: any) => setRoleName(val)}
-                                            placeholder="enter roll name"
-                                            disabled={isView}
-                                        />
+                                        {isView ? getViewFunction('Roll Name', form.roleName, 'plain') :
+                                            <InputTextField
+                                                required
+                                                label="Roll Name"
+                                                value={form.roleName}
+                                                onChange={(val: any) => setRoleName(val)}
+                                                placeholder="enter roll name"
+                                                disabled={isView}
+                                                errors={formErrors.roleName}
+                                            />}
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 4 }}>
-                                        <AutocompleteField
-                                            label="Access Modules"
-                                            multiple
-                                            value={form.selectedModules}
-                                            options={moduleOptions}
-                                            onChange={(val: any) => setSelectedModules(val ?? [])}
-                                            placeholder="Select access modules"
-                                            disabled={isView}
-                                        />
+                                        {isView ? getViewFunction('Access Modules', form.selectedModules, 'chip') :
+                                            <AutocompleteField
+                                                required
+                                                label="Access Modules"
+                                                multiple
+                                                value={form.selectedModules}
+                                                options={moduleOptions}
+                                                onChange={(val: any) => setSelectedModules(val ?? [])}
+                                                placeholder="Select access modules"
+                                                disabled={isView}
+                                                error={formErrors.selectedModules}
+                                            />}
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 4 }}>
-                                        <AutocompleteField
-                                            label="Status"
-                                            value={form.status}
-                                            options={STATUS_OPTIONS}
-                                            onChange={(val: any) => setStatus(val)}
-                                            placeholder="Select status"
-                                            disabled={isView}
-                                        />
+                                        {isView ? getViewFunction('Status', form.status?.label, 'plain') :
+                                            <AutocompleteField
+                                                required
+                                                label="Status"
+                                                value={form.status}
+                                                options={STATUS_OPTIONS}
+                                                onChange={(val: any) => setStatus(val)}
+                                                placeholder="Select status"
+                                                disabled={isView}
+                                                error={formErrors.status}
+                                            />}
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <DateField
-                                            label="Start Date"
-                                            value={form.startDate ? dayjs(form.startDate) : null}
-                                            onChange={(val: any) => setStartDate(val ? val.toDate() : null)}
-                                            optional
-                                            disabled={isView}
-                                        />
+                                        {isView ? getViewFunction('Start Date', form.startDate && dayjs(form.startDate).format('MM/DD/YYYY'), 'plain') :
+                                            <DateField
+                                                label="Start Date"
+                                                value={form.startDate ? dayjs(form.startDate) : null}
+                                                onChange={(val: any) => setStartDate(val ? val.toDate() : null)}
+                                                optional
+                                                disabled={isView}
+                                            />}
                                     </Grid>
 
                                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <DateField
-                                            label="End Date"
-                                            value={form.endDate ? dayjs(form.endDate) : null}
-                                            optional
-                                            onChange={(val: any) => setEndDate(val ? val.toDate() : null)}
-                                            disabled={isView}
-                                        />
+                                        {isView ? getViewFunction('End Date', form.endDate && dayjs(form.endDate).format('MM/DD/YYYY'), 'plain') :
+                                            <DateField
+                                                label="End Date"
+                                                value={form.endDate ? dayjs(form.endDate) : null}
+                                                optional
+                                                onChange={(val: any) => setEndDate(val ? val.toDate() : null)}
+                                                disabled={isView}
+                                            />}
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -268,6 +298,7 @@ const AddNewRolesPage: React.FC = () => {
                     permissions={form.permissions}
                     onChange={setPermissions}
                     disabled={isView}
+                    errors={formErrors.permissions}
                     mainSx={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
                 />
 
@@ -279,6 +310,17 @@ const AddNewRolesPage: React.FC = () => {
                     submitting={submitting}
                 />
             </Box>
+            <CustomModal
+                open={isSucess}
+                onClose={() => setSuccussModel(false)}
+                type="success"
+                title={isEdit ? "Roles Successfully Updated!" : "Roles Created Successfully"}
+                description="Welcome to Nimora. Your profile is ready, and you can now start finding the right support workers for your needs."
+                backText="Back"
+                primaryText="Dashboard"
+                onBack={handleModalBackPrimary}
+                onPrimary={handleModalPrimary}
+            />
         </Box>
     );
 };

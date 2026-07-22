@@ -14,6 +14,7 @@ import {
     type Theme,
 } from "@mui/material";
 import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
+import FieldError from "@/components/fieldError/fieldError";
 
 export interface PermissionRow {
     module: string;
@@ -28,6 +29,7 @@ interface PermissionMatrixProps {
     onChange: (rows: PermissionRow[]) => void;
     disabled?: boolean;
     mainSx?: SxProps<Theme>;
+    errors?: string
 }
 
 const BORDER = "#EEEEEE";
@@ -40,6 +42,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
     onChange,
     disabled = false,
     mainSx,
+    errors = ''
 }) => {
     const isAllSelected = useMemo(() => {
         if (!permissions.length) return false;
@@ -165,7 +168,9 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                                     fontWeight: 500,
                                     color: "#6B7280",
                                 }}
-                            />
+                            >
+                                <FieldError message={errors} />
+                            </TableCell>
                             {actions.map((action) => (
                                 <TableCell
                                     key={action}
@@ -259,6 +264,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                     </TableBody>
                 </Table>
             </TableContainer>
+
         </Paper>
     );
 };

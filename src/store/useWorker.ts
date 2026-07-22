@@ -19,6 +19,7 @@ import type {
     StepId,
 } from "@/types/worker";
 import { getMimeType } from "../utils/helper";
+import { handleApiError } from "@/utils/errorHandler";
 
 // ---------------------------------------------------------------------------
 // Endpoints
@@ -470,7 +471,7 @@ interface WorkerStore {
     uploadErrors: Record<string, string>;
 
     // table actions
-    fetchWorkers: () => Promise<void>;
+    fetchWorkers: (payload: any) => Promise<void>;
     setSearchValue: (value: string) => void;
     setCurrentPage: (page: number) => void;
     status?: boolean;
@@ -500,7 +501,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
     workersLoading: false,
     workersError: null,
     searchValue: "",
-    currentPage: 1,
+    currentPage: 0,
     totalPages: 1,
 
     mode: "create",
@@ -519,11 +520,15 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
     uploadErrors: {},
 
     // =========================== TABLE ===========================
-    fetchWorkers: async () => {
+    fetchWorkers: async (payload_: any) => {
         set({ workersLoading: true, workersError: null });
         try {
             const { searchValue, currentPage } = get();
-            const res = await createApiRequest(ENDPOINTS.list, { search: searchValue, page: currentPage });
+            const res = await createApiRequest(ENDPOINTS.list, {
+                search: searchValue,
+                "offset": currentPage,
+                "limit": payload_?.limit ?? 10,
+            });
             const payload = res.data?.data ?? res.data ?? {};
             set({
                 workers: payload.rows ?? payload.workers ?? payload ?? [],
@@ -549,7 +554,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             }));
             return true;
         } catch (err) {
-            set({ workersError: "Failed to update worker status" });
+            const message = handleApiError(err, "Failed to active or inactive");
+            set({ workersError: message ?? "Failed to update worker status" });
             return false;
         }
     },
@@ -562,7 +568,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             set((state) => ({ workers: state.workers.filter((w) => w.id !== id) }));
             return true;
         } catch (err) {
-            set({ workersError: "Failed to delete worker" });
+            const message = handleApiError(err, "Failed to delete");
+            set({ workersError: message ?? "Failed to delete worker" });
             return false;
         }
     },
@@ -802,7 +809,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             set({ isSubmitting: false, submitSuccess: true });
             return true;
         } catch (err) {
-            set({ isSubmitting: false, workersError: "Failed to submit worker details" });
+            const message = handleApiError(err, "Failed to worker");
+            set({ isSubmitting: false, workersError: message ?? "Failed to submit worker details" });
             return false;
         }
     },

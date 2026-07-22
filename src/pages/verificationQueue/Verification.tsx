@@ -81,7 +81,7 @@ export default function VerificationTable() {
 
   const [selected, setSelected] = useState<"client" | "worker">("client");
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const ROWS_PER_PAGE = 10;
 
   /*
@@ -222,13 +222,13 @@ export default function VerificationTable() {
   // tab function
   const handleTab = (val: any) => {
     setSelected(val);
-    setCurrentPage(1);
+    setCurrentPage(0);
   }
 
   //table search function with api call
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    setCurrentPage(1);
+    setCurrentPage(0);
     getVerificationQueue({
       offset: 0,
       limit: ROWS_PER_PAGE,
@@ -301,7 +301,7 @@ export default function VerificationTable() {
         noDataSubTitle="There is no data available to display at the moment."
         isLoading={loading}
         totalPages={Math.ceil(total / ROWS_PER_PAGE)}
-        currentPage={currentPage}
+        currentPage={currentPage === 0 ? 1 : currentPage}
         searchValue={searchValue}
         columnStates={columnStates}
         onColumnStatesChange={setColumnStates}

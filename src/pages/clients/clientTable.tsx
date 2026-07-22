@@ -57,7 +57,11 @@ export default function ClientTable() {
 
     // Refetch whenever search text or page changes.
     useEffect(() => {
-        fetchClients();
+        fetchClients({
+            offset: 0,
+            limit: ROWS_PER_PAGE,
+            search: searchValue,
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchValue, currentPage]);
 
@@ -280,7 +284,7 @@ export default function ClientTable() {
                 columns={CLIENT_COLUMNS}
                 rowActions={getRowActions}
                 totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
-                currentPage={currentPage}
+                currentPage={currentPage === 0 ? 1 : currentPage}
                 noData="No client records found"
                 noDataSubTitle="There is no data available to display at the moment."
                 isLoading={clientsLoading}
