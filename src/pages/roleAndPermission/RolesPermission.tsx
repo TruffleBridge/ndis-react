@@ -210,7 +210,6 @@ export default function RolesAndPermissionTable() {
   }
 
   const handleDelete = async () => {
-    debugger;
     const res: any = await deleteRole(values?.id)
     if (res) {
       setStateModal(false)
@@ -225,7 +224,6 @@ export default function RolesAndPermissionTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
-    debugger;
     setCurrentPage(page - 1);
     getRoles({
       offset: page - 1,

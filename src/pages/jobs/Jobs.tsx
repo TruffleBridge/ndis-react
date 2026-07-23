@@ -247,7 +247,6 @@ export default function JobTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
-    debugger;
     setCurrentPage(page - 1);
     fetchJobs({
       offset: page - 1,
