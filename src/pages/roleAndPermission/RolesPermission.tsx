@@ -147,7 +147,7 @@ export default function RolesAndPermissionTable() {
 
   }
 
-  const rowActions: RowAction<RoleProps>[] = [
+  const getRowActions = (row: RoleProps): RowAction<RoleProps>[] => [
     {
       label: "Edit",
       icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
@@ -162,14 +162,15 @@ export default function RolesAndPermissionTable() {
       ),
       onClick: (row) => handleEdit(row, 'view'),
     },
-    {
-      label: "Delete",
-      icon: <DeleteIcon width={11} height={13} />,
-      onClick: (row) => {
-        setValues(row);
-        setStateModal(true);
-      },
-    },
+    ...(row?.status.toLowerCase() === "active"
+      ? [{
+        label: "Delete",
+        icon: <DeleteIcon width={11} height={13} />,
+        onClick: () => {
+          setValues(row);
+          setStateModal(true);
+        },
+      }] : []),
   ];
 
   const tableRows: RoleProps[] = roles.map((item: any) => ({
@@ -221,6 +222,18 @@ export default function RolesAndPermissionTable() {
     }
   }
 
+
+  // page changing function
+  const handlePageChange = (page: number) => {
+    debugger;
+    setCurrentPage(page - 1);
+    getRoles({
+      offset: page - 1,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
+
   return (
     <Box>
       {listLoading && <Loading />}
@@ -228,9 +241,9 @@ export default function RolesAndPermissionTable() {
       <TableComponent
         rows={tableRows}
         columns={ROLES_COLUMNS}
-        rowActions={rowActions}
+        rowActions={getRowActions}
         totalPages={totalPages}
-        currentPage={currentPage === 0 ? 1 : currentPage}
+        currentPage={currentPage + 1}
         searchValue={searchValue}
         searchPlaceholder="Search roles here..."
         noData="No roles records found"
@@ -241,7 +254,7 @@ export default function RolesAndPermissionTable() {
           setSearchValue(v);
           setCurrentPage(0);
         }}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
         onExportData={() => console.log("Export")}
         onFilter={() => console.log("Filter")}
         customLabel="Add Role"

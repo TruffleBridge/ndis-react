@@ -148,8 +148,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         }
     },
 
-    setSearchValue: (value) => set({ searchValue: value, currentPage: 1 }),
-    setCurrentPage: (page) => set({ currentPage: page }),
+    setSearchValue: (value) => set({ searchValue: value, currentPage: 0 }),
+    setCurrentPage: (page) => set({ currentPage: page - 1 }),
 
     // ========================== table status update =====================
     updateState: (key, val) =>
@@ -350,7 +350,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             firstName: personalData?.firstName,
             email: personalData?.email,
             phoneNumber: personalData?.mobile,
-            countryCode: "+91", // or personalData?.countryCode
+            countryCode: "+61", // or personalData?.countryCode
             type: "client",
             dateOfBirth: dayjs(personalData?.dob).format("YYYY-MM-DD"),
             gender: personalData?.gender?.toUpperCase(),

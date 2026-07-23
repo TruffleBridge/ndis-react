@@ -11,6 +11,7 @@ import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
 import { formatStatus } from "@/utils/menuUtils";
+import { useExportStore } from "@/store/useExportStore";
 
 const STATUS_STYLES = {
   active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
@@ -112,6 +113,10 @@ export default function WorkersTable() {
   const updateState = useWorkerStore((s) => s.updateState);
   const status = useWorkerStore((s) => s.status);
 
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const loading = useExportStore((s) => s.loading);
+
   useEffect(() => {
     fetchWorkers(ROWS_PER_PAGE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,7 +140,7 @@ export default function WorkersTable() {
         setStateModal('status');
       },
     },
-    ...(row?.status === "ACTIVE"
+    ...(row?.status.toLowerCase() === "active"
       ? [
         {
           label: "Edit",
@@ -173,7 +178,7 @@ export default function WorkersTable() {
         }),
     },
 
-    ...(row?.status === "ACTIVE"
+    ...(row?.status.toLowerCase() === "active"
       ? [
         {
           label: "Delete",
@@ -181,6 +186,7 @@ export default function WorkersTable() {
           sx: {
             color: "#7F7F7F",
           },
+
           onClick: () => {
             setValues(row);
             setStateModal('delete')
@@ -222,16 +228,21 @@ export default function WorkersTable() {
     setStateModal(null)
   };
 
+  const handleExport = () => {
+    const visibleColumns = columnStates?.filter((column) => column?.visible)?.map((column) => column?.key);
+    exportExcel("/admin/workerManagementList/export", { customizeTable: visibleColumns ?? [] });
+  }
+
 
   return (
     <Box>
-      {workersLoading && <Loading />}
+      {(workersLoading || loading) && <Loading />}
       <TableComponent
         rows={tableData}
         columns={WORKER_COLUMNS}
         rowActions={getRowActions}
         totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
-        currentPage={currentPage === 0 ? 1 : currentPage}
+        currentPage={currentPage + 1}
         // loading={workersLoading}
         searchValue={searchValue}
         noData="No Worker records found"
@@ -241,7 +252,7 @@ export default function WorkersTable() {
         onColumnStatesChange={setColumnStates}
         onSearch={setSearchValue}
         onPageChange={setCurrentPage}
-        onExportData={() => console.log("Export")}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
         customLabel="Add Worker"
         onCustomChange={() => goToForm({ mode: "create" })}

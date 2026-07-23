@@ -313,7 +313,7 @@ const buildRegisterPayload = (
     email: personal.email,
     password: 'Test@123',
     phoneNumber: personal.mobile,
-    countryCode: personal.countryCode,
+    countryCode: '+61',
     type: ACCOUNT_TYPE,
     dateOfBirth: personal.dateOfBirth,
     gender: toGenderEnum(personal.gender),
@@ -540,8 +540,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         }
     },
 
-    setSearchValue: (value) => set({ searchValue: value, currentPage: 1 }),
-    setCurrentPage: (page) => set({ currentPage: page }),
+    setSearchValue: (value) => set({ searchValue: value, currentPage: 0 }),
+    setCurrentPage: (page) => set({ currentPage: page - 1 }),
 
     // ================= STATUS UPDATE (also used for delete) =================
     updateState: (val) =>

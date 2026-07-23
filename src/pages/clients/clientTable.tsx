@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
 import type { Client, ClientFormNavState } from "@/types/client";
 import { useClientStore } from "@/store/useClient";
+import { useExportStore } from "@/store/useExportStore";
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 import { formatStatus } from "@/utils/menuUtils";
 
@@ -53,6 +54,10 @@ export default function ClientTable() {
     const updateState = useClientStore((s) => s.updateState);
     const getStatusUpdate = useClientStore((s) => s.getStatusUpdate);
     const resetForm = useClientStore((s) => s.resetForm);
+
+    // export download data
+    const exportExcel = useExportStore((s) => s.exportExcel);
+    const loading = useExportStore((s) => s.loading);
 
 
     // Refetch whenever search text or page changes.
@@ -203,7 +208,7 @@ export default function ClientTable() {
                 setStateModal(true);
             },
         },
-        ...(row?.clientStatus === "ACTIVE"
+        ...(row?.clientStatus.toLowerCase() === "active"
             ? [
                 {
                     label: "Edit",
@@ -241,7 +246,7 @@ export default function ClientTable() {
                 }),
         },
 
-        ...(row?.clientStatus === "ACTIVE"
+        ...(row?.clientStatus.toLowerCase() === "active"
             ? [
                 {
                     label: "Delete",
@@ -275,16 +280,22 @@ export default function ClientTable() {
         updateState?.("delete", false);
     };
 
+    const handleExport = () => {
+        const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
+        exportExcel("/admin/clientManagementList/export", { customizeTable: visibleColumns ?? [] }
+        );
+    }
+
 
     return (
         <Box>
-            {clientsLoading && <Loading />}
+            {(clientsLoading || loading) && <Loading />}
             <TableComponent
                 rows={tableData}
                 columns={CLIENT_COLUMNS}
                 rowActions={getRowActions}
                 totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
-                currentPage={currentPage === 0 ? 1 : currentPage}
+                currentPage={currentPage + 1}
                 noData="No client records found"
                 noDataSubTitle="There is no data available to display at the moment."
                 isLoading={clientsLoading}
@@ -294,7 +305,7 @@ export default function ClientTable() {
                 onColumnStatesChange={setColumnStates}
                 onSearch={setSearchValue}
                 onPageChange={setCurrentPage}
-                onExportData={() => console.log("Export")}
+                onExportData={() => handleExport()}
                 onFilter={() => console.log("Filter")}
                 customLabel="Add Client"
                 onCustomChange={() => {

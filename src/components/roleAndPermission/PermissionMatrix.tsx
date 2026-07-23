@@ -171,7 +171,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                             >
                                 <FieldError message={errors} />
                             </TableCell>
-                            {actions.map((action) => (
+                            {permissions?.length > 0 && actions.map((action) => (
                                 <TableCell
                                     key={action}
                                     align="center"

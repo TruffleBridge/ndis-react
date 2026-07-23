@@ -223,7 +223,7 @@ const AddNewRolesPage: React.FC = () => {
                         <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 12 }}>
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                    <Grid size={{ xs: 12, sm: isView ? 2 : 4 }}>
                                         {isView ? getViewFunction('Roll Name', form.roleName, 'plain') :
                                             <InputTextField
                                                 required
@@ -236,7 +236,7 @@ const AddNewRolesPage: React.FC = () => {
                                             />}
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                    <Grid size={{ xs: 12, sm: isView ? 3 : 4 }}>
                                         {isView ? getViewFunction('Access Modules', form.selectedModules, 'chip') :
                                             <AutocompleteField
                                                 required
@@ -251,7 +251,7 @@ const AddNewRolesPage: React.FC = () => {
                                             />}
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                    <Grid size={{ xs: 12, sm: isView ? 2 : 4 }}>
                                         {isView ? getViewFunction('Status', form.status?.label, 'plain') :
                                             <AutocompleteField
                                                 required
@@ -265,7 +265,7 @@ const AddNewRolesPage: React.FC = () => {
                                             />}
                                     </Grid>
 
-                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                    <Grid size={{ xs: 12, sm: 6, md: isView ? 2 : 3 }}>
                                         {isView ? getViewFunction('Start Date', form.startDate && dayjs(form.startDate).format('MM/DD/YYYY'), 'plain') :
                                             <DateField
                                                 label="Start Date"

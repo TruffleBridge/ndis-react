@@ -38,7 +38,7 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
 
 export default function JobTable() {
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const {
     jobs,
     loading,
@@ -191,7 +191,7 @@ export default function JobTable() {
   const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
   const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
 
-  const ROWS_PER_PAGE = 5;
+  const ROWS_PER_PAGE = 10;
 
 
   const totalPages = Math.ceil(totalCount / ROWS_PER_PAGE);
@@ -237,9 +237,9 @@ export default function JobTable() {
   //table search function with api call
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    setCurrentPage(1);
+    setCurrentPage(0);
     fetchJobs({
-      offset: 0,
+      offset: currentPage,
       limit: ROWS_PER_PAGE,
       search: value,
     });
@@ -247,9 +247,10 @@ export default function JobTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    debugger;
+    setCurrentPage(page - 1);
     fetchJobs({
-      offset: (page - 1) * ROWS_PER_PAGE,
+      offset: page - 1,
       limit: ROWS_PER_PAGE,
       search: searchValue,
     });
@@ -263,7 +264,7 @@ export default function JobTable() {
         columns={JOBS_COLUMNS}
         rowActions={rowActions}
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={currentPage + 1}
         searchValue={searchValue}
         noData="No jobs records found"
         noDataSubTitle="There is no data available to display at the moment."
