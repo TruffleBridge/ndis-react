@@ -147,7 +147,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }}>
-                        {isView ? getViewFunction('Mobile Number', data?.mobile, 'plain') :
+                        {isView ? getViewFunction('Mobile Number', '+61 ' + data?.mobile, 'plain') :
                             <InputTextField
                                 label="Mobile Number"
                                 value={data.mobile}
