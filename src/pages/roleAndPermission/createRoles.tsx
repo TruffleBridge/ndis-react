@@ -272,6 +272,7 @@ const AddNewRolesPage: React.FC = () => {
                                                 value={form.startDate ? dayjs(form.startDate) : null}
                                                 onChange={(val: any) => setStartDate(val ? val.toDate() : null)}
                                                 optional
+                                                disablePast
                                                 disabled={isView}
                                             />}
                                     </Grid>
@@ -282,6 +283,7 @@ const AddNewRolesPage: React.FC = () => {
                                                 label="End Date"
                                                 value={form.endDate ? dayjs(form.endDate) : null}
                                                 optional
+                                                minDate={dayjs(form.startDate)}
                                                 onChange={(val: any) => setEndDate(val ? val.toDate() : null)}
                                                 disabled={isView}
                                             />}

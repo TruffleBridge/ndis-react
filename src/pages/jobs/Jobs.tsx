@@ -4,6 +4,7 @@ import { Loading, TableComponent, type ColumnDef, type ColumnState, type RowActi
 import { useEffect, useState } from "react";
 import { useJobManagementStore } from "@/store/useJobManagementStore";
 import { formatTime } from "@/utils/helper";
+import { useExportStore } from "@/store/useExportStore";
 
 interface JobProps {
   jobId: string;
@@ -45,6 +46,10 @@ export default function JobTable() {
     totalCount,
     fetchJobs,
   } = useJobManagementStore();
+
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const isExcelloading = useExportStore((s) => s.loading);
 
   // format
   const formatShift = (item: any) =>
@@ -255,9 +260,15 @@ export default function JobTable() {
     });
   }
 
+  const handleExport = () => {
+    const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
+    exportExcel("/admin/jobManagementList/export", { customizeTable: visibleColumns ?? [] }
+    );
+  }
+
   return (
     <Box>
-      {loading && <Loading />}
+      {(isExcelloading || loading) && <Loading />}
       <TableComponent
         rows={jobs}
         columns={JOBS_COLUMNS}
@@ -272,7 +283,7 @@ export default function JobTable() {
         onColumnStatesChange={setColumnStates}   // only called on "Apply"
         onSearch={(v) => handleSearch(v)}
         onPageChange={handlePageChange}
-        onExportData={() => console.log("Export")}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
       />
       <Menu

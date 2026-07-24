@@ -13,7 +13,8 @@ import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
 import { useRoles } from "@/store/useRoles";
-import { formatDate } from "@/utils/helper";
+import { useExportStore } from "@/store/useExportStore";
+import dayjs from "dayjs";
 
 interface RoleProps {
   id: number;
@@ -129,6 +130,10 @@ export default function RolesAndPermissionTable() {
     deleteRole
   } = useRoles();
 
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const isExcelloading = useExportStore((s) => s.loading);
+
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(ROLES_COLUMNS)
   );
@@ -188,9 +193,9 @@ export default function RolesAndPermissionTable() {
       item.status === "Active"
         ? "Active"
         : "InActive",
-    startDate: formatDate(item.startDate) ?? "-",
-    endDate: formatDate(item.endDate) ?? "-",
-    lastUpdated: formatDate(item.updatedAt) ?? "-",
+    startDate: item.startDate ? dayjs(item.startDate).format('DD/MM/YYYY') : "-",
+    endDate: item.endDate ? dayjs(item.endDate).format('DD/MM/YYYY') : "-",
+    lastUpdated: item.updatedAt ? dayjs(item.updatedAt).format('DD/MM/YYYY') : "-",
   }));
 
   useEffect(() => {
@@ -232,9 +237,25 @@ export default function RolesAndPermissionTable() {
     });
   }
 
+  const handleExport = () => {
+    const columnMapping: Record<string, string> = {
+      "ID": "Role ID",
+      "# of Users": "User Count",
+      "Last Updated by": "Last Updated By"
+    };
+
+    const visibleColumns = columnStates
+      .filter((column) => column.visible)
+      .map((column) => columnMapping[column.key] || column.key);
+
+    exportExcel("/roles/list/export", {
+      customizeTable: visibleColumns,
+    });
+  };
+
   return (
     <Box>
-      {listLoading && <Loading />}
+      {(isExcelloading || listLoading) && <Loading />}
 
       <TableComponent
         rows={tableRows}
@@ -253,7 +274,7 @@ export default function RolesAndPermissionTable() {
           setCurrentPage(0);
         }}
         onPageChange={handlePageChange}
-        onExportData={() => console.log("Export")}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
         customLabel="Add Role"
         onCustomChange={() => navigate("/create-roles")}

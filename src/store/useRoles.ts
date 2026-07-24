@@ -389,7 +389,7 @@ export const useRoles = create<RoleStore>((set, get) => ({
         try {
             set({ submitting: true, error: null });
             const payload = {
-                ...roleDetails,
+                // ...roleDetails,
                 roleId,
                 description: roleDetails?.description ?? '',
                 name: form.roleName,
