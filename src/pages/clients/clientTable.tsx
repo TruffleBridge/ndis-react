@@ -281,7 +281,16 @@ export default function ClientTable() {
     };
 
     const handleExport = () => {
-        const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
+        const columnMapping: Record<string, string> = {
+            "Support Type": "Support Types",
+            "Assigned Worker": "Assigned Workers",
+            "Active Jobs": "Active Jobs Count",
+            "Client Status": "Status"
+        };
+
+        const visibleColumns = columnStates
+            .filter((column) => column.visible)
+            .map((column) => columnMapping[column.key] || column.key);
         exportExcel("/admin/clientManagementList/export", { customizeTable: visibleColumns ?? [] }
         );
     }

@@ -229,7 +229,13 @@ export default function WorkersTable() {
   };
 
   const handleExport = () => {
-    const visibleColumns = columnStates?.filter((column) => column?.visible)?.map((column) => column?.key);
+    const columnMapping: Record<string, string> = {
+      "Upload Document": "DocumentCount",
+    };
+
+    const visibleColumns = columnStates
+      .filter((column) => column.visible)
+      .map((column) => columnMapping[column.key] || column.key);
     exportExcel("/admin/workerManagementList/export", { customizeTable: visibleColumns ?? [] });
   }
 
