@@ -1,20 +1,23 @@
-import { Avatar, Box, Chip, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { useState } from "react";
+import { Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
+import { useEffect, useState } from "react";
+import { useJobManagementStore } from "@/store/useJobManagementStore";
+import { formatTime } from "@/utils/helper";
+import { useExportStore } from "@/store/useExportStore";
 
 interface JobProps {
-  id: number;
   jobId: string;
   avatar?: string;
   name: string;
   workerName: string;
   serviceType?: string;
-  serviceDate: string;
+  serviceDate?: string;
   jobStatus: string;
-  shiftTime: string;
+  shiftTimeAndDate: any;
   location: string;
   paymentStatus: string;
+  bookingId?: number | null;
   [key: string]: unknown;
 }
 
@@ -28,145 +31,6 @@ const STATUS_STYLES: Record<string, { backgroundColor: string; color: string; bo
   Failed: { backgroundColor: '#ECEFF1', color: '#34485F' },
 };
 
-const INITIAL_JOBS: JobProps[] = [
-  {
-    id: 1, jobId: "J123",
-    name: "Jane Cooper",
-    workerName: 'Phonix baker',
-    serviceDate: "05/01/2026",
-    jobStatus: "Assigned",
-    serviceType: "New Applicant",
-    paymentStatus: "Paid",
-    shiftTime: '09:00 am - 1:00 PM',
-    location: 'Sydney'
-  },
-  {
-    id: 2, jobId: "J123",
-    name: "Jane Cooper",
-    workerName: 'Phonix baker',
-    serviceDate: "05/01/2026",
-    jobStatus: "Open",
-    serviceType: "New Applicant",
-    paymentStatus: "Paid",
-    shiftTime: '09:00 am - 1:00 PM',
-    location: 'Sydney'
-  },
-  {
-    id: 3, jobId: "J123",
-    name: "Jane Cooper",
-    workerName: 'Phonix baker',
-    serviceDate: "05/01/2026",
-    jobStatus: "Assigned",
-    serviceType: "New Applicant",
-    paymentStatus: "Pending",
-    shiftTime: '09:00 am - 1:00 PM',
-    location: 'Sydney'
-  },
-  {
-    id: 4, jobId: "J123",
-    name: "Jane Cooper",
-    workerName: 'Phonix baker',
-    serviceDate: "05/01/2026",
-    jobStatus: "Open",
-    serviceType: "New Applicant",
-    paymentStatus: "Paid",
-    shiftTime: '09:00 am - 1:00 PM',
-    location: 'Sydney'
-  },
-  {
-    id: 5, jobId: "J123",
-    name: "Jane Cooper",
-    workerName: 'Phonix baker',
-    serviceDate: "05/01/2026",
-    jobStatus: "Completed",
-    serviceType: "New Applicant",
-    paymentStatus: "Pending",
-    shiftTime: '09:00 am - 1:00 PM',
-    location: 'Sydney'
-  },
-
-];
-
-const JOBS_COLUMNS: ColumnDef<JobProps>[] = [
-  { headerName: "Job ID", field: "jobId" },
-  {
-    headerName: "Client Name",
-    field: "name",
-    // width: 150,
-    render: (_value, row) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src="https://i.pravatar.cc/150" />
-        <Box>
-          <Typography>
-            {row.name}
-          </Typography>
-        </Box>
-      </Box>
-    ),
-  },
-  {
-    headerName: "Worker Name",
-    field: "workerName",
-    // width: 150,
-    render: (_value, row) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src="https://i.pravatar.cc/150" />
-        <Box>
-          <Typography>
-            {row.workerName}
-          </Typography>
-        </Box>
-      </Box>
-    ),
-  },
-  { headerName: "Service Type", field: "serviceType" },
-  {
-    headerName: "Job Status", field: "jobStatus",
-    render: (value) => {
-      const label = value as string;
-      const style = STATUS_STYLES[label] ?? {};
-      return (
-        <Chip
-          label={label}
-          size="small"
-          sx={{
-            ...style,
-            fontWeight: 500,
-            fontSize: "0.75rem",
-            height: 24,
-            borderRadius: "8px",
-            border: style.borderColor ? `1px solid ${style.borderColor}` : "none",
-          }}
-        />
-      );
-    },
-  },
-  { headerName: "Service Date", field: "serviceDate" },
-  { headerName: "Shift Time", field: "shiftTime" },
-  { headerName: "Location", field: "location" },
-  {
-    headerName: "Payment Status",
-    field: "paymentStatus",
-    render: (value) => {
-      const label = value as string;
-      const style = STATUS_STYLES[label] ?? {};
-      return (
-        <Chip
-          label={label}
-          size="small"
-          sx={{
-            ...style,
-            fontWeight: 500,
-            fontSize: "0.75rem",
-            height: 24,
-            borderRadius: "8px",
-            border: style.borderColor ? `1px solid ${style.borderColor}` : "none",
-          }}
-        />
-      );
-    },
-  },
-];
 
 // Helper: build initial ColumnState[] from a ColumnDef[]
 function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
@@ -174,29 +38,168 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
 }
 
 export default function JobTable() {
-  const [jobs] = useState<JobProps[]>(INITIAL_JOBS);
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const {
+    jobs,
+    loading,
+    totalCount,
+    fetchJobs,
+  } = useJobManagementStore();
+
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const isExcelloading = useExportStore((s) => s.loading);
+
+  // format
+  const formatShift = (item: any) =>
+    `${item.serviceDate} (${formatTime(item.startTime)} - ${formatTime(item.endTime)})`;
+
+
+  const JOBS_COLUMNS: ColumnDef<JobProps>[] = [
+    { headerName: "Job ID", field: "jobId" },
+    {
+      headerName: "Client Name",
+      field: "name",
+      // width: 150,
+      render: (_value, row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src={row?.avatar} >
+            {row.name[0]}
+          </Avatar>
+          <Box>
+            <Typography>
+              {row.name}
+            </Typography>
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      headerName: "Worker Name",
+      field: "workerName",
+      // width: 150,
+      render: (_value, row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "#E5E7EB", color: "#374151", fontSize: 14 }} src={row?.avatar}>
+            {row.workerName[0]}
+          </Avatar>
+          <Box>
+            <Typography>
+              {row.workerName}
+            </Typography>
+          </Box>
+        </Box>
+      ),
+    },
+    { headerName: "Business Name", field: "businessName" },
+    { headerName: "Service Type", field: "serviceType" },
+    {
+      headerName: "Job Status", field: "jobStatus",
+      render: (value) => {
+        const label = value as string;
+        const style = STATUS_STYLES[label] ?? {};
+        return (
+          <Chip
+            label={label}
+            size="small"
+            sx={{
+              ...style,
+              fontWeight: 500,
+              fontSize: "0.75rem",
+              height: 24,
+              borderRadius: "8px",
+              border: style.borderColor ? `1px solid ${style.borderColor}` : "none",
+            }}
+          />
+        );
+      },
+    },
+    {
+      headerName: "Service Date and Shift Time", field: "shiftTimeAndDate",
+      render: (_value, row) => {
+        const dateTime = row?.shiftTimeAndDate ?? [];
+
+        const displayTypes = dateTime.slice(0, 1);
+        const extraCount = dateTime.length - 1;
+
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "13px",
+                color: "#222214",
+              }}
+            >
+              {displayTypes.map((v: any, index: number) => (
+                <span key={index}>
+                  {formatShift(v)}
+                </span>
+              ))}
+            </Typography>
+
+            {extraCount > 0 && (
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  color: "primary.main",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSupportTypeClick(e, dateTime);
+                }}
+              >
+                +{extraCount}
+              </Typography>
+            )}
+          </Box>
+        );
+      },
+    },
+    { headerName: "Location", field: "location" },
+    {
+      headerName: "Payment Status",
+      field: "paymentStatus",
+      render: (value) => {
+        const label = value as string;
+        const style = STATUS_STYLES[label] ?? {};
+        return (
+          <Chip
+            label={label}
+            size="small"
+            sx={{
+              ...style,
+              fontWeight: 500,
+              fontSize: "0.75rem",
+              height: 24,
+              borderRadius: "8px",
+              border: style.borderColor ? `1px solid ${style.borderColor}` : "none",
+            }}
+          />
+        );
+      },
+    },
+  ];
 
   // columnStates is the committed state — the table renders from this
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(JOBS_COLUMNS)
   );
+  const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
+  const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
 
-  const ROWS_PER_PAGE = 5;
+  const ROWS_PER_PAGE = 10;
 
-  const filteredJobs = jobs.filter(
-    (w) =>
-      w.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      w.location.toLowerCase().includes(searchValue.toLowerCase())
-  );
 
-  const paginatedJobs = filteredJobs.slice(
-    (currentPage - 1) * ROWS_PER_PAGE,
-    currentPage * ROWS_PER_PAGE
-  );
-
-  const totalPages = Math.ceil(filteredJobs.length / ROWS_PER_PAGE);
+  const totalPages = Math.ceil(totalCount / ROWS_PER_PAGE);
 
   const rowActions: RowAction<JobProps>[] = [
     {
@@ -212,23 +215,105 @@ export default function JobTable() {
     // },
   ];
 
+  // popover data
+  const handleSupportTypeClick = (
+    event: React.MouseEvent<HTMLElement>,
+    types: string[]
+  ) => {
+    setSupportAnchor(event.currentTarget);
+    setSelectedSupportTypes(types);
+  };
+
+  const handleCloseSupport = () => {
+    setSupportAnchor(null);
+    setSelectedSupportTypes([]);
+  };
+
+
+  useEffect(() => {
+    fetchJobs({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: "",
+    });
+  }, []);
+
+
+  //table search function with api call
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    setCurrentPage(0);
+    fetchJobs({
+      offset: currentPage,
+      limit: ROWS_PER_PAGE,
+      search: value,
+    });
+  }
+
+  // page changing function
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page - 1);
+    fetchJobs({
+      offset: page - 1,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
+
+  const handleExport = () => {
+    const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
+    exportExcel("/admin/jobManagementList/export", { customizeTable: visibleColumns ?? [] }
+    );
+  }
+
   return (
     <Box>
+      {(isExcelloading || loading) && <Loading />}
       <TableComponent
-        rows={paginatedJobs}
+        rows={jobs}
         columns={JOBS_COLUMNS}
         rowActions={rowActions}
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={currentPage + 1}
         searchValue={searchValue}
+        noData="No jobs records found"
+        noDataSubTitle="There is no data available to display at the moment."
         searchPlaceholder="Search jobs..."
         columnStates={columnStates}
         onColumnStatesChange={setColumnStates}   // only called on "Apply"
-        onSearch={(v) => { setSearchValue(v); setCurrentPage(1); }}
-        onPageChange={setCurrentPage}
-        onExportData={() => console.log("Export")}
+        onSearch={(v) => handleSearch(v)}
+        onPageChange={handlePageChange}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
       />
+      <Menu
+        anchorEl={supportAnchor}
+        open={Boolean(supportAnchor)}
+        onClose={handleCloseSupport}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "10px",
+              p: 0.3,
+            },
+          },
+        }}
+      >
+        {selectedSupportTypes?.map((item: any, index: number) => (
+          <MenuItem key={index}>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                color: "#222214",
+                fontWeight: 400,
+              }}
+            >
+              {item.serviceDate} ({item.startTime} - {item.endTime})
+            </Typography>
+          </MenuItem>
+        ))}
+
+      </Menu>
     </Box>
   );
 }

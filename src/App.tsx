@@ -1,8 +1,9 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import AppRoutes from './routes/AppRoutes';
-import { MenuProvider } from './context/menuContext';
-import { MenuRouteSync } from './context/MenuRouteSync';
-import theme from './theme/theme';
+import { MenuProvider } from '@/context/menuContext';
+import { MenuRouteSync } from '@/context/MenuRouteSync';
+import theme from '@/theme/theme';
+import { GlobalSnackbar } from '@/components';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <CssBaseline />
         <MenuRouteSync />
         <AppRoutes />
+        <GlobalSnackbar />
       </ThemeProvider>
     </MenuProvider>
   );

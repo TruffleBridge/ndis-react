@@ -18,6 +18,7 @@ import { useVerificationQueueStore } from "@/store/useVerification";
 import dayjs from "dayjs";
 import { formatStatus } from "@/utils/menuUtils";
 import { cta, VerifyStyles } from "./style";
+import { useExportStore } from "@/store/useExportStore";
 
 interface VerificationRow {
   id: number;
@@ -79,9 +80,13 @@ export default function VerificationTable() {
     getVerificationQueue,
   } = useVerificationQueueStore();
 
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const isLoading = useExportStore((s) => s.loading);
+
   const [selected, setSelected] = useState<"client" | "worker">("client");
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const ROWS_PER_PAGE = 10;
 
   /*
@@ -222,13 +227,13 @@ export default function VerificationTable() {
   // tab function
   const handleTab = (val: any) => {
     setSelected(val);
-    setCurrentPage(1);
+    setCurrentPage(0);
   }
 
   //table search function with api call
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    setCurrentPage(1);
+    setCurrentPage(0);
     getVerificationQueue({
       offset: 0,
       limit: ROWS_PER_PAGE,
@@ -239,9 +244,9 @@ export default function VerificationTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1);
     getVerificationQueue({
-      offset: (page - 1) * ROWS_PER_PAGE,
+      offset: page - 1,
       limit: ROWS_PER_PAGE,
       search: searchValue,
       type: selected,
@@ -265,11 +270,22 @@ export default function VerificationTable() {
     });
   }, [selected]);
 
+
+  const handleExport = () => {
+    const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
+    exportExcel("/admin/verificationQueue/export", {
+      customizeTable: visibleColumns ?? [],
+      type: selected
+    });
+  }
+
+
+
   return (
 
     <Box>
       {/* Client / Worker Toggle */}
-      {loading && <Loading />}
+      {(loading || isLoading) && <Loading />}
       <Box
         sx={VerifyStyles.mainSx}
       >
@@ -301,13 +317,13 @@ export default function VerificationTable() {
         noDataSubTitle="There is no data available to display at the moment."
         isLoading={loading}
         totalPages={Math.ceil(total / ROWS_PER_PAGE)}
-        currentPage={currentPage}
+        currentPage={currentPage + 1}
         searchValue={searchValue}
         columnStates={columnStates}
         onColumnStatesChange={setColumnStates}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
-        onExportData={() => { }}
+        onExportData={() => handleExport()}
         onFilter={() => { }}
       />
     </Box>

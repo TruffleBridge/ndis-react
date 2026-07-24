@@ -10,10 +10,12 @@ import { useNavigate } from "react-router-dom";
 import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
+import { formatStatus } from "@/utils/menuUtils";
+import { useExportStore } from "@/store/useExportStore";
 
 const STATUS_STYLES = {
-  ACTIVE: { backgroundColor: "#D9F7E5", color: "#07AB48" },
-  INACTIVE: { backgroundColor: "#ECEFF1", color: "#34485F" },
+  active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
+  inactive: { backgroundColor: "#ECEFF1", color: "#34485F" },
 };
 
 const ALERT_STYLES = {
@@ -44,7 +46,11 @@ const WORKER_COLUMNS: ColumnDef<Worker>[] = [
     headerName: "Status",
     field: "status",
     render: (value) => {
-      const style = STATUS_STYLES[value as keyof typeof STATUS_STYLES];
+      const key = formatStatus(value as string);
+      const style = key
+        ? STATUS_STYLES[key.toLowerCase() as keyof typeof STATUS_STYLES]
+        : {};
+      // const style = STATUS_STYLES[value as keyof typeof STATUS_STYLES];
       return (
         <Chip
           label={value as string}
@@ -84,6 +90,9 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
   return cols.map((col) => ({ key: col.headerName, visible: true }));
 }
 
+const ROWS_PER_PAGE = 10;
+
+
 export default function WorkersTable() {
   const navigate = useNavigate();
   const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(WORKER_COLUMNS));
@@ -104,8 +113,12 @@ export default function WorkersTable() {
   const updateState = useWorkerStore((s) => s.updateState);
   const status = useWorkerStore((s) => s.status);
 
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const loading = useExportStore((s) => s.loading);
+
   useEffect(() => {
-    fetchWorkers();
+    fetchWorkers(ROWS_PER_PAGE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, currentPage]);
 
@@ -127,7 +140,7 @@ export default function WorkersTable() {
         setStateModal('status');
       },
     },
-    ...(row?.status === "ACTIVE"
+    ...(row?.status.toLowerCase() === "active"
       ? [
         {
           label: "Edit",
@@ -165,7 +178,7 @@ export default function WorkersTable() {
         }),
     },
 
-    ...(row?.status === "ACTIVE"
+    ...(row?.status.toLowerCase() === "active"
       ? [
         {
           label: "Delete",
@@ -173,6 +186,7 @@ export default function WorkersTable() {
           sx: {
             color: "#7F7F7F",
           },
+
           onClick: () => {
             setValues(row);
             setStateModal('delete')
@@ -206,7 +220,7 @@ export default function WorkersTable() {
       setStateModal(null);
       // updateState?.('delete', false)
       // updateState?.('status', false)
-      fetchWorkers();
+      fetchWorkers(ROWS_PER_PAGE);
     }
   }
 
@@ -214,16 +228,21 @@ export default function WorkersTable() {
     setStateModal(null)
   };
 
+  const handleExport = () => {
+    const visibleColumns = columnStates?.filter((column) => column?.visible)?.map((column) => column?.key);
+    exportExcel("/admin/workerManagementList/export", { customizeTable: visibleColumns ?? [] });
+  }
+
 
   return (
     <Box>
-      {workersLoading && <Loading />}
+      {(workersLoading || loading) && <Loading />}
       <TableComponent
         rows={tableData}
         columns={WORKER_COLUMNS}
         rowActions={getRowActions}
-        totalPages={Math.ceil(totalPages / 10)}
-        currentPage={currentPage}
+        totalPages={Math.ceil(totalPages / ROWS_PER_PAGE)}
+        currentPage={currentPage + 1}
         // loading={workersLoading}
         searchValue={searchValue}
         noData="No Worker records found"
@@ -233,7 +252,7 @@ export default function WorkersTable() {
         onColumnStatesChange={setColumnStates}
         onSearch={setSearchValue}
         onPageChange={setCurrentPage}
-        onExportData={() => console.log("Export")}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
         customLabel="Add Worker"
         onCustomChange={() => goToForm({ mode: "create" })}

@@ -139,6 +139,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Frontside Upload"
                                 value={data.drivingFront}
+                                disabled={isView}
                                 // loading={uploadingKeys.drivingFront}
                                 onChange={(file) => handleUpload("drivingFront", file)}
                             />
@@ -148,6 +149,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Backside Upload"
                                 value={data.drivingBack}
+                                disabled={isView}
                                 // loading={uploadingKeys.drivingBack}
                                 onChange={(file) => handleUpload("drivingBack", file)}
                             />
@@ -196,6 +198,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.policeCertificate}
+                                disabled={isView}
                                 // loading={uploadingKeys.policeCertificate}
                                 onChange={(file) => handleUpload("policeCertificate", file)}
                             />
@@ -230,6 +233,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.blueCardCertificate}
+                                disabled={isView}
                                 // loading={uploadingKeys.blueCardCertificate}
                                 onChange={(file) => handleUpload("blueCardCertificate", file)}
                             />
@@ -264,6 +268,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.firstAidCertificate}
+                                disabled={isView}
                                 // loading={uploadingKeys.firstAidCertificate}
                                 onChange={(file) => handleUpload("firstAidCertificate", file)}
                             />
@@ -298,6 +303,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                             <UploadVariant3
                                 label="Upload Certificate"
                                 value={data.cprCertificate}
+                                disabled={isView}
                                 // loading={uploadingKeys.cprCertificate}
                                 onChange={(file) => handleUpload("cprCertificate", file)}
                             />

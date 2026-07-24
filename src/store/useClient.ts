@@ -20,6 +20,7 @@ import type {
 } from "@/types/client";
 import dayjs from "dayjs";
 import { DOCUMENT_FIELDS } from "@/pages/clients/utils/constants";
+import { handleApiError } from "@/utils/errorHandler";
 
 // ---------------------------------------------------------------------------
 // Endpoints - swap these placeholders for the real ones. Kept in one place
@@ -82,7 +83,7 @@ interface ClientStore {
     submitSuccess: boolean;
 
     // ---------------- table actions ----------------
-    fetchClients: () => Promise<void>;
+    fetchClients: (payload?: any) => Promise<void>;
     setSearchValue: (value: string) => void;
     setCurrentPage: (page: number) => void;
     deleteClient?: (id: number | string) => Promise<boolean>;
@@ -111,7 +112,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     clientsLoading: false,
     clientsError: null,
     searchValue: "",
-    currentPage: 1,
+    currentPage: 0,
     totalPages: 1,
 
     mode: "create",
@@ -127,11 +128,13 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     deleteStatus: false,
 
     // =========================== TABLE (getTableApi) ===========================
-    fetchClients: async () => {
+    fetchClients: async (payload_: any) => {
         set({ clientsLoading: true, clientsError: null });
         try {
-            const { searchValue } = get();
+            const { searchValue, currentPage } = get();
             const res = await createApiRequest(ENDPOINTS.list, {
+                "offset": currentPage ?? 0,
+                "limit": payload_?.limit ?? 10,
                 search: searchValue,
             });
             const payload = res.data?.data ?? res.data ?? {};
@@ -145,8 +148,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         }
     },
 
-    setSearchValue: (value) => set({ searchValue: value, currentPage: 1 }),
-    setCurrentPage: (page) => set({ currentPage: page }),
+    setSearchValue: (value) => set({ searchValue: value, currentPage: 0 }),
+    setCurrentPage: (page) => set({ currentPage: page - 1 }),
 
     // ========================== table status update =====================
     updateState: (key, val) =>
@@ -165,7 +168,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             set((state) => ({ clients: state.clients.filter((c) => c.id !== id) }));
             return true;
         } catch (err) {
-            set({ clientsError: "Failed to delete client" });
+            const message = handleApiError(err, deleteStatus ? "Failed to delete" : "Failed to active or inactive");
+            set({ clientsError: message ?? "Failed to delete client" });
             return false;
         }
     },
@@ -346,7 +350,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             firstName: personalData?.firstName,
             email: personalData?.email,
             phoneNumber: personalData?.mobile,
-            countryCode: "+91", // or personalData?.countryCode
+            countryCode: "+61", // or personalData?.countryCode
             type: "client",
             dateOfBirth: dayjs(personalData?.dob).format("YYYY-MM-DD"),
             gender: personalData?.gender?.toUpperCase(),
@@ -394,7 +398,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             set({ isSubmitting: false, submitSuccess: true });
             return true;
         } catch (err) {
-            set({ isSubmitting: false, clientsError: "Failed to submit client details" });
+            const message = handleApiError(err, "Failed to client");
+            set({ isSubmitting: false, clientsError: message ?? "Failed to submit client details" });
             return false;
         }
     },

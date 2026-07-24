@@ -50,7 +50,7 @@ export const TopNavbar = ({
         </IconButton>
         <Typography
           variant="h5"
-          sx={S.pageTitle}
+          sx={{ ...S.pageTitle}}
           noWrap
         >
           {pageTitle}
@@ -67,7 +67,7 @@ export const TopNavbar = ({
           AI Insights
         </Button>
 
-        <Box sx={S.searchWrapper}>
+        <Box sx={{ ...S.searchWrapper, display: { xs: 'none', md: 'flex' } }}>
           <InputTextField
             value=""
             onChange={() => { }}

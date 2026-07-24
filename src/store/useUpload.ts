@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { ClientDocument } from "@/types/client";
 import { createApiRequest } from "@/api/api";
+import { handleApiError } from "@/utils/errorHandler";
 
 interface UploadStore {
     uploadDocument: (file: File, documentType: string, fieldKey: string) => Promise<ClientDocument | null>;
@@ -49,9 +50,10 @@ export const useUploadStore = create<UploadStore>((set) => ({
             set((state) => ({ uploadingKeys: { ...state.uploadingKeys, [fieldKey]: false } }));
             return uploaded;
         } catch (err) {
+            const message = handleApiError(err, "Failed to upload");
             set((state) => ({
                 uploadingKeys: { ...state.uploadingKeys, [fieldKey]: false },
-                uploadErrors: { ...state.uploadErrors, [fieldKey]: "Upload failed. Please try again." },
+                uploadErrors: { ...state.uploadErrors, [fieldKey]: message ?? "Upload failed. Please try again." },
             }));
             return null;
         }

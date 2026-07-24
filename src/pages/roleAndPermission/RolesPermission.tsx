@@ -1,10 +1,20 @@
 import { Box, Chip } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { TableComponent, type ColumnDef, type ColumnState, type RowAction } from "../../components";
-import { useState } from "react";
+import {
+  CustomModal,
+  Loading,
+  TableComponent,
+  type ColumnDef,
+  type ColumnState,
+  type RowAction,
+} from "@/components";
+import { useEffect, useState } from "react";
 import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
 import { EditOutlined } from "@mui/icons-material";
+import { useRoles } from "@/store/useRoles";
+import { useExportStore } from "@/store/useExportStore";
+import dayjs from "dayjs";
 
 interface RoleProps {
   id: number;
@@ -12,7 +22,7 @@ interface RoleProps {
   accessModules: string;
   users: number;
   accessLevel: string | "Full" | "Limited";
-  status: string | "Active" | "Inactive";
+  status: string | "Active" | "InActive";
   startDate: string;
   endDate: string;
   lastUpdated: string;
@@ -25,57 +35,11 @@ const STATUS_STYLES = {
     backgroundColor: "#DCFCE7",
     color: "#16A34A",
   },
-  Inactive: {
-    backgroundColor: '#ECEFF1', color: '#34485F'
+  InActive: {
+    backgroundColor: "#ECEFF1",
+    color: "#34485F",
   },
 };
-
-const INITIAL_ROLES: RoleProps[] = [
-  {
-    id: 1,
-    roleName: "Super Admin",
-    accessModules: "All Modules",
-    users: 2,
-    accessLevel: "Full",
-    status: "Active",
-    startDate: "01/01/2021",
-    endDate: "11/30/2024",
-    lastUpdated: "11/30/2024",
-  },
-  {
-    id: 2,
-    roleName: "Support Coordinator",
-    accessModules: "Jobs and Clients",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Active",
-    startDate: "10/02/2021",
-    endDate: "11/22/2024",
-    lastUpdated: "11/22/2024",
-  },
-  {
-    id: 3,
-    roleName: "Operations Admin",
-    accessModules: "Jobs and Workers",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Active",
-    startDate: "07/06/2024",
-    endDate: "12/31/2024",
-    lastUpdated: "12/31/2024",
-  },
-  {
-    id: 4,
-    roleName: "Finance Admin",
-    accessModules: "Payments",
-    users: 1,
-    accessLevel: "Limited",
-    status: "Inactive",
-    startDate: "09/04/2021",
-    endDate: "11/28/2024",
-    lastUpdated: "11/28/2024",
-  },
-];
 
 const ROLES_COLUMNS: ColumnDef<RoleProps>[] = [
   {
@@ -145,74 +109,188 @@ const ROLES_COLUMNS: ColumnDef<RoleProps>[] = [
   },
 ];
 
-// Helper: build initial ColumnState[] from a ColumnDef[]
 function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
-  return cols.map((col) => ({ key: col.headerName, visible: true }));
+  return cols.map((col) => ({
+    key: col.headerName,
+    visible: true,
+  }));
 }
 
 export default function RolesAndPermissionTable() {
-  const [roles] = useState<RoleProps[]>(INITIAL_ROLES);
   const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [stateModal, setStateModal] = useState(false);
+  const [values, setValues] = useState<any>();
 
-  // columnStates is the committed state — the table renders from this
+  const {
+    roles,
+    totalCount,
+    getRoles,
+    listLoading,
+    deleteRole
+  } = useRoles();
+
+  // export download data
+  const exportExcel = useExportStore((s) => s.exportExcel);
+  const isExcelloading = useExportStore((s) => s.loading);
+
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(ROLES_COLUMNS)
   );
+
   const navigate = useNavigate();
 
-  const ROWS_PER_PAGE = 5;
+  const ROWS_PER_PAGE = 10;
 
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.roleName.toLowerCase().includes(searchValue.toLowerCase()) ||
-      role.accessModules.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const handleEdit = (row: any, mode: string) => {
+    navigate("/create-roles", {
+      state: {
+        id: row.id,
+        mode: mode,
+      },
+    });
 
-  const paginatedRoles = filteredRoles.slice(
-    (currentPage - 1) * ROWS_PER_PAGE,
-    currentPage * ROWS_PER_PAGE
-  );
+  }
 
-  const totalPages = Math.ceil(filteredRoles.length / ROWS_PER_PAGE);
-
-  const rowActions: RowAction<RoleProps>[] = [
+  const getRowActions = (row: RoleProps): RowAction<RoleProps>[] => [
     {
       label: "Edit",
       icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => console.log("Edit", row),
+      onClick: (row) => handleEdit(row, 'edit'),
     },
     {
       label: "View",
-      icon: <VisibilityOutlinedIcon sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => console.log("View", row),
+      icon: (
+        <VisibilityOutlinedIcon
+          sx={{ fontSize: 15, color: "#7F7F7F" }}
+        />
+      ),
+      onClick: (row) => handleEdit(row, 'view'),
     },
-    {
-      label: "Delete",
-      icon: <DeleteIcon width={11} height={13} />,
-      onClick: (row) => console.log("Delete", row),
-    },
+    ...(row?.status.toLowerCase() === "active"
+      ? [{
+        label: "Delete",
+        icon: <DeleteIcon width={11} height={13} />,
+        onClick: () => {
+          setValues(row);
+          setStateModal(true);
+        },
+      }] : []),
   ];
+
+  const tableRows: RoleProps[] = roles.map((item: any) => ({
+    id: item.id,
+    roleName: item.name,
+    accessModules: item.accessModules?.length
+      ? item.accessModules.join(", ")
+      : "No Modules",
+    users: item.userCount,
+    accessLevel:
+      item.accessLevel === "LIMITED"
+        ? "Limited"
+        : "Full",
+    status:
+      item.status === "Active"
+        ? "Active"
+        : "InActive",
+    startDate: item.startDate ? dayjs(item.startDate).format('DD/MM/YYYY') : "-",
+    endDate: item.endDate ? dayjs(item.endDate).format('DD/MM/YYYY') : "-",
+    lastUpdated: item.updatedAt ? dayjs(item.updatedAt).format('DD/MM/YYYY') : "-",
+  }));
+
+  useEffect(() => {
+    getRoles({
+      search: searchValue,
+      offset: currentPage ?? 0,
+      limit: ROWS_PER_PAGE,
+    });
+  }, [
+    searchValue,
+    currentPage,
+  ]);
+
+  const totalPages = Math.ceil(totalCount / ROWS_PER_PAGE);
+  const handleClose = () => {
+    setStateModal(false)
+  }
+
+  const handleDelete = async () => {
+    const res: any = await deleteRole(values?.id)
+    if (res) {
+      setStateModal(false)
+      getRoles({
+        search: searchValue,
+        offset: currentPage ?? 0,
+        limit: ROWS_PER_PAGE,
+      });
+    }
+  }
+
+
+  // page changing function
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page - 1);
+    getRoles({
+      offset: page - 1,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
+
+  const handleExport = () => {
+    const columnMapping: Record<string, string> = {
+      "ID": "Role ID",
+      "# of Users": "User Count",
+      "Last Updated by": "Last Updated By"
+    };
+
+    const visibleColumns = columnStates
+      .filter((column) => column.visible)
+      .map((column) => columnMapping[column.key] || column.key);
+
+    exportExcel("/roles/list/export", {
+      customizeTable: visibleColumns,
+    });
+  };
 
   return (
     <Box>
+      {(isExcelloading || listLoading) && <Loading />}
+
       <TableComponent
-        rows={paginatedRoles}
+        rows={tableRows}
         columns={ROLES_COLUMNS}
-        rowActions={rowActions}
+        rowActions={getRowActions}
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={currentPage + 1}
         searchValue={searchValue}
-        searchPlaceholder="Search here..."
+        searchPlaceholder="Search roles here..."
+        noData="No roles records found"
+        noDataSubTitle="There is no data available to display at the moment."
         columnStates={columnStates}
-        onColumnStatesChange={setColumnStates}   // only called on "Apply"
-        onSearch={(v) => { setSearchValue(v); setCurrentPage(1); }}
-        onPageChange={setCurrentPage}
-        onExportData={() => console.log("Export")}
+        onColumnStatesChange={setColumnStates}
+        onSearch={(v) => {
+          setSearchValue(v);
+          setCurrentPage(0);
+        }}
+        onPageChange={handlePageChange}
+        onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
         customLabel="Add Role"
-        onCustomChange={() => navigate('/create-roles')}
+        onCustomChange={() => navigate("/create-roles")}
         isHasAction
+      />
+
+      <CustomModal
+        open={stateModal}
+        onClose={handleClose}
+        type="warning"
+        backText={"cancel"}
+        primaryText="Confirm"
+        onBack={handleClose}
+        onPrimary={handleDelete}
+        title={values?.roleName}
+        description={'Are you sure you want to delete this role?'}
       />
     </Box>
   );

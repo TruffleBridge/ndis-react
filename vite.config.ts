@@ -12,14 +12,14 @@ export default defineConfig({
   },
 
   // temporary solution
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://52.66.162.16",
-        changeOrigin: true,
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     "/api": {
+  //       target: "http://52.66.162.16",
+  //       changeOrigin: true,
+  //     },
+  //   },
+  // },
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

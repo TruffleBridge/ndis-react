@@ -311,7 +311,7 @@ export function UploadVariant1({
 
             {!disabled && inputElement}
 
-            <DropZone
+            {!disabled && <DropZone
                 isDragging={isDragging}
                 onClick={() => !disabled && trigger()}
                 onDragOver={(event) => {
@@ -343,7 +343,7 @@ export function UploadVariant1({
                 <Typography variant="body2" sx={{ color: "#64748B", mt: -0.5 }}>
                     Supported formats: {FORMAT_LABEL}
                 </Typography>
-            </DropZone>
+            </DropZone>}
 
             {error && (
                 <Alert severity="error" sx={{ mt: 1.5, borderRadius: 2 }} onClose={() => setError(null)}>

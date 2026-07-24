@@ -65,3 +65,24 @@ export const getMimeType = (fileName: string) => {
       return "application/octet-stream";
   }
 };
+
+// time formatted
+export const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":");
+  const h = Number(hours);
+  const period = h >= 12 ? "PM" : "AM";
+  const formattedHour = h % 12 || 12;
+
+  return `${String(formattedHour).padStart(2, "0")}:${minutes} ${period}`;
+};
+
+export const formatDate = (date: string | Date) => {
+  const d = new Date(date);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
+

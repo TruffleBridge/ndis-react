@@ -14,9 +14,11 @@ import {
     type Theme,
 } from "@mui/material";
 import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
+import FieldError from "@/components/fieldError/fieldError";
 
 export interface PermissionRow {
     module: string;
+    moduleId?: number; // maps this row back to the actual module for the API payload
     permissions: Record<string, boolean>;
 }
 
@@ -27,6 +29,7 @@ interface PermissionMatrixProps {
     onChange: (rows: PermissionRow[]) => void;
     disabled?: boolean;
     mainSx?: SxProps<Theme>;
+    errors?: string
 }
 
 const BORDER = "#EEEEEE";
@@ -39,6 +42,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
     onChange,
     disabled = false,
     mainSx,
+    errors = ''
 }) => {
     const isAllSelected = useMemo(() => {
         if (!permissions.length) return false;
@@ -137,7 +141,7 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
                     <Checkbox
                         checked={isAllSelected}
-                        disabled={disabled}
+                        disabled={disabled || !permissions.length}
                         onChange={handleSelectAll}
                         size="small"
                         checkedIcon={<RoleCheckedboxIcon />}
@@ -164,8 +168,10 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                                     fontWeight: 500,
                                     color: "#6B7280",
                                 }}
-                            />
-                            {actions.map((action) => (
+                            >
+                                <FieldError message={errors} />
+                            </TableCell>
+                            {permissions?.length > 0 && actions.map((action) => (
                                 <TableCell
                                     key={action}
                                     align="center"
@@ -185,10 +191,10 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
                     <TableBody>
                         {permissions.map((row, rowIndex) => (
-                            <TableRow key={row.module} hover sx={{
+                            <TableRow key={row.moduleId ?? row.module} hover sx={{
                                 "& MuiTableRow-root.MuiTableRow-hover:hover": {
                                     bgcolor: '#EEEEEE',
-                                    py:2
+                                    py: 2
                                 }
                             }}>
                                 <TableCell
@@ -251,13 +257,14 @@ const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                                         color: "#9CA3AF",
                                     }}
                                 >
-                                    No permissions available
+                                    Select an access module to configure permissions
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </TableContainer>
+
         </Paper>
     );
 };

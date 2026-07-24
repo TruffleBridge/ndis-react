@@ -135,7 +135,7 @@ export const SideNavbar = ({
             <LogoSupportIcon />
             {showLabels && (
               <Typography component="span" sx={S.brandName}>
-                CareSupport
+                Nimora
               </Typography>
             )}
           </Box>

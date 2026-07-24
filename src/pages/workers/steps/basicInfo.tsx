@@ -147,13 +147,14 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }}>
-                        {isView ? getViewFunction('Mobile Number', data?.mobile, 'plain') :
+                        {isView ? getViewFunction('Mobile Number', '+61 ' + data?.mobile, 'plain') :
                             <InputTextField
                                 label="Mobile Number"
-                                placeholder="+61 400 000 000"
                                 value={data.mobile}
                                 errors={errors.mobile}
-                                onChange={(value) => setField("mobile", onlyNumbers(value))}
+                                startAdornment={<span style={{ color: '#222214' }}>+61</span>}
+                                placeholder="412 345 678"
+                                onChange={(value) => { if (value?.length < 10) setField("mobile", onlyNumbers(value)) }}
                             />}
                     </Grid>
 
