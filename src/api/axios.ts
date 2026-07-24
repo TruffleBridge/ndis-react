@@ -1,13 +1,13 @@
 import axios from "axios";
 
 // base url from the env
-const base_url = import.meta.env.VITE_API_URL;
+// const base_url = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
-    baseURL: base_url,
+    baseURL: "http://52.66.162.16/api",
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
-        'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNzg0NzA1MzU0LCJleHAiOjE3ODUzMTAxNTR9.8B12r6BjYqMfS4aUJtvWmnRS_fakKXr7LDJ8xa9pdOU"
+        'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNzg0ODk1NjkzLCJleHAiOjE3ODU1MDA0OTN9.Obk-mCyS6sMJ3IbmZPlTsprbuKQrHs8Wxv3N-8cq2Io"
     },
 });
 
