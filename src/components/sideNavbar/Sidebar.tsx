@@ -36,6 +36,7 @@ interface NavItemWithIcon {
   label: string;
   icon: NavIconRenderer;
   path: string;
+  disabled?:boolean
 }
 
 export interface SideNavbarProps {
@@ -163,6 +164,7 @@ export const SideNavbar = ({
                     //   setOpen(false);
                     // }
                   }}
+                  disabled={item?.disabled}
                   sx={{
                     ...(active ? S.navItemActive : S.navItemInactive),
                     width: showLabels ? "100%" : "80%",

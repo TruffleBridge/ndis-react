@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 export interface NavItem {
   label: string;
   path: string;
+  disabled?: boolean
 }
 
 /** Route prefixes that belong to a parent nav item (longest match wins). */
@@ -18,11 +19,11 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Workers", path: "/workers" },
   { label: "Jobs", path: "/jobs" },
   { label: "Clients", path: "/clients" },
-  { label: "Bookings", path: "/bookings" },
-  { label: "Budget", path: "/budget" },
+  { label: "Bookings", path: "/bookings", disabled: true },
+  { label: "Budget", path: "/budget", disabled: true },
   { label: "Roles and Permission", path: "/roles-permission" },
-  { label: "Rewards", path: "/rewards" },
-  { label: "Subscription", path: "/subscription" },
+  { label: "Rewards", path: "/rewards", disabled: true },
+  { label: "Subscription", path: "/subscription", disabled: true },
 ];
 
 const sortedNavItems = [...NAV_ITEMS].sort(
