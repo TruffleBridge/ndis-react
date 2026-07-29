@@ -121,6 +121,24 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                         py: 0,
                     },
 
+                    // Autofill fix
+                    "& input:-webkit-autofill": {
+                        WebkitBoxShadow: "0 0 0 1000px #FFFFFF inset",
+                        WebkitTextFillColor: '#222214',
+                        caretColor: 'currentColor',
+                        borderRadius: "inherit",
+                    },
+
+                    "& input:-webkit-autofill:hover": {
+                        WebkitBoxShadow: "0 0 0 1000px #FFFFFF inset",
+                        WebkitTextFillColor: '#222214',
+                    },
+
+                    "& input:-webkit-autofill:focus": {
+                        WebkitBoxShadow: `0 0 0 1000px #FFFFFF inset`,
+                        WebkitTextFillColor: '#222214',
+                    },
+
                     ...sx,
                 }}
             />

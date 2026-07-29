@@ -15,6 +15,7 @@ import { EditOutlined } from "@mui/icons-material";
 import { useRoles } from "@/store/useRoles";
 import { useExportStore } from "@/store/useExportStore";
 import dayjs from "dayjs";
+import { usePermission } from "@/hooks/usePermission";
 
 interface RoleProps {
   id: number;
@@ -127,12 +128,16 @@ export default function RolesAndPermissionTable() {
     totalCount,
     getRoles,
     listLoading,
-    deleteRole
+    deleteRole,
+    resetForm
   } = useRoles();
 
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isExcelloading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canDelete, canExport, canView, canCreate, canUpdate } = usePermission('Roles & Permission');
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(ROLES_COLUMNS)
@@ -153,21 +158,23 @@ export default function RolesAndPermissionTable() {
   }
 
   const getRowActions = (row: RoleProps): RowAction<RoleProps>[] => [
-    {
+    ...(canUpdate ? [{
       label: "Edit",
-      icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => handleEdit(row, 'edit'),
-    },
-    {
+      icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
+      onClick: () => handleEdit(row, 'edit'),
+    }] : []),
+
+    ...(canView ? [{
       label: "View",
       icon: (
         <VisibilityOutlinedIcon
           sx={{ fontSize: 15, color: "#7F7F7F" }}
         />
       ),
-      onClick: (row) => handleEdit(row, 'view'),
-    },
-    ...(row?.status.toLowerCase() === "active"
+      onClick: () => handleEdit(row, 'view'),
+    }] : []),
+
+    ...((row?.status.toLowerCase() === "active" && canDelete)
       ? [{
         label: "Delete",
         icon: <DeleteIcon width={11} height={13} />,
@@ -276,8 +283,12 @@ export default function RolesAndPermissionTable() {
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
-        customLabel="Add Role"
-        onCustomChange={() => navigate("/create-roles")}
+        showExport={canExport}
+        customLabel={canCreate ? "Add Role" : ''}
+        onCustomChange={() => {
+          resetForm();
+          navigate("/create-roles")
+        }}
         isHasAction
       />
 

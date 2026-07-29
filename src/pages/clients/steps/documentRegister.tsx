@@ -8,6 +8,7 @@ import { ClientStyles } from "../styles";
 import { DOCUMENT_FIELDS } from "../utils/constants";
 import { useClientStore } from "@/store/useClient";
 import { useUploadStore } from "@/store/useUpload";
+import { usePermission } from "@/hooks/usePermission";
 
 interface DocumentRegisterProps {
     isView?: boolean;
@@ -34,6 +35,9 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
     const mandatoryKeys = mandatoryFields.map((f) => f.key);
     const uploadDocument = useUploadStore((s) => s.uploadDocument);
     const idProofUploadError = useUploadStore((s) => s.uploadErrors);
+    // roles based on access
+    const { canUpdate, canCreate } = usePermission('Clients');
+
 
     const onNext = () => {
         if (isView) {
@@ -114,14 +118,22 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
                     Prev
                 </Button>
 
-                <Button
-                    sx={ClientStyles.nextCta}
-                    endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
-                    onClick={onNext}
-                    disabled={isSubmitting}
-                >
-                    {isView ? "Close" : mode === 'edit' ? "Update" : isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
+                {((mode === "create" && canCreate) || (mode === "edit" && canUpdate)) && (
+                    <Button
+                        sx={ClientStyles.nextCta}
+                        endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
+                        onClick={onNext}
+                        disabled={isSubmitting}
+                    >
+                        {isView
+                            ? "Close"
+                            : mode === "edit"
+                                ? "Update"
+                                : isSubmitting
+                                    ? "Submitting..."
+                                    : "Submit"}
+                    </Button>
+                )}
             </Box>
         </Box>
     );

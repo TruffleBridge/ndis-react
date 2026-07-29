@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 import { formatStatus } from "@/utils/menuUtils";
 import { cta, VerifyStyles } from "./style";
 import { useExportStore } from "@/store/useExportStore";
+import { usePermission } from "@/hooks/usePermission";
 
 interface VerificationRow {
   id: number;
@@ -83,6 +84,10 @@ export default function VerificationTable() {
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isLoading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canExport } = usePermission('Verification');
+
 
   const [selected, setSelected] = useState<"client" | "worker">("client");
   const [searchValue, setSearchValue] = useState("");
@@ -322,6 +327,7 @@ export default function VerificationTable() {
         columnStates={columnStates}
         onColumnStatesChange={setColumnStates}
         onSearch={handleSearch}
+        showExport={canExport}
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
         onFilter={() => { }}

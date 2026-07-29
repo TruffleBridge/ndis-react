@@ -25,9 +25,12 @@ import {
 import { sidebarStyles as S } from "@/components/topNavbar/styles";
 import {
   NAV_ITEMS,
+  NAV_MODULE_MAP,
   isNavItemActive,
   type NavIconRenderer,
 } from "@/constants/navigation";
+import usePermissionStore from "@/store/usePermissionStore";
+import { useAuthStore } from "@/store/auth";
 
 export const COLLAPSED_WIDTH = 72;
 export const EXPANDED_WIDTH = 248;
@@ -36,7 +39,7 @@ interface NavItemWithIcon {
   label: string;
   icon: NavIconRenderer;
   path: string;
-  disabled?:boolean
+  disabled?: boolean;
 }
 
 export interface SideNavbarProps {
@@ -75,6 +78,12 @@ export const SideNavbar = ({
   const location = useLocation();
   const theme = useTheme();
 
+  // 🔑 permissions store 
+  const permissions = usePermissionStore((s) => s.permissions);
+  const refreshToken = useAuthStore(state => state.refreshToken);
+  const fetchRolePermissions = usePermissionStore((s) => s.fetchRolePermissions);
+
+
   const isControlled = openProp !== undefined;
   const open = isControlled ? (openProp as boolean) : openState;
 
@@ -89,23 +98,39 @@ export const SideNavbar = ({
     : open
       ? EXPANDED_WIDTH
       : COLLAPSED_WIDTH;
-  // ≤475px: labels in hamburger drawer when open | >475px: labels only when sidebar expanded
   const showLabels = isMobileNav ? isDrawerOpen : open;
+
+  // 🔑 canView false ah irukura modules ah filter panni remove pannurom
+  const visibleNavItems = React.useMemo(() => {
+    debugger;
+    return NAV_ITEMS_WITH_ICONS.filter((item) => {
+      const moduleName = NAV_MODULE_MAP[item.label] ?? item.label;
+      const perm = permissions.find(
+        (p) => p.moduleName?.toLowerCase() === moduleName.toLowerCase()
+      );
+      return perm?.canView === true;
+    });
+  }, [permissions]);
+
+  const handleSideRoute = async (e: any, item: any) => {
+    debugger;
+    e.stopPropagation();
+    setOpen(false);
+    navigate(item.path);
+    const res_ = await refreshToken();
+    if (res_) {
+      return fetchRolePermissions();
+    }
+  }
 
   return (
     <>
       {isMobileNav && isDrawerOpen && (
-        <Box
-          onClick={() => setOpen(false)}
-          sx={S.mobileOverlay}
-        />
+        <Box onClick={() => setOpen(false)} sx={S.mobileOverlay} />
       )}
 
       {!isMobileNav && open && (
-        <Box
-          onClick={() => setOpen(false)}
-          sx={S.overlay}
-        />
+        <Box onClick={() => setOpen(false)} sx={S.overlay} />
       )}
 
       <Box
@@ -149,21 +174,14 @@ export const SideNavbar = ({
           sx={S.navScrollArea}
         >
           <List sx={{ px: showLabels ? 1 : 0.75 }}>
-            {NAV_ITEMS_WITH_ICONS.map((item) => {
+            {visibleNavItems.map((item) => {
               const active = isNavItemActive(location.pathname, item);
 
               return (
                 <ListItemButton
                   key={item.path}
                   selected={active}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(item.path);
-                    setOpen(false)
-                    // if (isMobileNav) {
-                    //   setOpen(false);
-                    // }
-                  }}
+                  onClick={(e) => handleSideRoute(e, item)}
                   disabled={item?.disabled}
                   sx={{
                     ...(active ? S.navItemActive : S.navItemInactive),

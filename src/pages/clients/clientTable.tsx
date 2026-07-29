@@ -10,6 +10,7 @@ import { useClientStore } from "@/store/useClient";
 import { useExportStore } from "@/store/useExportStore";
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 import { formatStatus } from "@/utils/menuUtils";
+import { usePermission } from "@/hooks/usePermission";
 
 const CLIENT_STATUS_STYLES = {
     active: {
@@ -58,6 +59,10 @@ export default function ClientTable() {
     // export download data
     const exportExcel = useExportStore((s) => s.exportExcel);
     const loading = useExportStore((s) => s.loading);
+
+    // roles based on access
+    const { canCreate, canDelete, canExport, canView, canUpdate } = usePermission('Clients');
+
 
 
     // Refetch whenever search text or page changes.
@@ -208,7 +213,7 @@ export default function ClientTable() {
                 setStateModal(true);
             },
         },
-        ...(row?.clientStatus.toLowerCase() === "active"
+        ...((row?.clientStatus.toLowerCase() === "active" || canUpdate)
             ? [
                 {
                     label: "Edit",
@@ -229,24 +234,28 @@ export default function ClientTable() {
             ]
             : []),
 
-        {
-            label: "View",
-            icon: (
-                <VisibilityOutlinedIcon
-                    sx={{
-                        fontSize: 14,
-                        color: "#7F7F7F",
-                    }}
-                />
-            ),
-            onClick: () =>
-                goToForm({
-                    mode: "view",
-                    clientId: row.id,
-                }),
-        },
+        ...(canView
+            ? [
+                {
+                    label: "View",
+                    icon: (
+                        <VisibilityOutlinedIcon
+                            sx={{
+                                fontSize: 14,
+                                color: "#7F7F7F",
+                            }}
+                        />
+                    ),
+                    onClick: () =>
+                        goToForm({
+                            mode: "view",
+                            clientId: row.id,
+                        }),
+                },
+            ]
+            : []),
 
-        ...(row?.clientStatus.toLowerCase() === "active"
+        ...(row?.clientStatus.toLowerCase() === "active" && canDelete
             ? [
                 {
                     label: "Delete",
@@ -316,7 +325,8 @@ export default function ClientTable() {
                 onPageChange={setCurrentPage}
                 onExportData={() => handleExport()}
                 onFilter={() => console.log("Filter")}
-                customLabel="Add Client"
+                customLabel={canCreate ? "Add Client" : ''}
+                showExport={canExport}
                 onCustomChange={() => {
                     resetForm();
                     goToForm({ mode: "create" })

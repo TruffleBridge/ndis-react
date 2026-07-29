@@ -22,6 +22,7 @@ import { ArrowBackIosNewOutlined } from "@mui/icons-material";
 import { useRoles, PERMISSION_ACTIONS, STATUS_OPTIONS } from "@/store/useRoles";
 import dayjs from "dayjs";
 import { getViewFunction } from "@/utils/viewfunction";
+import { usePermission } from "@/hooks/usePermission";
 
 interface FormActionsProps {
     onCancel?: () => void;
@@ -148,6 +149,9 @@ const AddNewRolesPage: React.FC = () => {
         formErrors
     } = useRoles();
 
+    // roles based on access
+    const { canCreate, canUpdate } = usePermission('Roles & Permission');
+
     // Flow 1: load modules once
     useEffect(() => {
         getModules();
@@ -194,7 +198,6 @@ const AddNewRolesPage: React.FC = () => {
         navigate("/roles-permission");
     };
 
-    console.log(formErrors, 'formErrors');
 
     return (
         <Box>
@@ -305,10 +308,12 @@ const AddNewRolesPage: React.FC = () => {
                 />
 
                 <FormActions
-                    onCancel={() => navigate("/roles-permission")}
+                    onCancel={() => {
+                        navigate("/roles-permission")
+                    }}
                     onSubmit={handleSubmit}
                     submitLabel={isEdit ? "Update" : "Save"}
-                    hideSubmit={isView}
+                    hideSubmit={(canCreate || canUpdate) ? false : isView}
                     submitting={submitting}
                 />
             </Box>

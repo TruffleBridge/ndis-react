@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useJobManagementStore } from "@/store/useJobManagementStore";
 import { formatTime } from "@/utils/helper";
 import { useExportStore } from "@/store/useExportStore";
+import { usePermission } from "@/hooks/usePermission";
 
 interface JobProps {
   jobId: string;
@@ -50,6 +51,9 @@ export default function JobTable() {
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isExcelloading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canExport } = usePermission('Verification');
 
   // format
   const formatShift = (item: any) =>
@@ -283,6 +287,7 @@ export default function JobTable() {
         onColumnStatesChange={setColumnStates}   // only called on "Apply"
         onSearch={(v) => handleSearch(v)}
         onPageChange={handlePageChange}
+        showExport={canExport}
         onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
       />

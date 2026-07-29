@@ -363,7 +363,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                 top: "calc(100% + 8px)",
                                                 // right: 0,
                                                 zIndex: 1300,
-                                                width: 260,
+                                                width: 'auto',
                                                 borderRadius: "12px",
                                                 border: "1px solid #E5E7EB",
                                                 overflow: "hidden",

@@ -12,6 +12,7 @@ import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
 import { formatStatus } from "@/utils/menuUtils";
 import { useExportStore } from "@/store/useExportStore";
+import { usePermission } from "@/hooks/usePermission";
 
 const STATUS_STYLES = {
   active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
@@ -117,12 +118,16 @@ export default function WorkersTable() {
   const exportExcel = useExportStore((s) => s.exportExcel);
   const loading = useExportStore((s) => s.loading);
 
+  // roles based on access
+  const { canDelete, canExport, canView, canCreate, canUpdate } = usePermission('Workers');
+
   useEffect(() => {
     fetchWorkers(ROWS_PER_PAGE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, currentPage]);
 
   const goToForm = (state: WorkerFormNavState) => navigate("/create-worker", { state });
+
 
   const getRowActions = (row: Worker): RowAction<Worker>[] => [
     {
@@ -140,7 +145,7 @@ export default function WorkersTable() {
         setStateModal('status');
       },
     },
-    ...(row?.status.toLowerCase() === "active"
+    ...((row?.status.toLowerCase() === "active" || canUpdate)
       ? [
         {
           label: "Edit",
@@ -161,7 +166,7 @@ export default function WorkersTable() {
       ]
       : []),
 
-    {
+    ...(canView ? [{
       label: "View",
       icon: (
         <VisibilityOutlinedIcon
@@ -176,9 +181,9 @@ export default function WorkersTable() {
           mode: "view",
           workerId: row.id,
         }),
-    },
+    }] : []),
 
-    ...(row?.status.toLowerCase() === "active"
+    ...((row?.status.toLowerCase() === "active" && canDelete)
       ? [
         {
           label: "Delete",
@@ -260,7 +265,8 @@ export default function WorkersTable() {
         onPageChange={setCurrentPage}
         onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
-        customLabel="Add Worker"
+        showExport={canExport}
+        customLabel={canCreate ? "Add Worker" : ""}
         onCustomChange={() => goToForm({ mode: "create" })}
       />
 

@@ -14,6 +14,7 @@ import { useWorkerStore } from "@/store/useWorker";
 import type { ComplianceInfo } from "@/types/worker";
 import { useUploadStore } from "@/store/useUpload";
 import { getViewFunction } from "@/utils/viewfunction";
+import { usePermission } from "@/hooks/usePermission";
 
 interface ComplianceProps {
     isView?: boolean;
@@ -30,6 +31,9 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
     const isSubmitting = useWorkerStore((s) => s.isSubmitting);
     const uploadDocument = useUploadStore((s) => s.uploadDocument);
     const uploadErrors = useUploadStore((s) => s.uploadErrors)
+
+    const { canCreate, canUpdate } = usePermission('Workers');
+
 
     // One handler shared by every UploadVariant2/3 field below.
     const handleUpload = async (field: keyof ComplianceInfo, file: any) => {
@@ -327,14 +331,14 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                     Prev
                 </Button>
 
-                <Button
+                {(canCreate || (mode && canUpdate)) && <Button
                     sx={WorkerStyles.nextCta}
                     endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
                     onClick={onSubmit}
                     disabled={isSubmitting}
                 >
                     {isView ? "Close" : mode ? "Update" : isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
+                </Button>}
             </Box>
         </Box>
     );

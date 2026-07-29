@@ -4,14 +4,11 @@ import { useLocation } from "react-router-dom";
 import { SideNavbar, TopNavbar } from "@/components";
 import { layoutStyles as S } from "./styles";
 import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
+import { Outlet } from "react-router-dom";
 
 const COLLAPSED_WIDTH = 72;
 
-interface Props {
-  children: React.ReactNode;
-}
-
-export default function MainLayout({ children }: Props) {
+export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobileNav = useMediaQuery(MOBILE_NAV_QUERY);
   const location = useLocation();
@@ -42,7 +39,9 @@ export default function MainLayout({ children }: Props) {
         />
 
         <Box sx={S.content}>
-          {children}
+          <div>
+            <Outlet />
+          </div>
         </Box>
       </Box>
     </Box>
