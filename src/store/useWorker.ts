@@ -526,7 +526,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
             const { searchValue, currentPage } = get();
             const res = await createApiRequest(ENDPOINTS.list, {
                 search: searchValue,
-                "offset": currentPage,
+                "offset": currentPage * 10,
                 "limit": payload_?.limit ?? 10,
             });
             const payload = res.data?.data ?? res.data ?? {};

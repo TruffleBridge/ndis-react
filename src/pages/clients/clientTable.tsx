@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
-import { DeleteIcon } from "@/assets";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
-import { EditOutlined } from "@mui/icons-material";
 import type { Client, ClientFormNavState } from "@/types/client";
 import { useClientStore } from "@/store/useClient";
 import { useExportStore } from "@/store/useExportStore";
-import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 import { formatStatus } from "@/utils/menuUtils";
 import { usePermission } from "@/hooks/usePermission";
+import { useRowActions } from "@/hooks/useRowActions";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 const CLIENT_STATUS_STYLES = {
     active: {
@@ -60,6 +58,13 @@ export default function ClientTable() {
     const exportExcel = useExportStore((s) => s.exportExcel);
     const loading = useExportStore((s) => s.loading);
 
+    // checkbox functions
+    const {
+        selectedRows,
+        handleSelectAll,
+        handleSelectRow,
+    } = useRowSelection<any>();
+
     // roles based on access
     const { canCreate, canDelete, canExport, canView, canUpdate } = usePermission('Clients');
 
@@ -77,7 +82,6 @@ export default function ClientTable() {
 
     // Single helper so Edit/View/Create all navigate the same way - only the
 
-    const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
 
     const CLIENT_COLUMNS: ColumnDef<Client>[] = [
         { headerName: "Client ID", field: "clientId" },
@@ -196,82 +200,42 @@ export default function ClientTable() {
         }
     })
 
-    const getRowActions = (row: Client): RowAction<Client>[] => [
-        {
-            label: "Status",
-            icon: (
-                <AutorenewOutlinedIcon
-                    sx={{
-                        fontSize: 14,
-                        color: "#7F7F7F",
-                    }}
-                />
-            ),
-            onClick: () => {
-                updateState?.('delete', false)
+    // row actions funcation
+    const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
+
+    const getRowActions = (row: Client) =>
+        useRowActions({
+            row,
+            status: row.clientStatus,
+            canView,
+            canUpdate,
+            canDelete,
+
+            onStatus: () => {
+                updateState?.("delete", false);
                 setValues(row);
                 setStateModal(true);
             },
-        },
-        ...((row?.clientStatus.toLowerCase() === "active" || canUpdate)
-            ? [
-                {
-                    label: "Edit",
-                    icon: (
-                        <EditOutlined
-                            sx={{
-                                fontSize: 14,
-                                color: "#7F7F7F",
-                            }}
-                        />
-                    ),
-                    onClick: () =>
-                        goToForm({
-                            mode: "edit",
-                            clientId: row.id,
-                        }),
-                },
-            ]
-            : []),
 
-        ...(canView
-            ? [
-                {
-                    label: "View",
-                    icon: (
-                        <VisibilityOutlinedIcon
-                            sx={{
-                                fontSize: 14,
-                                color: "#7F7F7F",
-                            }}
-                        />
-                    ),
-                    onClick: () =>
-                        goToForm({
-                            mode: "view",
-                            clientId: row.id,
-                        }),
-                },
-            ]
-            : []),
+            onEdit: () =>
+                goToForm({
+                    mode: "edit",
+                    clientId: row.id,
+                }),
 
-        ...(row?.clientStatus.toLowerCase() === "active" && canDelete
-            ? [
-                {
-                    label: "Delete",
-                    icon: <DeleteIcon height={13} width={11} />,
-                    sx: {
-                        color: "#7F7F7F",
-                    },
-                    onClick: () => {
-                        updateState?.('delete', true)
-                        setValues(row);
-                        setStateModal(true)
-                    },
-                },
-            ]
-            : []),
-    ];
+            onView: () =>
+                goToForm({
+                    mode: "view",
+                    clientId: row.id,
+                }),
+
+            onDelete: () => {
+                updateState?.("delete", true);
+                setValues(row);
+                setStateModal(true);
+            },
+        });
+
 
     const handleStatueChange = async () => {
         const res = await getStatusUpdate(values?.id)
@@ -300,7 +264,12 @@ export default function ClientTable() {
         const visibleColumns = columnStates
             .filter((column) => column.visible)
             .map((column) => columnMapping[column.key] || column.key);
-        exportExcel("/admin/clientManagementList/export", { customizeTable: visibleColumns ?? [] }
+        exportExcel("/admin/clientManagementList/export", {
+            customizeTable: visibleColumns ?? [],
+            ...(selectedRows?.length > 0 && {
+                ids: selectedRows.map((v) => v.id),
+            }),
+        }
         );
     }
 
@@ -331,6 +300,10 @@ export default function ClientTable() {
                     resetForm();
                     goToForm({ mode: "create" })
                 }}
+                //checkbox
+                selectedRows={selectedRows}
+                onSelectAll={handleSelectAll}
+                onSelectRow={handleSelectRow}
             />
             <CustomModal
                 open={stateModal}

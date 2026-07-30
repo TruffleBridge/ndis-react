@@ -329,10 +329,21 @@ const Dashboard = () => {
     { label: "Payments" },
   ];
 
+  const generateId = () => {
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto?.randomUUID === "function"
+    ) {
+      return crypto?.randomUUID();
+    }
+
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  };
+
   const handleSelectOption = (label: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto?.randomUUID(), fromAssistant: false, text: label },
+      { id: generateId(), fromAssistant: false, text: label },
     ]);
     // TODO: call your API / next-step logic here
   };
@@ -340,7 +351,7 @@ const Dashboard = () => {
   const handleSend = (value: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto?.randomUUID(), fromAssistant: false, text: value },
+      { id: generateId(), fromAssistant: false, text: value },
     ]);
   };
 
@@ -579,7 +590,7 @@ const Dashboard = () => {
       {/* ── Bottom row: Revenue | Compliance | Pending Actions ──────────── */}
       <Grid container spacing={2}>
         {/* Revenue Trends */}
-        <Grid size={{ xs: 12, md: 12,lg:6 }}>
+        <Grid size={{ xs: 12, md: 12, lg: 6 }}>
           <Card sx={S.revenueCard}>
             <CardContent>
               <Typography variant="h6" sx={S.revenueTitle}>
@@ -596,7 +607,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Compliance Alerts */}
-        <Grid size={{ xs: 12, md: 6, lg: 3  }}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.complianceCard}>
             <CardContent sx={S.pendingCardContent}>
               <Box sx={S.complianceHeader}>

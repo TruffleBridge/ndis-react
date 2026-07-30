@@ -1,21 +1,19 @@
 import { Box, Chip } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
   CustomModal,
   Loading,
   TableComponent,
   type ColumnDef,
   type ColumnState,
-  type RowAction,
 } from "@/components";
 import { useEffect, useState } from "react";
-import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
-import { EditOutlined } from "@mui/icons-material";
 import { useRoles } from "@/store/useRoles";
 import { useExportStore } from "@/store/useExportStore";
 import dayjs from "dayjs";
 import { usePermission } from "@/hooks/usePermission";
+import { useRowActions } from "@/hooks/useRowActions";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 interface RoleProps {
   id: number;
@@ -132,6 +130,13 @@ export default function RolesAndPermissionTable() {
     resetForm
   } = useRoles();
 
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
+
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isExcelloading = useExportStore((s) => s.loading);
@@ -157,33 +162,24 @@ export default function RolesAndPermissionTable() {
 
   }
 
-  const getRowActions = (row: RoleProps): RowAction<RoleProps>[] => [
-    ...(canUpdate ? [{
-      label: "Edit",
-      icon: <EditOutlined sx={{ fontSize: 14, color: "#7F7F7F" }} />,
-      onClick: () => handleEdit(row, 'edit'),
-    }] : []),
+  // row actions function
+  const getRowActions = (row: RoleProps) =>
+    useRowActions({
+      row,
+      status: row.status,
+      canView,
+      canUpdate,
+      canDelete,
 
-    ...(canView ? [{
-      label: "View",
-      icon: (
-        <VisibilityOutlinedIcon
-          sx={{ fontSize: 15, color: "#7F7F7F" }}
-        />
-      ),
-      onClick: () => handleEdit(row, 'view'),
-    }] : []),
+      onEdit: () => handleEdit(row, "edit"),
 
-    ...((row?.status.toLowerCase() === "active" && canDelete)
-      ? [{
-        label: "Delete",
-        icon: <DeleteIcon width={11} height={13} />,
-        onClick: () => {
-          setValues(row);
-          setStateModal(true);
-        },
-      }] : []),
-  ];
+      onView: () => handleEdit(row, "view"),
+
+      onDelete: () => {
+        setValues(row);
+        setStateModal(true);
+      },
+    });
 
   const tableRows: RoleProps[] = roles.map((item: any) => ({
     id: item.id,
@@ -236,9 +232,11 @@ export default function RolesAndPermissionTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
+    const offset = (page - 1) * ROWS_PER_PAGE;
+
     setCurrentPage(page - 1);
     getRoles({
-      offset: page - 1,
+      offset: offset,
       limit: ROWS_PER_PAGE,
       search: searchValue,
     });
@@ -256,7 +254,10 @@ export default function RolesAndPermissionTable() {
       .map((column) => columnMapping[column.key] || column.key);
 
     exportExcel("/roles/list/export", {
-      customizeTable: visibleColumns,
+      customizeTable: visibleColumns ?? [],
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows?.map((v) => v.id),
+      }),
     });
   };
 
@@ -290,6 +291,10 @@ export default function RolesAndPermissionTable() {
           navigate("/create-roles")
         }}
         isHasAction
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
 
       <CustomModal

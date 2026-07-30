@@ -6,6 +6,7 @@ import { useJobManagementStore } from "@/store/useJobManagementStore";
 import { formatTime } from "@/utils/helper";
 import { useExportStore } from "@/store/useExportStore";
 import { usePermission } from "@/hooks/usePermission";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 interface JobProps {
   jobId: string;
@@ -47,6 +48,13 @@ export default function JobTable() {
     totalCount,
     fetchJobs,
   } = useJobManagementStore();
+
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
 
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
@@ -256,9 +264,11 @@ export default function JobTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
+    const offset = (page - 1) * ROWS_PER_PAGE;
+
     setCurrentPage(page - 1);
     fetchJobs({
-      offset: page - 1,
+      offset: offset,
       limit: ROWS_PER_PAGE,
       search: searchValue,
     });
@@ -266,7 +276,12 @@ export default function JobTable() {
 
   const handleExport = () => {
     const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
-    exportExcel("/admin/jobManagementList/export", { customizeTable: visibleColumns ?? [] }
+    exportExcel("/admin/jobManagementList/export", {
+      customizeTable: visibleColumns ?? [],
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows?.map((v) => v.id ? v?.id : v?.jobId),
+      }),
+    }
     );
   }
 
@@ -290,6 +305,10 @@ export default function JobTable() {
         showExport={canExport}
         onExportData={() => handleExport()}
         onFilter={() => console.log("Filter")}
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
       <Menu
         anchorEl={supportAnchor}

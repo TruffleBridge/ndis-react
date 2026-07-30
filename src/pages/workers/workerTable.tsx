@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
-import {
-  DeleteIcon,
-  //  MoreCircleIcon, CircleTickIcon
-} from "@/assets";
+import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
-import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
 import { formatStatus } from "@/utils/menuUtils";
 import { useExportStore } from "@/store/useExportStore";
 import { usePermission } from "@/hooks/usePermission";
+import { useRowSelection } from "@/hooks/useRowSelection";
+import { useRowActions } from "@/hooks/useRowActions";
 
 const STATUS_STYLES = {
   active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
@@ -114,6 +110,13 @@ export default function WorkersTable() {
   const updateState = useWorkerStore((s) => s.updateState);
   const status = useWorkerStore((s) => s.status);
 
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
+
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const loading = useExportStore((s) => s.loading);
@@ -126,80 +129,40 @@ export default function WorkersTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, currentPage]);
 
+
+  // row actions
   const goToForm = (state: WorkerFormNavState) => navigate("/create-worker", { state });
+  const getRowActions = (row: Worker) =>
+    useRowActions({
+      row,
+      status: row.status,
+      canView,
+      canUpdate,
+      canDelete,
 
-
-  const getRowActions = (row: Worker): RowAction<Worker>[] => [
-    {
-      label: "Status",
-      icon: (
-        <AutorenewOutlined
-          sx={{
-            fontSize: 14,
-            color: "#7F7F7F",
-          }}
-        />
-      ),
-      onClick: () => {
+      onStatus: () => {
         setValues(row);
-        setStateModal('status');
+        setStateModal("status");
       },
-    },
-    ...((row?.status.toLowerCase() === "active" || canUpdate)
-      ? [
-        {
-          label: "Edit",
-          icon: (
-            <EditOutlined
-              sx={{
-                fontSize: 14,
-                color: "#7F7F7F",
-              }}
-            />
-          ),
-          onClick: () =>
-            goToForm({
-              mode: "edit",
-              workerId: row.id,
-            }),
-        },
-      ]
-      : []),
 
-    ...(canView ? [{
-      label: "View",
-      icon: (
-        <VisibilityOutlinedIcon
-          sx={{
-            fontSize: 14,
-            color: "#7F7F7F",
-          }}
-        />
-      ),
-      onClick: () =>
+      onEdit: () =>
+        goToForm({
+          mode: "edit",
+          workerId: row.id,
+        }),
+
+      onView: () =>
         goToForm({
           mode: "view",
           workerId: row.id,
         }),
-    }] : []),
 
-    ...((row?.status.toLowerCase() === "active" && canDelete)
-      ? [
-        {
-          label: "Delete",
-          icon: <DeleteIcon height={13} width={11} />,
-          sx: {
-            color: "#7F7F7F",
-          },
+      onDelete: () => {
+        setValues(row);
+        setStateModal("delete");
+      },
+    });
 
-          onClick: () => {
-            setValues(row);
-            setStateModal('delete')
-          },
-        },
-      ]
-      : []),
-  ];
 
   // mapped
   const tableData = workers?.map((item: any) => {
@@ -241,7 +204,12 @@ export default function WorkersTable() {
     const visibleColumns = columnStates
       .filter((column) => column.visible)
       .map((column) => columnMapping[column.key] || column.key);
-    exportExcel("/admin/workerManagementList/export", { customizeTable: visibleColumns ?? [] });
+    exportExcel("/admin/workerManagementList/export", {
+      customizeTable: visibleColumns ?? [],
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows.map((v) => v.id),
+      }),
+    });
   }
 
 
@@ -268,6 +236,10 @@ export default function WorkersTable() {
         showExport={canExport}
         customLabel={canCreate ? "Add Worker" : ""}
         onCustomChange={() => goToForm({ mode: "create" })}
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
 
       <CustomModal

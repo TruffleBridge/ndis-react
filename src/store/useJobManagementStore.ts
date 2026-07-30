@@ -15,6 +15,7 @@ const mapJobs = (rows: JobManagement[]): JobProps[] =>
     rows.map((job) => {
 
         return {
+            id: job?.jobId,
             jobId: "J" + job?.jobId,
             avatar: job?.client.profilePicture ?? undefined,
             name: job?.client?.fullName,

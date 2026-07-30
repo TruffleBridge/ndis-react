@@ -6,6 +6,7 @@ import { layoutStyles as S } from "./styles";
 import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
 import { Outlet } from "react-router-dom";
 import usePermissionStore from '@/store/usePermissionStore';
+import NotificationParent from "./components/notificationparent";
 
 
 const COLLAPSED_WIDTH = 72;
@@ -48,6 +49,9 @@ export default function MainLayout() {
         <TopNavbar
           sidebarOpen={sidebarOpen}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+          notificationChildren={
+            <NotificationParent />
+          }
         />
 
         <Box sx={S.content}>

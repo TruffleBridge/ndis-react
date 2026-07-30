@@ -291,8 +291,8 @@ export default function VirtualAssistantWidget({
             sx={{
                 width: 380,
                 maxWidth: "92vw",
-                height: 620,
-                maxHeight: "85vh",
+                height: 470,
+                maxHeight: "75vh",
                 display: "flex",
                 flexDirection: "column",
                 borderRadius: "20px",

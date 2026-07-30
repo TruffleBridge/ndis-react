@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Badge,
   Box,
   Button,
   IconButton,
@@ -9,7 +8,6 @@ import {
 import { useLocation } from "react-router-dom";
 import {
   SparkleIcon,
-  NotificationIcon,
   SearchIcon,
   CollapseIcon,
 } from "@/assets/index";
@@ -23,6 +21,7 @@ export interface TopNavbarProps {
   onToggleSidebar: () => void;
   userInitials?: string;
   notificationCount?: number;
+  notificationChildren?: any;
 }
 
 const insights = [
@@ -36,7 +35,7 @@ const insights = [
 export const TopNavbar = ({
   onToggleSidebar,
   userInitials = "MD",
-  notificationCount = 10,
+  notificationChildren
 }: TopNavbarProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const location = useLocation();
@@ -50,7 +49,7 @@ export const TopNavbar = ({
         </IconButton>
         <Typography
           variant="h5"
-          sx={{ ...S.pageTitle}}
+          sx={{ ...S.pageTitle }}
           noWrap
         >
           {pageTitle}
@@ -79,22 +78,7 @@ export const TopNavbar = ({
         </Box>
 
         <IconButton sx={S.notifBtn}>
-          <Badge
-            badgeContent={notificationCount}
-            color="error"
-            invisible={notificationCount === 0}
-            sx={{
-              "& .MuiBadge-badge": {
-                height: 22,
-                width: 32,
-                fontSize: 12,
-                top: "0",
-                left: 0,
-              },
-            }}
-          >
-            <NotificationIcon />
-          </Badge>
+          {notificationChildren}
         </IconButton>
 
         <IconButton sx={S.userBtn}>

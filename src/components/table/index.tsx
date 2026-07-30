@@ -32,6 +32,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { NoDataFound } from "../noData/NoDataFound";
+import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
+import { IndeterminateCheckBox } from "@mui/icons-material";
 
 //  Types 
 
@@ -85,6 +87,12 @@ export interface TableComponentProps<T = Record<string, unknown>> {
     noData?: string;
     noDataSubTitle?: string;
     isLoading?: boolean;
+
+    // checkbox fucntion
+    selectedRows?: any[];
+    onSelectAll?: (checked: boolean, rows: any[]) => void;
+    onSelectRow?: (checked: boolean, row: any) => void;
+
 }
 
 //  TableComponent 
@@ -112,6 +120,9 @@ export function TableComponent<T extends Record<string, unknown>>({
     isHasAction = false,
     noData = '',
     noDataSubTitle = '',
+    onSelectAll = () => null,
+    onSelectRow = () => null,
+    selectedRows = []
 }: TableComponentProps<T>) {
 
     // ── Row context menu ──────────────────────────────────────────────────────
@@ -234,6 +245,15 @@ export function TableComponent<T extends Record<string, unknown>>({
 
     const isStatusLast =
         visibleColumns?.find((v) => v?.field === "status")?.field;
+
+
+    // checkbox functions
+    const allSelected =
+        rows.length > 0 && selectedRows?.length === rows?.length;
+
+    const someSelected =
+        selectedRows?.length > 0 && selectedRows?.length < rows?.length;
+
 
     //  Render
     return (
@@ -420,11 +440,9 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                             checked={cs.visible}
                                                             onChange={() => handleToggleVisible(cs.key)}
                                                             onClick={(e) => e.stopPropagation()}
-                                                            sx={{
-                                                                padding: "4px",
-                                                                color: "#D1D5DB",
-                                                                "&.Mui-checked": { color: "#111827" },
-                                                            }}
+                                                            checkedIcon={<RoleCheckedboxIcon />}
+                                                            icon={<RolesCheckboxIcon />}
+
                                                         />
                                                     </Box>
                                                 ))}
@@ -536,7 +554,21 @@ export function TableComponent<T extends Record<string, unknown>>({
                     }}>
                         <Table>
                             <TableHead>
-                                <TableRow>
+                                <TableRow sx={{ bgcolor: '#F6F6F6' }}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={allSelected}
+                                            indeterminate={someSelected}
+                                            indeterminateIcon={<IndeterminateCheckBox sx={{
+                                                fontSize: 24,      // Change size
+                                                color: "custom.700",  // Icon color
+                                            }} />}
+                                            checkedIcon={<RoleCheckedboxIcon />}
+                                            icon={<RolesCheckboxIcon />}
+                                            onChange={(e) => onSelectAll(e.target.checked, rows)}
+                                        />
+                                    </TableCell>
+
                                     {visibleColumns.map((col, i) => (
                                         <TableCell
                                             key={i}
@@ -565,53 +597,74 @@ export function TableComponent<T extends Record<string, unknown>>({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row, rowIdx) => (
-                                    <TableRow key={rowIdx} sx={{
-                                        height: '100%', minHeight: '360px'
-                                    }}>
-                                        {visibleColumns.map((col, colIdx) => {
-                                            const rawValue = col.field !== undefined ? row[col.field] : undefined;
-                                            return (
+                                {rows.map((row, rowIdx) => {
+                                    const isSelected = selectedRows.some(
+                                        (item) => item.id === row.id // unique key
+                                    );
+
+                                    return (
+                                        <TableRow
+                                            key={rowIdx}
+                                            hover
+                                            selected={isSelected}
+                                            sx={{
+                                                backgroundColor: isSelected ? "#F3F4F6" : "inherit",
+                                            }}
+                                        >
+                                            <TableCell padding="checkbox">
+                                                <Checkbox
+                                                    checked={isSelected}
+                                                    checkedIcon={<RoleCheckedboxIcon />}
+                                                    icon={<RolesCheckboxIcon />}
+                                                    onChange={(e) => onSelectRow(e.target.checked, row)}
+                                                />
+                                            </TableCell>
+
+                                            {visibleColumns.map((col, colIdx) => {
+                                                const rawValue =
+                                                    col.field !== undefined ? row[col.field] : undefined;
+
+                                                return (
+                                                    <TableCell
+                                                        key={colIdx}
+                                                        sx={{
+                                                            ...baseBodyCellSx,
+                                                            ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
+                                                            ...col.cellSx,
+                                                            ...((isHasAction && isStatusLast) &&
+                                                                col.field === "status" && {
+                                                                borderLeft: "1px solid #E5E7EB",
+                                                            }),
+                                                        }}
+                                                    >
+                                                        {col.render
+                                                            ? col.render(rawValue, row)
+                                                            : (rawValue as React.ReactNode) ?? "—"}
+                                                    </TableCell>
+                                                );
+                                            })}
+
+                                            {hasActions && (
                                                 <TableCell
-                                                    key={colIdx}
                                                     sx={{
-                                                        ...baseBodyCellSx,
-                                                        ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
-                                                        ...col.cellSx,
-                                                        ...((isHasAction && isStatusLast) &&
-                                                            col.field === "status" && {
-                                                            borderLeft: "1px solid #E5E7EB",
-                                                        }),
+                                                        px: 1,
+                                                        py: 1.5,
+                                                        width: 48,
                                                     }}
                                                 >
-                                                    {col.render
-                                                        ? col.render(rawValue, row)
-                                                        : (rawValue as React.ReactNode) ?? "—"}
+                                                    {rowActions && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={(e) => openMenu(e, row)}
+                                                        >
+                                                            <MoreVertIcon fontSize="small" />
+                                                        </IconButton>
+                                                    )}
                                                 </TableCell>
-                                            );
-                                        })}
-
-                                        {hasActions && (
-                                            <TableCell
-                                                sx={{
-                                                    px: 1,
-                                                    py: 1.5,
-                                                    width: 48,
-                                                    borderBottom: rowIdx === rows.length - 1 ? 0 : "1px solid #E5E7EB",
-                                                    borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
-                                                }}
-                                            >
-                                                {rowActions && (<IconButton
-                                                    size="small"
-                                                    onClick={(e) => openMenu(e, row)}
-                                                    sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
-                                                >
-                                                    <MoreVertIcon fontSize="small" />
-                                                </IconButton>)}
-                                            </TableCell>
-                                        )}
-                                    </TableRow>
-                                ))}
+                                            )}
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </Box>
@@ -672,7 +725,8 @@ export function TableComponent<T extends Record<string, unknown>>({
                     <Box
                         sx={{
                             display: "flex",
-                            justifyContent: "flex-end",
+                            justifyContent: "space-between",
+                            alignItems: 'center',
                             px: 2.5,
                             py: 1.5,
                             backgroundColor: "#FFFFFF",
@@ -681,6 +735,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                             borderBottomRightRadius: "12px",
                         }}
                     >
+                        <span style={{ color: "#b3abab" }}>Selected rows: <span style={{ color: '#222124' }}>({selectedRows?.length})</span></span>
                         <Pagination
                             count={totalPages ? totalPages : 1}
                             page={currentPage}

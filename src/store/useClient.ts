@@ -133,7 +133,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         try {
             const { searchValue, currentPage } = get();
             const res = await createApiRequest(ENDPOINTS.list, {
-                "offset": currentPage ?? 0,
+                "offset": currentPage * 10,
                 "limit": payload_?.limit ?? 10,
                 search: searchValue,
             });
