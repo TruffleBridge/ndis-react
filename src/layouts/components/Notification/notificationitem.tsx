@@ -23,13 +23,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                 borderBottom: "1px solid #e0e0e0",
             }}
         >
-            <Avatar style={{ width: 32, height: 32, backgroundColor: "#90caf9" }}>
+            <Avatar sx={{ width: 32, height: 32, backgroundColor: "primary.light" }}>
                 <CircleNotificationsIcon fontSize="small" />
             </Avatar>
             <Box style={{ flex: 1, minWidth: 0 }}>
                 <Typography
                     variant="subtitle2"
-                    style={{ fontWeight: notification.isRead ? 400 : 600 }}
+                    style={{ fontWeight: notification.isRead ? 500 : 600 }}
                 >
                     {notification.title}
                 </Typography>

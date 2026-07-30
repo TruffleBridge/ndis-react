@@ -15,7 +15,6 @@ export const useAuthStore = create<AuthStore>()(
         error: null,
 
         login: async ({ email, password }) => {
-            debugger;
             set({ loading: true, error: null });
 
             try {

@@ -51,7 +51,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             onClose={onClose}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
-            slotProps={{ paper: { style: { width, maxHeight: 420, overflow: "hidden" } } }}
+            slotProps={{ paper: { style: { width, maxHeight: 370, overflow: "hidden", borderRadius: 8, boxShadow: '0px 1px 3px rgba(0,0,0,0.04),0px 12px 32px rgba(0,0,0,0.08)', borderColor: '#ECEFF5' } } }}
         >
             <Box
                 style={{

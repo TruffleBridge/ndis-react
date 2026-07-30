@@ -102,7 +102,6 @@ export const SideNavbar = ({
 
   // 🔑 canView false ah irukura modules ah filter panni remove pannurom
   const visibleNavItems = React.useMemo(() => {
-    debugger;
     return NAV_ITEMS_WITH_ICONS.filter((item) => {
       const moduleName = NAV_MODULE_MAP[item.label] ?? item.label;
       const perm = permissions.find(
@@ -113,7 +112,6 @@ export const SideNavbar = ({
   }, [permissions]);
 
   const handleSideRoute = async (e: any, item: any) => {
-    debugger;
     e.stopPropagation();
     setOpen(false);
     navigate(item.path);
