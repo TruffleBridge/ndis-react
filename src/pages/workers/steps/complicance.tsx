@@ -122,7 +122,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Driving License Number"
                                     value={data.drivingLicenseNumber}
                                     placeholder="Enter driving license"
-                                    isView={isView}
                                     onChange={(value) => setField("drivingLicenseNumber", value)}
                                 />}
                         </Grid>
@@ -169,7 +168,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="National Police Check Number"
                                     value={data.policeNumber}
                                     placeholder="Enter national police"
-                                    isView={isView}
                                     onChange={(value) => setField("policeNumber", value)}
                                 />}
                         </Grid>
@@ -218,7 +216,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Blue Card Number"
                                     value={data.blueCardNumber}
                                     placeholder="Enter blue card number"
-                                    isView={isView}
                                     onChange={(value) => setField("blueCardNumber", value)}
                                 />}
                         </Grid>
@@ -253,7 +250,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Certificate Number"
                                     placeholder="Enter certificate number"
                                     value={data.firstAidCertificateNumber}
-                                    isView={isView}
                                     onChange={(value) => setField("firstAidCertificateNumber", value)}
                                 />}
                         </Grid>
@@ -288,7 +284,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Certificate Number"
                                     placeholder="Enter certificate number"
                                     value={data.cprCertificateNumber}
-                                    isView={isView}
                                     onChange={(value) => setField("cprCertificateNumber", value)}
                                 />}
                         </Grid>

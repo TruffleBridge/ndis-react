@@ -227,13 +227,13 @@ const AddNewRolesPage: React.FC = () => {
                             <Grid size={{ xs: 12, md: 12 }}>
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, sm: isView ? 2 : 4 }}>
-                                        {isView ? getViewFunction('Roll Name', form.roleName, 'plain') :
+                                        {isView ? getViewFunction('Role Name', form.roleName, 'plain') :
                                             <InputTextField
                                                 required
-                                                label="Roll Name"
+                                                label="Role Name"
                                                 value={form.roleName}
                                                 onChange={(val: any) => setRoleName(val)}
-                                                placeholder="enter roll name"
+                                                placeholder="enter role name"
                                                 disabled={isView}
                                                 errors={formErrors.roleName}
                                             />}

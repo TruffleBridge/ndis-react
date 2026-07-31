@@ -18,6 +18,7 @@ const Subscription = lazy(() => import("@/pages/subscription/Subscription"));
 const AddNewWorkerPage = lazy(() => import("@/pages/workers/createWorker"));
 const AddNewClientPage = lazy(() => import("@/pages/clients/createClient"));
 const AddNewRolesPage = lazy(() => import("@/pages/roleAndPermission/createRoles"));
+const ProfileDetails = lazy(() => import("@/pages/profile/profiledetails"));
 
 const AppRoutes = () => {
   return (
@@ -51,6 +52,7 @@ const AppRoutes = () => {
 
         <Route path="rewards" element={<Rewards />} />
         <Route path="subscription" element={<Subscription />} />
+        <Route path="profile-details" element={<ProfileDetails />} />
       </Route>
     </Routes>
   );

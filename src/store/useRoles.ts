@@ -108,7 +108,7 @@ interface RoleStore {
 
     error: string | null;
 
-    getRoles: (payload: RoleListPayload) => Promise<void>;
+    getRoles: (payload: RoleListPayload, filter?: any) => Promise<void>;
     getModules: () => Promise<void>;
     getRoleById: (id: number) => Promise<void>;
     resetRoleDetails: () => void;
@@ -190,10 +190,14 @@ export const useRoles = create<RoleStore>((set, get) => ({
         })),
 
 
-    getRoles: async (payload) => {
+    getRoles: async (payload, filter) => {
         try {
             set({ listLoading: true, error: null });
-            const res = await createApiRequest("/roles/list", payload);
+            const payload_ = {
+                payload,
+                filters: filter?.filter
+            }
+            const res = await createApiRequest("/roles/list", payload_);
             if (res.data.status) {
                 set({
                     roles: res.data.data.rows,
@@ -201,7 +205,8 @@ export const useRoles = create<RoleStore>((set, get) => ({
                 });
             }
         } catch (error: any) {
-            set({ error: error?.message ?? "Failed to fetch roles" });
+            const message = handleApiError(error, "Failed to get role");
+            set({ error: message ?? "Failed to fetch roles" });
         } finally {
             set({ listLoading: false });
         }
@@ -264,7 +269,8 @@ export const useRoles = create<RoleStore>((set, get) => ({
                 });
             }
         } catch (error: any) {
-            set({ error: error?.message ?? "Failed to fetch role" });
+            const message = handleApiError(error, "Failed to rolebyid");
+            set({ error: message ?? "Failed to fetch role" });
         } finally {
             set({ detailsLoading: false });
         }

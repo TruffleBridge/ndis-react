@@ -21,7 +21,6 @@ interface InputTextFieldProps extends Omit<TextFieldProps, "onChange"> {
     errors?: string;
     required?: boolean;
     mainSx?: SxProps<Theme>;
-    isView?: boolean;
     onChange?: (value: string) => void;
 }
 
@@ -44,7 +43,6 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
     errors,
     required,
     mainSx,
-    isView = false,
     onChange,
     ...rest
 }) => {
@@ -94,8 +92,8 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                             borderWidth: '1.4px',
                             borderColor: "#D0D5DD",
                             "&.MuiOutlinedInput-notchedOutline": {
-                                // borderColor: "#D0D5DD",
-                            }
+                                borderColor: "#D0D5DD",
+                            },
                         },
 
                         "&:hover fieldset": {

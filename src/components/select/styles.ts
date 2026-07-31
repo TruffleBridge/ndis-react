@@ -59,7 +59,7 @@ export const getSelectStyles = (
     marginTop: 4,
     boxShadow:
       "0px 4px 6px -2px rgba(16,24,40,0.03), 0px 12px 16px -4px rgba(16,24,40,0.08)",
-    zIndex: 20,
+    zIndex: 99999,
     overflow: "hidden", // clip child so only menuList scrolls, not the whole menu
   }),
 
@@ -68,6 +68,10 @@ export const getSelectStyles = (
   menuList: (base) => ({
     ...base,
     padding: 4,
+  }),
+  menuPortal: (base: any) => ({
+    ...base,
+    zIndex: 99999,
   }),
 
   option: (base, state) => ({

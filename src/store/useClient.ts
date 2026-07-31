@@ -136,6 +136,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
                 "offset": currentPage * 10,
                 "limit": payload_?.limit ?? 10,
                 search: searchValue,
+                ...(payload_?.filter && { filters: payload_?.filter })
             });
             const payload = res.data?.data ?? res.data ?? {};
             set({

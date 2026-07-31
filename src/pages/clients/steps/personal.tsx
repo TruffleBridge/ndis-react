@@ -68,7 +68,6 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 label="First Name"
                                 value={personalData.firstName}
                                 placeholder="e.g. Jane Cooper"
-                                isView={isView}
                                 error={!!errors.firstName}
                                 errors={errors.firstName}
                                 required
@@ -98,7 +97,6 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                             <InputTextField
                                 label="Mobile Number"
                                 value={personalData?.mobile}
-                                isView={isView}
                                 required
                                 error={!!errors.mobile}
                                 errors={errors.mobile}
@@ -116,7 +114,6 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                                 label="Email Address"
                                 value={personalData?.email}
                                 placeholder="jane@gmail.com"
-                                isView={isView}
                                 required
                                 error={!!errors.email}
                                 errors={errors.email}

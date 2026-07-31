@@ -528,6 +528,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
                 search: searchValue,
                 "offset": currentPage * 10,
                 "limit": payload_?.limit ?? 10,
+                ...(payload_?.filter && { filters: payload_?.filter })
             });
             const payload = res.data?.data ?? res.data ?? {};
             set({

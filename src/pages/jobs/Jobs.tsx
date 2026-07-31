@@ -1,6 +1,6 @@
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
+import { FilterPopover, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
 import { useEffect, useState } from "react";
 import { useJobManagementStore } from "@/store/useJobManagementStore";
 import { formatTime } from "@/utils/helper";
@@ -42,6 +42,9 @@ function buildColumnStates<T>(cols: ColumnDef<T>[]): ColumnState[] {
 export default function JobTable() {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [filter, setFilter] = useState<any>(null);
+
+  //store
   const {
     jobs,
     loading,
@@ -285,6 +288,20 @@ export default function JobTable() {
     );
   }
 
+
+  // apply filter
+  const handleApplyFilter = () => {
+    const payload = {
+      bookingStatus: filter?.map((v: any) => v?.value) ?? []
+    }
+    fetchJobs({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: "",
+      filter: payload ?? []
+    });
+  }
+
   return (
     <Box>
       {(isExcelloading || loading) && <Loading />}
@@ -304,7 +321,28 @@ export default function JobTable() {
         onPageChange={handlePageChange}
         showExport={canExport}
         onExportData={() => handleExport()}
-        onFilter={() => console.log("Filter")}
+        //filter
+        filterChildren={
+          <FilterPopover
+            buttonLabel="Filter"
+            selects={
+              [
+                {
+                  id: "status",
+                  label: "Job Status",
+                  multiple: true,
+                  options: [
+                    { label: 'Open', value: "open" },
+                    { label: 'Confirmed', value: "confirmed" },
+                    { label: 'Completed', value: "completed" }],
+                  value: filter,
+                  onChange: (val: any) => setFilter(val),
+                },
+              ]}
+            disabled={!filter?.some((v: any) => v?.value)}
+            onApply={() => handleApplyFilter()}
+            onClear={() => setFilter(null)}
+          />}
         //checkbox
         selectedRows={selectedRows}
         onSelectAll={handleSelectAll}

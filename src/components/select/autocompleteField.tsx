@@ -116,6 +116,7 @@ const makeMenuList = (
                     style: {
                         maxHeight: MENU_LIST_HEIGHT,
                         overflowY: "auto",
+                        zIndex: 999
                     },
                 }}
             >

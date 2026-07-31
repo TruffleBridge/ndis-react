@@ -1,6 +1,7 @@
 import { Box, Chip } from "@mui/material";
 import {
   CustomModal,
+  FilterPopover,
   Loading,
   TableComponent,
   type ColumnDef,
@@ -120,6 +121,12 @@ export default function RolesAndPermissionTable() {
   const [currentPage, setCurrentPage] = useState(0);
   const [stateModal, setStateModal] = useState(false);
   const [values, setValues] = useState<any>();
+  const [filter, setFilter] = useState<any>({
+    modules: null,
+    level: null,
+    status: null
+  });
+
 
   const {
     roles,
@@ -127,7 +134,9 @@ export default function RolesAndPermissionTable() {
     getRoles,
     listLoading,
     deleteRole,
-    resetForm
+    resetForm,
+    modules,
+    getModules
   } = useRoles();
 
   // checkbox functions
@@ -261,6 +270,77 @@ export default function RolesAndPermissionTable() {
     });
   };
 
+  console.log(filter, 'filter');
+
+  useEffect(() => {
+    getModules();
+  }, []);
+
+  // apply filter
+  const handleApplyFilter = () => {
+    const payload = {
+      modules: filter.modules?.map((v: any) => v.value) ?? [],
+      level: filter.level?.value ?? null,
+      status: filter.status?.value ?? null,
+    };
+
+    getRoles({
+      offset: currentPage,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    }, {
+      filter: payload ?? []
+    });
+  }
+
+  const moduleOptions = modules?.map((m) => ({ label: m?.moduleName, value: m?.id }));
+
+  // filter fields showing
+  const filterFields = [
+    {
+      id: "access-modules",
+      label: "Access Modules",
+      multiple: true,
+      options: moduleOptions,
+      value: filter?.modules,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          modules: val,
+        })),
+    },
+    {
+      id: "access-level",
+      label: "Access Level",
+      multiple: false,
+      options: [
+        { label: 'Full', value: "Full" },
+        { label: 'Limited', value: "Limited" },
+      ],
+      value: filter?.level,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          level: val,
+        }))
+    },
+    {
+      id: "status",
+      label: "Status",
+      multiple: false,
+      options: [
+        { label: 'Active', value: "true" },
+        { label: 'InActive', value: "false" },
+      ],
+      value: filter?.status,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          status: val,
+        }))
+    },
+  ];
+
   return (
     <Box>
       {(isExcelloading || listLoading) && <Loading />}
@@ -283,13 +363,21 @@ export default function RolesAndPermissionTable() {
         }}
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
-        onFilter={() => console.log("Filter")}
         showExport={canExport}
         customLabel={canCreate ? "Add Role" : ''}
         onCustomChange={() => {
           resetForm();
           navigate("/create-roles")
         }}
+        //filter
+        filterChildren={
+          <FilterPopover
+            buttonLabel="Filter"
+            selects={filterFields}
+            disabled={!Object.values(filter).some((value) => value)}
+            onApply={() => handleApplyFilter()}
+            onClear={() => setFilter({ status: null, modules: null, level: null })}
+          />}
         isHasAction
         //checkbox
         selectedRows={selectedRows}

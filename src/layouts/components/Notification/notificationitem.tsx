@@ -19,7 +19,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             style={{
                 alignItems: "flex-start",
                 gap: 12,
-                backgroundColor: notification.isRead ? "transparent" : "#f5f5f5",
+                backgroundColor: notification?.isRead ? "transparent" : "#f5f5f5",
                 borderBottom: "1px solid #e0e0e0",
             }}
         >
@@ -28,10 +28,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             </Avatar>
             <Box style={{ flex: 1, minWidth: 0 }}>
                 <Typography
-                    variant="subtitle2"
-                    style={{ fontWeight: notification.isRead ? 500 : 600 }}
+                    variant="body1"
+                    style={{ fontWeight: notification?.isRead ? 500 : 600 }}
                 >
-                    {notification.title}
+                    {notification?.title}
                 </Typography>
                 <Typography
                     variant="body2"
@@ -44,10 +44,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                         WebkitBoxOrient: "vertical",
                     }}
                 >
-                    {notification.message}
+                    {notification?.message}
                 </Typography>
                 <Typography variant="caption" style={{ color: "#bdbdbd" }}>
-                    {new Date(notification.createdAt).toLocaleString()}
+                    {new Date(notification?.createdAt).toLocaleString()}
                 </Typography>
             </Box>
         </ListItemButton>

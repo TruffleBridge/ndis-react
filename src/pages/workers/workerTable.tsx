@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
+import { CustomModal, FilterPopover, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
@@ -95,6 +95,7 @@ export default function WorkersTable() {
   const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(WORKER_COLUMNS));
   const [stateModal, setStateModal] = useState<'status' | 'delete' | null>(null);
   const [values, setValues] = useState<any>();
+  const [filter, setFilter] = useState<any>(null);
 
   const workers = useWorkerStore((s) => s.workers);
   // const workersLoading = useWorkerStore((s) => s.workersLoading);
@@ -212,6 +213,17 @@ export default function WorkersTable() {
     });
   }
 
+  // apply filter
+  const handleApplyFilter = () => {
+    const payload = {
+      status: [filter?.value]
+    }
+    fetchWorkers({
+      limit: ROWS_PER_PAGE,
+      filter: payload ?? []
+    });
+  }
+
 
   return (
     <Box>
@@ -232,10 +244,30 @@ export default function WorkersTable() {
         onSearch={setSearchValue}
         onPageChange={setCurrentPage}
         onExportData={() => handleExport()}
-        onFilter={() => console.log("Filter")}
         showExport={canExport}
         customLabel={canCreate ? "Add Worker" : ""}
         onCustomChange={() => goToForm({ mode: "create" })}
+        //filter
+        filterChildren={
+          <FilterPopover
+            buttonLabel="Filter"
+            selects={
+              [
+                {
+                  id: "status",
+                  label: "Status",
+                  multiple: false,
+                  options: [
+                    { label: 'Active', value: "true" },
+                    { label: 'InActive', value: "false" }],
+                  value: filter,
+                  onChange: (val: any) => setFilter(val),
+                },
+              ]}
+            onApply={() => handleApplyFilter()}
+            onClear={() => setFilter(null)}
+            disabled={!Object.values(filter ?? {}).some((v: any) => v)}
+          />}
         //checkbox
         selectedRows={selectedRows}
         onSelectAll={handleSelectAll}

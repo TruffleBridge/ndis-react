@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import {
+  Avatar,
   Box,
   Button,
   IconButton,
+  Menu,
+  MenuItem,
   Typography,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   SparkleIcon,
   SearchIcon,
@@ -13,8 +16,11 @@ import {
 } from "@/assets/index";
 import { InputTextField } from "@/components/input/textField";
 import { AIInsightsPopover } from "../popover";
-import { navbarStyles as S } from "./styles";
+import { navbarStyles, navbarStyles as S } from "./styles";
 import { getNavTitle } from "@/constants/navigation";
+import { LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
+import { useProfileStore } from "@/store/useProfilestore";
+import FormLabel from "../formLabel/formLabel";
 
 export interface TopNavbarProps {
   sidebarOpen: boolean;
@@ -34,12 +40,43 @@ const insights = [
 
 export const TopNavbar = ({
   onToggleSidebar,
-  userInitials = "MD",
   notificationChildren
 }: TopNavbarProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const location = useLocation();
   const pageTitle = getNavTitle(location.pathname);
+  const navigate = useNavigate();
+
+  const profile = useProfileStore((state) => state.profile);
+  const logout = useProfileStore((state) => state.logout);
+
+  const [anchorEl1, setAnchorEl1] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl1);
+
+  const handleAvatarClick = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl1(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl1(null);
+  };
+
+  const handleProfileClick = () => {
+    handleClose();
+    navigate('/profile-details')
+  };
+
+  const handleLogoutClick = () => {
+    handleClose();
+    logout();
+  };
+
+  const initials = profile.fullName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <Box sx={S.appBar}>
@@ -77,13 +114,68 @@ export const TopNavbar = ({
           />
         </Box>
 
-        <IconButton sx={S.notifBtn}>
+        <IconButton sx={S.notifBtn}
+          component="div">
           {notificationChildren}
         </IconButton>
 
-        <IconButton sx={S.userBtn}>
+        {/* <IconButton >
           <Typography sx={S.userInitials}>{userInitials}</Typography>
+        </IconButton> */}
+        <IconButton
+          onClick={handleAvatarClick}
+          size="small"
+          aria-controls={open ? "profile-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          sx={{
+            p: 0,
+            m: 0,
+            cursor: 'pointer',
+            "&:hover": {
+              bgcolor: "transparent",
+            },
+          }}
+        >
+          <Avatar
+            src={""}
+            sx={navbarStyles.userBtn}
+
+          >
+            {!profile.avatarUrl && initials}
+          </Avatar>
         </IconButton>
+        <Menu
+          id="profile-menu"
+          anchorEl={anchorEl1}
+          open={open}
+          onClose={handleClose}
+          onClick={handleClose}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 1,
+                minWidth: 170,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'custom.800',
+                boxShadow: "0px 1px 3px rgba(0,0,0,0.04),0px 12px 32px rgba(0,0,0,0.08)",
+              },
+            },
+          }}
+        >
+          <MenuItem onClick={handleProfileClick} sx={navbarStyles?.menu}>
+            <PersonOutlineOutlined fontSize="small" sx={{ color: 'custom.500' }} />
+            <FormLabel label="My Profile" sxText={{ m: 0 }} />
+          </MenuItem>
+
+          <MenuItem onClick={handleLogoutClick} sx={navbarStyles?.menu}>
+            <LogoutOutlined fontSize="small" sx={{ color: 'error.main' }} />
+            <FormLabel label="Logout" sxText={{ m: 0, color: 'error.main' }} />
+          </MenuItem>
+        </Menu>
       </Box>
 
       <AIInsightsPopover

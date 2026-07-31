@@ -329,7 +329,6 @@ export default function VerificationTable() {
         showExport={canExport}
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
-        onFilter={() => { }}
         //checkbox
         selectedRows={selectedRows}
         onSelectAll={handleSelectAll}

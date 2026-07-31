@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
+import { CustomModal, FilterPopover, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
 import type { Client, ClientFormNavState } from "@/types/client";
 import { useClientStore } from "@/store/useClient";
@@ -36,6 +36,7 @@ export default function ClientTable() {
     const [values, setValues] = useState<any>();
     const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
     const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
+    const [filter, setFilter] = useState<any>(null);
     const ROWS_PER_PAGE = 10;
 
 
@@ -79,8 +80,6 @@ export default function ClientTable() {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchValue, currentPage]);
-
-    // Single helper so Edit/View/Create all navigate the same way - only the
 
 
     const CLIENT_COLUMNS: ColumnDef<Client>[] = [
@@ -149,7 +148,7 @@ export default function ClientTable() {
         { headerName: "Location", field: "location" },
         { headerName: "Funding Type", field: "fundingType" },
         {
-            headerName: "Client Status",
+            headerName: "Status",
             field: "clientStatus",
             render: (value) => {
                 const key = formatStatus(value as string);
@@ -201,6 +200,8 @@ export default function ClientTable() {
     })
 
     // row actions funcation
+
+    // Single helper so Edit/View/Create all navigate the same way - only the
     const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
 
     const getRowActions = (row: Client) =>
@@ -273,6 +274,18 @@ export default function ClientTable() {
         );
     }
 
+    // apply filter
+    const handleApplyFilter = () => {
+        const payload = {
+            status: [filter?.value]
+        }
+        fetchClients({
+            offset: 0,
+            limit: ROWS_PER_PAGE,
+            search: searchValue,
+            filter: payload ?? []
+        });
+    }
 
     return (
         <Box>
@@ -293,13 +306,34 @@ export default function ClientTable() {
                 onSearch={setSearchValue}
                 onPageChange={setCurrentPage}
                 onExportData={() => handleExport()}
-                onFilter={() => console.log("Filter")}
                 customLabel={canCreate ? "Add Client" : ''}
                 showExport={canExport}
                 onCustomChange={() => {
                     resetForm();
                     goToForm({ mode: "create" })
                 }}
+                //filter
+                filterChildren={
+                    <FilterPopover
+                        buttonLabel="Filter"
+                        selects={
+                            [
+                                {
+                                    id: "status",
+                                    label: "Status",
+                                    multiple: false,
+                                    options: [
+                                        { label: 'Active', value: "true" },
+                                        { label: 'InActive', value: "false" }],
+                                    value: filter,
+                                    onChange: (val: any) => setFilter(val),
+                                },
+                            ]}
+                        onApply={() => handleApplyFilter()}
+                        onClear={() => setFilter(null)}
+                        disabled={!Object.values(filter ?? {}).some((v: any) => v)}
+
+                    />}
                 //checkbox
                 selectedRows={selectedRows}
                 onSelectAll={handleSelectAll}

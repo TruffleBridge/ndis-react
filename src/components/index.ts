@@ -31,3 +31,5 @@ export { Loading } from "./loading/loading";
 export { CircularProgressWithLabel } from "./circleBarWithLabel";
 export { GlobalSnackbar } from "./GlobalSnackbar";
 export { InfiniteScrollList } from "./Infinitescrolllist/infinitescrolllist";
+export { FilterPopover } from "./filterPopover/FilterPopover";
+export type { FilterSelectConfig } from "./filterPopover/FilterPopover";

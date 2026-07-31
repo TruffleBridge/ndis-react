@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
-        'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNzg0ODk1NjkzLCJleHAiOjE3ODU1MDA0OTN9.Obk-mCyS6sMJ3IbmZPlTsprbuKQrHs8Wxv3N-8cq2Io"
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     },
 });
 
