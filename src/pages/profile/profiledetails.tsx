@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, type ChangeEvent } from "react";
 import {
     Box,
     Paper,
@@ -17,8 +17,7 @@ import SaveIcon from "@mui/icons-material/CheckOutlined";
 import CameraAltIcon from "@mui/icons-material/CameraAltOutlined";
 import { useProfileStore } from "@/store/useProfilestore";
 import type { AdminProfile } from "@/types/profile";
-import { getViewFunction } from "@/utils/viewfunction";
-import { InputTextField } from "@/components";
+import { InputTextField, Loading } from "@/components";
 
 
 const ProfileDetails = () => {
@@ -30,6 +29,8 @@ const ProfileDetails = () => {
     const cancelEdit = useProfileStore((s) => s.cancelEdit);
     const updateProfile = useProfileStore((s) => s.updateProfile);
     const setField = useProfileStore((s) => s.setField);
+    const initForm = useProfileStore((s) => s.initForm);
+    const getlistLoading = useProfileStore((s) => s.getlistLoading);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,7 +55,10 @@ const ProfileDetails = () => {
     };
 
     const handleSave = async () => {
-        await updateProfile();
+        const res: any = await updateProfile();
+        if (res) {
+            initForm();
+        }
     };
 
     const initials = data.fullName
@@ -75,6 +79,11 @@ const ProfileDetails = () => {
         type: opts?.type ?? "text",
     });
 
+    useEffect(() => {
+        initForm();
+    }, [])
+
+
     return (
         <Box
             sx={{
@@ -84,6 +93,7 @@ const ProfileDetails = () => {
                 py: { xs: 3, sm: 4 },
             }}
         >
+            {getlistLoading && <Loading />}
             <Stack
                 component="div"
                 direction={{ xs: "column", sm: "row" }}
@@ -221,10 +231,10 @@ const ProfileDetails = () => {
 
                     <Box>
                         <Typography sx={{ fontSize: { xs: "1.1rem", sm: "1.25rem" }, fontWeight: 700, color: "#1a1f36" }}>
-                            {data.fullName}
+                            {profile.fullName}
                         </Typography>
                         <Typography sx={{ fontSize: "0.85rem", color: "#6b7280", mb: 1 }}>
-                            {data.designation} &middot; {data.department}
+                            {data.role}
                         </Typography>
                         <Chip
                             label={data.status}
@@ -278,32 +288,23 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a email"
+                                    placeholder="enter a phone number"
                                     startAdornment={'+61 '}
-                                    onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
-                                />
-                            );
-                        })()}
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                        {(() => {
-                            const fp: any = fieldProps("Employee ID", "employeeId");
-                            return (
-                                <InputTextField
-                                    {...fp}
-                                    placeholder="enter a employeeId"
-                                    disabled
-                                    onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
+                                    onChange={(value: string) => {
+                                        const sanitizedValue = value.replace(/\D/g, '').slice(0, 9);
+
+                                        fp.onChange && fp.onChange?.({
+                                            target: { value: sanitizedValue },
+                                        } as any);
+                                    }}
                                 />
                             );
                         })()}
                     </Grid>
                 </Grid>
 
-                <Divider sx={{ my: { xs: 3, sm: 4 } }} />
-
                 {/* Work information - admin specific */}
-                <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, color: "#1a1f36", mb: 2 }}>
+                {/* <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, color: "#1a1f36", mb: 2 }}>
                     Work Information
                 </Typography>
 
@@ -320,7 +321,7 @@ const ProfileDetails = () => {
                     <Grid size={{ xs: 12, sm: 3 }}>
                         {getViewFunction('Joining Date', data?.joiningDate, 'plain')}
                     </Grid>
-                </Grid>
+                </Grid> */}
 
                 <Divider sx={{ my: { xs: 3, sm: 4 } }} />
 
@@ -337,7 +338,6 @@ const ProfileDetails = () => {
                                 <InputTextField
                                     {...fp}
                                     placeholder="enter a address"
-                                    disabled
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -350,7 +350,6 @@ const ProfileDetails = () => {
                                 <InputTextField
                                     {...fp}
                                     placeholder="enter a city"
-                                    disabled
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -363,7 +362,6 @@ const ProfileDetails = () => {
                                 <InputTextField
                                     {...fp}
                                     placeholder="enter a state"
-                                    disabled
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -376,7 +374,6 @@ const ProfileDetails = () => {
                                 <InputTextField
                                     {...fp}
                                     placeholder="enter a pincode"
-                                    disabled
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );

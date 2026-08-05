@@ -164,7 +164,8 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         try {
             await updateApiRequest(ENDPOINTS.status, {
                 "userId": id,
-                "status": deleteStatus ? "DELETED" : status ? "ACTIVE" : "INACTIVE"
+                "status": deleteStatus ? "DELETED" : status ? "ACTIVE" : "INACTIVE",
+                module: "Clients",
             });
             set((state) => ({ clients: state.clients.filter((c) => c.id !== id) }));
             return true;
@@ -353,6 +354,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
             phoneNumber: personalData?.mobile,
             countryCode: "+61", // or personalData?.countryCode
             type: "client",
+             ...(mode === "edit" && { module: "Clients" }),
             dateOfBirth: dayjs(personalData?.dob).format("YYYY-MM-DD"),
             gender: personalData?.gender?.toUpperCase(),
             password: "Test@123",

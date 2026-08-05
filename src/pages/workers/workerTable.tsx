@@ -216,7 +216,7 @@ export default function WorkersTable() {
   // apply filter
   const handleApplyFilter = () => {
     const payload = {
-      status: [filter?.value]
+      status: filter?.value
     }
     fetchWorkers({
       limit: ROWS_PER_PAGE,
@@ -224,6 +224,15 @@ export default function WorkersTable() {
     });
   }
 
+  // clear filter
+  const handleClear = () => {
+    setFilter(null);
+    fetchWorkers({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
 
   return (
     <Box>
@@ -258,14 +267,14 @@ export default function WorkersTable() {
                   label: "Status",
                   multiple: false,
                   options: [
-                    { label: 'Active', value: "true" },
-                    { label: 'InActive', value: "false" }],
+                    { label: 'Active', value: true },
+                    { label: 'InActive', value: false }],
                   value: filter,
                   onChange: (val: any) => setFilter(val),
                 },
               ]}
             onApply={() => handleApplyFilter()}
-            onClear={() => setFilter(null)}
+            onClear={() => handleClear()}
             disabled={!Object.values(filter ?? {}).some((v: any) => v)}
           />}
         //checkbox

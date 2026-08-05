@@ -41,6 +41,7 @@ const Login = () => {
     const loading = useAuthStore(state => state.loading);
     const authError = useAuthStore(state => state.error);
     const clearError = useAuthStore(state => state.clearError);
+    const forgotPassword = useAuthStore(state => state.forgotPassword);
 
     const [values, setValues] = useState<FormValues>({
         email: "",
@@ -54,6 +55,7 @@ const Login = () => {
 
     const updateValue = (field: keyof FormValues, value: any) => {
         setValues(prev => ({ ...prev, [field]: value }));
+        setErrors(prev => ({ ...prev, [field]: undefined }));
         if (authError) clearError();
     };
 
@@ -76,6 +78,14 @@ const Login = () => {
         if (result.success) window.location.href = '/';
 
     }, [values, login, navigate]);
+
+    const handleForgotPassword = async () => {
+        if (!values.email.trim()) {
+            setErrors({ email: "Email is required" });
+            return;
+        }
+        await forgotPassword(values.email);
+    }
 
 
     return (
@@ -188,8 +198,8 @@ const Login = () => {
                                     label="Remember me"
                                 />
 
-                                <Link sx={{ color: PRIMARY, fontWeight: 600, cursor: "pointer" }}>
-                                    Forgot password?
+                                <Link sx={{ color: PRIMARY, fontWeight: 600, cursor: "pointer" }} onClick={() => handleForgotPassword()}>
+                                    Forgot Password?
                                 </Link>
 
                             </Box>

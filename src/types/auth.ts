@@ -56,6 +56,7 @@ export interface AuthActions {
     login: (
         payload: LoginPayload
     ) => Promise<{ success: boolean; message?: string }>;
+    forgotPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
     logout: () => void;
     clearError: () => void;
     setUser: (user: User) => void;

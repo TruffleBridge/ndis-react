@@ -301,6 +301,15 @@ export default function JobTable() {
       filter: payload ?? []
     });
   }
+  // clear filter
+  const handleClear = () => {
+    setFilter(null);
+    fetchJobs({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: "",
+    });
+  } 
 
   return (
     <Box>
@@ -332,7 +341,7 @@ export default function JobTable() {
                   label: "Job Status",
                   multiple: true,
                   options: [
-                    { label: 'Open', value: "open" },
+                    { label: 'Open', value: "Open" },
                     { label: 'Confirmed', value: "confirmed" },
                     { label: 'Completed', value: "completed" }],
                   value: filter,
@@ -341,7 +350,7 @@ export default function JobTable() {
               ]}
             disabled={!filter?.some((v: any) => v?.value)}
             onApply={() => handleApplyFilter()}
-            onClear={() => setFilter(null)}
+            onClear={() => handleClear()}
           />}
         //checkbox
         selectedRows={selectedRows}

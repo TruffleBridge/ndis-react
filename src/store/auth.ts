@@ -56,6 +56,37 @@ export const useAuthStore = create<AuthStore>()(
             }
         },
 
+        forgotPassword: async (email) => {
+            set({ loading: true, error: null });
+
+            try {
+                const response = await createApiRequest("auth/forgot-password", { email, });
+
+                if (response?.data?.status) {
+                    set({
+                        loading: false,
+                        error: null,
+                    });
+                    return { success: true, message: response?.data?.message, };
+                }
+
+                const message =
+                    response?.data?.message || "Failed to send reset password email.";
+
+                set({ loading: false, error: message, });
+
+                return { success: false, message, };
+            } catch (err: any) {
+                const message = handleApiError(err, "Something went wrong. Please try again.");
+                set({
+                    loading: false,
+                    error: message,
+                });
+
+                return { success: false, message, };
+            }
+        },
+
         logout: () => {
             localStorage.clear();
 

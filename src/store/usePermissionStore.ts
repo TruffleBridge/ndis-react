@@ -30,7 +30,7 @@ const usePermissionStore = create<PermissionState>((set, get) => ({
     fetchRolePermissions: async () => {
         set({ loading: true, error: null });
         try {
-            const res = await getApiRequest('/roles/');
+            const res = await getApiRequest('/roles/user');
             const res_ = res?.data?.data ?? res?.data;
             if (res?.status) {
                 set({

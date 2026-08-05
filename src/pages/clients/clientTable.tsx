@@ -277,13 +277,23 @@ export default function ClientTable() {
     // apply filter
     const handleApplyFilter = () => {
         const payload = {
-            status: [filter?.value]
+            status: filter?.value ?? null,
         }
         fetchClients({
             offset: 0,
             limit: ROWS_PER_PAGE,
             search: searchValue,
             filter: payload ?? []
+        });
+    }
+
+    // clear filter
+    const handleClear = () => {
+        setFilter(null);
+        fetchClients({
+            offset: 0,
+            limit: ROWS_PER_PAGE,
+            search: searchValue,
         });
     }
 
@@ -323,14 +333,14 @@ export default function ClientTable() {
                                     label: "Status",
                                     multiple: false,
                                     options: [
-                                        { label: 'Active', value: "true" },
-                                        { label: 'InActive', value: "false" }],
+                                        { label: 'Active', value: true },
+                                        { label: 'InActive', value: false }],
                                     value: filter,
                                     onChange: (val: any) => setFilter(val),
                                 },
                             ]}
                         onApply={() => handleApplyFilter()}
-                        onClear={() => setFilter(null)}
+                        onClear={() => handleClear()}
                         disabled={!Object.values(filter ?? {}).some((v: any) => v)}
 
                     />}

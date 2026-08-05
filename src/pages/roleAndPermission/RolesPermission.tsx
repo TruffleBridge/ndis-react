@@ -270,7 +270,6 @@ export default function RolesAndPermissionTable() {
     });
   };
 
-  console.log(filter, 'filter');
 
   useEffect(() => {
     getModules();
@@ -279,9 +278,9 @@ export default function RolesAndPermissionTable() {
   // apply filter
   const handleApplyFilter = () => {
     const payload = {
-      modules: filter.modules?.map((v: any) => v.value) ?? [],
-      level: filter.level?.value ?? null,
-      status: filter.status?.value ?? null,
+      moduleIds: filter?.modules?.map((v: any) => v?.value) ?? [],
+      accessLevel: filter?.level?.value ?? undefined,
+      status: filter?.status?.value ?? undefined,
     };
 
     getRoles({
@@ -290,6 +289,20 @@ export default function RolesAndPermissionTable() {
       search: searchValue,
     }, {
       filter: payload ?? []
+    });
+  }
+  
+  // clear filter
+  const handleClear = () => {
+    setFilter({
+      modules: null,
+      level: null,
+      status: null
+    });
+    getRoles({
+      offset: currentPage,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
     });
   }
 
@@ -314,8 +327,8 @@ export default function RolesAndPermissionTable() {
       label: "Access Level",
       multiple: false,
       options: [
-        { label: 'Full', value: "Full" },
-        { label: 'Limited', value: "Limited" },
+        { label: 'Full', value: "FULL" },
+        { label: 'Limited', value: "LIMITED" },
       ],
       value: filter?.level,
       onChange: (val: any) =>
@@ -329,8 +342,8 @@ export default function RolesAndPermissionTable() {
       label: "Status",
       multiple: false,
       options: [
-        { label: 'Active', value: "true" },
-        { label: 'InActive', value: "false" },
+        { label: 'Active', value: true },
+        { label: 'InActive', value: false },
       ],
       value: filter?.status,
       onChange: (val: any) =>
@@ -376,7 +389,7 @@ export default function RolesAndPermissionTable() {
             selects={filterFields}
             disabled={!Object.values(filter).some((value) => value)}
             onApply={() => handleApplyFilter()}
-            onClear={() => setFilter({ status: null, modules: null, level: null })}
+            onClear={() => handleClear()}
           />}
         isHasAction
         //checkbox

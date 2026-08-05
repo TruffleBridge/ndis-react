@@ -549,7 +549,10 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         set({ status: val }),
     updateWorkerStatus: async (id, status) => {
         try {
-            await updateApiRequest(ENDPOINTS.updateStatus, { userId: id, status: status === 'ACTIVE' ? "ACTIVE" : "INACTIVE" });
+            await updateApiRequest(ENDPOINTS.updateStatus, {
+                userId: id, status: status === 'ACTIVE' ? "ACTIVE" : "INACTIVE",
+                module: "Workers",
+            });
             set((state) => ({
                 workers: state.workers.map((w) => (w.id === id ? { ...w, status } : w)),
             }));
@@ -803,14 +806,17 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         );
         try {
             if (mode === "edit" && workerId != null) {
-                await updateApiRequest(ENDPOINTS.update, payload);
+                await updateApiRequest(ENDPOINTS.update, {
+                    payload,
+                    module: "Workers"
+                });
             } else {
                 await createApiRequest(ENDPOINTS.create, payload);
             }
             set({ isSubmitting: false, submitSuccess: true });
             return true;
         } catch (err) {
-            const message = handleApiError(err, "Failed to worker");
+            const message = handleApiError(err, "Failed to submit worker details");
             set({ isSubmitting: false, workersError: message ?? "Failed to submit worker details" });
             return false;
         }

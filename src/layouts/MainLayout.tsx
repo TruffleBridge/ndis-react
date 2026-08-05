@@ -7,6 +7,7 @@ import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
 import { Outlet } from "react-router-dom";
 import usePermissionStore from '@/store/usePermissionStore';
 import NotificationParent from "./components/notificationparent";
+import { useProfileStore } from "@/store/useProfilestore";
 
 
 const COLLAPSED_WIDTH = 72;
@@ -23,6 +24,8 @@ export default function MainLayout() {
   }, [location.pathname, isMobileNav]);
 
   const fetchRolePermissions = usePermissionStore((s) => s.fetchRolePermissions);
+  const initForm = useProfileStore((s) => s.initForm);
+
 
   const token = localStorage.getItem('authToken'); // unga token key enna nu confirm pannunga
   useEffect(() => {
@@ -30,6 +33,10 @@ export default function MainLayout() {
       fetchRolePermissions();
     }
   }, [token]);
+
+  useEffect(() => {
+    initForm();
+  }, [])
 
 
   return (
