@@ -18,7 +18,7 @@ import { InputTextField } from "@/components/input/textField";
 import { AIInsightsPopover } from "../popover";
 import { navbarStyles, navbarStyles as S } from "./styles";
 import { getNavTitle } from "@/constants/navigation";
-import { LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
+import { HistoryOutlined, LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
 import { useProfileStore } from "@/store/useProfilestore";
 import FormLabel from "../formLabel/formLabel";
 
@@ -65,6 +65,12 @@ export const TopNavbar = ({
     handleClose();
     navigate('/profile-details')
   };
+
+  const handleAuditLogsClick = () => {
+    handleClose();
+    navigate('/audit-logs')
+  };
+
 
   const handleLogoutClick = () => {
     handleClose();
@@ -169,6 +175,11 @@ export const TopNavbar = ({
           <MenuItem onClick={handleProfileClick} sx={navbarStyles?.menu}>
             <PersonOutlineOutlined fontSize="small" sx={{ color: 'custom.500' }} />
             <FormLabel label="My Profile" sxText={{ m: 0 }} />
+          </MenuItem>
+
+          <MenuItem onClick={handleAuditLogsClick} sx={navbarStyles?.menu}>
+            <HistoryOutlined fontSize="small" sx={{ color: 'custom.500' }} />
+            <FormLabel label="Audit Log(History)" sxText={{ m: 0 }} />
           </MenuItem>
 
           <MenuItem onClick={handleLogoutClick} sx={navbarStyles?.menu}>

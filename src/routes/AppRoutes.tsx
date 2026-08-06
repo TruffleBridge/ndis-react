@@ -20,10 +20,9 @@ const Rewards = lazy(() => import("@/pages/reward/Rewards"));
 const Subscription = lazy(() => import("@/pages/subscription/Subscription"));
 const AddNewWorkerPage = lazy(() => import("@/pages/workers/createWorker"));
 const AddNewClientPage = lazy(() => import("@/pages/clients/createClient"));
-const AddNewRolesPage = lazy(() =>
-  import("@/pages/roleAndPermission/createRoles")
-);
+const AddNewRolesPage = lazy(() => import("@/pages/roleAndPermission/createRoles"));
 const ProfileDetails = lazy(() => import("@/pages/profile/profiledetails"));
+const AuditLogsPage = lazy(() => import("@/pages/auditLog/auditLog"));
 
 const AppRoutes = () => {
   return (
@@ -52,6 +51,7 @@ const AppRoutes = () => {
           <Route path="rewards" element={<Rewards />} />
           <Route path="subscription" element={<Subscription />} />
           <Route path="profile-details" element={<ProfileDetails />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

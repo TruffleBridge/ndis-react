@@ -73,8 +73,8 @@ export interface TableComponentProps<T = Record<string, unknown>> {
     showExport?: boolean;
 
     // Controlled column state from parent
-    columnStates: ColumnState[];
-    onColumnStatesChange: (next: ColumnState[]) => void;
+    columnStates?: ColumnState[];
+    onColumnStatesChange?: (next: ColumnState[]) => void;
 
     onSearch?: (value: string) => void;
     filterChildren?: any;
@@ -155,7 +155,7 @@ export function TableComponent<T extends Record<string, unknown>>({
 
     // Open panel → copy current columnStates into draft
     const handleOpenCustomize = () => {
-        setDraftStates(columnStates.map((cs) => ({ ...cs })));
+        setDraftStates(columnStates?.map((cs) => ({ ...cs })) || []);
         setCustomizeOpen(true);
     };
 
@@ -166,7 +166,7 @@ export function TableComponent<T extends Record<string, unknown>>({
 
     // Apply draft → push to parent, close panel
     const handleApply = () => {
-        onColumnStatesChange(draftStates);
+        onColumnStatesChange?.(draftStates);
         setCustomizeOpen(false);
     };
 
@@ -203,7 +203,7 @@ export function TableComponent<T extends Record<string, unknown>>({
     };
 
     // Derive columns to render from the committed columnStates (not draft)
-    const visibleColumns = columnStates
+    const visibleColumns = (columnStates ?? [])
         .filter((cs) => cs.visible)
         .map((cs) => columns.find((col) => col.headerName === cs.key)!)
         .filter(Boolean);
