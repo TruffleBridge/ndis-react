@@ -23,6 +23,7 @@ import { useRoles, PERMISSION_ACTIONS, STATUS_OPTIONS } from "@/store/useRoles";
 import dayjs from "dayjs";
 import { getViewFunction } from "@/utils/viewfunction";
 import { usePermission } from "@/hooks/usePermission";
+import usePermissionStore from "@/store/usePermissionStore";
 
 interface FormActionsProps {
     onCancel?: () => void;
@@ -148,6 +149,7 @@ const AddNewRolesPage: React.FC = () => {
         resetForm,
         formErrors
     } = useRoles();
+    const { fetchRolePermissions } = usePermissionStore();
 
     // roles based on access
     const { canCreate, canUpdate } = usePermission('Roles & Permission');
@@ -179,6 +181,7 @@ const AddNewRolesPage: React.FC = () => {
             isEdit && roleId ? await updateRole(roleId) : await createRole();
 
         if (success) {
+            fetchRolePermissions();
             setSuccussModel(true)
         }
     };
