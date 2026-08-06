@@ -3,6 +3,7 @@ import { lazy } from "react";
 
 import MainLayout from "@/layouts/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
+import NotFound from "@/pages/NotFound";
 
 const Login = lazy(() => import("@/pages/login/login"));
 const Home = lazy(() => import("@/pages/dashboard/Home"));
@@ -12,12 +13,16 @@ const Clients = lazy(() => import("@/pages/clients/clientTable"));
 const Jobs = lazy(() => import("@/pages/jobs/Jobs"));
 const Bookings = lazy(() => import("@/pages/booking/Bookings"));
 const Budget = lazy(() => import("@/pages/budget/Budget"));
-const RolesPermission = lazy(() => import("@/pages/roleAndPermission/RolesPermission"));
+const RolesPermission = lazy(() =>
+  import("@/pages/roleAndPermission/RolesPermission")
+);
 const Rewards = lazy(() => import("@/pages/reward/Rewards"));
 const Subscription = lazy(() => import("@/pages/subscription/Subscription"));
 const AddNewWorkerPage = lazy(() => import("@/pages/workers/createWorker"));
 const AddNewClientPage = lazy(() => import("@/pages/clients/createClient"));
-const AddNewRolesPage = lazy(() => import("@/pages/roleAndPermission/createRoles"));
+const AddNewRolesPage = lazy(() =>
+  import("@/pages/roleAndPermission/createRoles")
+);
 const ProfileDetails = lazy(() => import("@/pages/profile/profiledetails"));
 
 const AppRoutes = () => {
@@ -25,35 +30,31 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      {/* Protected Routes */}
-      <Route
-        path="/*"
-        element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Home />} />
-        <Route path="verification-queue" element={<Verification />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Home />} />
 
-        <Route path="workers" element={<Workers />} />
-        <Route path="create-worker" element={<AddNewWorkerPage />} />
+          <Route path="verification-queue" element={<Verification />} />
 
-        <Route path="clients" element={<Clients />} />
-        <Route path="create-client" element={<AddNewClientPage />} />
+          <Route path="workers" element={<Workers />} />
+          <Route path="create-worker" element={<AddNewWorkerPage />} />
 
-        <Route path="jobs" element={<Jobs />} />
-        <Route path="bookings" element={<Bookings />} />
-        <Route path="budget" element={<Budget />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="create-client" element={<AddNewClientPage />} />
 
-        <Route path="roles-permission" element={<RolesPermission />} />
-        <Route path="create-roles" element={<AddNewRolesPage />} />
+          <Route path="jobs" element={<Jobs />} />
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="budget" element={<Budget />} />
 
-        <Route path="rewards" element={<Rewards />} />
-        <Route path="subscription" element={<Subscription />} />
-        <Route path="profile-details" element={<ProfileDetails />} />
+          <Route path="roles-permission" element={<RolesPermission />} />
+          <Route path="create-roles" element={<AddNewRolesPage />} />
+
+          <Route path="rewards" element={<Rewards />} />
+          <Route path="subscription" element={<Subscription />} />
+          <Route path="profile-details" element={<ProfileDetails />} />
+        </Route>
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
