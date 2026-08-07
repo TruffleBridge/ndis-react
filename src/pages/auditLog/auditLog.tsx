@@ -141,7 +141,6 @@ export default function AuditLogsPage() {
     };
 
     const handlePageChange = (page: number) => {
-        debugger;
         const offset = page;
         fetchAuditLogs({ page: offset, limit: ROWS_PER_PAGE, search: searchValue });
     };

@@ -89,7 +89,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                     label="Degree Name"
                                     placeholder="Enter degree name"
                                     value={data.degreeName}
-                                    isView={isView}
                                     onChange={(value) => setField("degreeName", value)}
                                 />}
                         </Grid>
@@ -100,7 +99,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                     label="Institution"
                                     placeholder="Enter institution"
                                     value={data.institution}
-                                    isView={isView}
                                     onChange={(value) => setField("institution", value)}
                                 />}
                         </Grid>
@@ -111,7 +109,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                     label="Years Completed"
                                     placeholder="Enter years"
                                     value={data.yearsCompleted}
-                                    isView={isView}
                                     onChange={(value) => setField("yearsCompleted", value)}
                                 />}
                         </Grid>
@@ -126,7 +123,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                     label="Certification Name"
                                     placeholder="Enter certification name"
                                     value={data.certificationName}
-                                    isView={isView}
                                     onChange={(value) => setField("certificationName", value)}
                                 />}
                         </Grid>
@@ -137,7 +133,6 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                                     label="Certification Number"
                                     placeholder="Enter certification number"
                                     value={data.certificationNumber}
-                                    isView={isView}
                                     onChange={(value) => setField("certificationNumber", value)}
                                 />}
                         </Grid>
