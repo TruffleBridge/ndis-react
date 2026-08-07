@@ -198,7 +198,7 @@ const AddNewRolesPage: React.FC = () => {
     const handleModalPrimary = () => {
         setSuccussModel(false)
         resetForm();
-        navigate("/roles-permission");
+        navigate("/");
     };
 
 

@@ -1,5 +1,5 @@
 // src/pages/admin/auditLogs/components/UserHistoryDrawer.tsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Drawer,
     Box,
@@ -10,6 +10,9 @@ import {
     CircularProgress,
     Avatar,
     Divider,
+    useMediaQuery,
+    useTheme,
+    Pagination,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -29,6 +32,8 @@ const ACTION_COLOR: Record<string, "success" | "info" | "error" | "grey"> = {
     UPDATE: "info",
     DELETE: "error",
 };
+
+const DEFAULT_LIMIT = 20;
 
 interface UserHistoryDrawerProps {
     open: boolean;
@@ -57,18 +62,43 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
     userId,
     onClose,
 }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const { userHistory, userHistoryLoading, userHistoryError, fetchUserHistory } =
-        useAuditStore();
+    const {
+        userHistory,
+        userHistoryLoading,
+        userHistoryError,
+        userHistoryTotalPages,
+        fetchUserHistory,
+    } = useAuditStore();
+
+    const [page, setPage] = useState(1);
+    const limit = DEFAULT_LIMIT;
+
+    // Reset to page 1 whenever a new user is opened
+    useEffect(() => {
+        if (open) {
+            setPage(1);
+        }
+    }, [open, userId]);
 
     useEffect(() => {
         if (open && userId != null) {
-            fetchUserHistory(userId);
+            fetchUserHistory(userId, page, limit);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, userId]);
+    }, [open, userId, page, limit]);
 
     const primaryActor = userHistory[0];
+
+    const totalPages = typeof userHistoryTotalPages === "string"
+        ? parseInt(userHistoryTotalPages, 10) || 1
+        : (userHistoryTotalPages as any)?.totalPages ?? 1;
+
+    const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
 
     return (
         <Drawer
@@ -79,10 +109,14 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                 "& .MuiDrawer-paper": {
                     width: { xs: "100%", sm: 420, md: 480 },
                     maxWidth: "100vw",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
                 },
             }}
         >
-            <Box sx={{ p: { xs: 2, sm: 3 }, height: "100%", overflowY: "auto" }}>
+            {/* Fixed Header */}
+            <Box sx={{ p: { xs: 2, sm: 3 }, flexShrink: 0, bgcolor: "background.paper" }}>
                 <Stack direction="row" sx={{
                     justifyContent: "space-between", alignItems: "center"
                 }}>
@@ -123,8 +157,11 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                     </Stack>
                 )}
 
-                <Divider sx={{ mb: 2 }} />
+                <Divider />
+            </Box>
 
+            {/* Scrollable Body */}
+            <Box sx={{ flex: 1, overflowY: "auto", px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 } }}>
                 {userHistoryLoading && (
                     <Stack sx={{ py: 4, alignItems: "center" }}>
                         <CircularProgress size={28} />
@@ -216,6 +253,54 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                     </Timeline>
                 )}
             </Box>
+
+            {/* Fixed Pagination Footer */}
+            {!userHistoryLoading && !userHistoryError && userHistory.length > 0 && (
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        justifyContent: { xs: "center", sm: "center" },
+                        alignItems: "center",
+                        gap: 1,
+                        px: { xs: 1.5, sm: 2.5 },
+                        py: 1.5,
+                        backgroundColor: "#FFFFFF",
+                        borderTop: "1px solid",
+                        borderColor: "divider",
+                        flexShrink: 0,
+                    }}
+                >
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handlePageChange}
+                        siblingCount={isMobile ? 0 : 1}
+                        boundaryCount={1}
+                        shape="rounded"
+                        size={isMobile ? "small" : "medium"}
+                        sx={{
+                            "& .MuiPaginationItem-root": {
+                                fontSize: "14px",
+                                color: "#b3abab",
+                                fontWeight: 400,
+                                minWidth: 34,
+                                height: 34,
+                                borderRadius: "8px",
+                                border: "none",
+                            },
+                            "& .MuiPaginationItem-root.Mui-selected": {
+                                backgroundColor: "#c9c2c2db",
+                                color: "#222124",
+                                fontSize: "14px",
+                                borderRadius: "8px",
+                                fontWeight: 600,
+                                "&:hover": { backgroundColor: "#c9c2c2db" },
+                            },
+                        }}
+                    />
+                </Box>
+            )}
         </Drawer>
     );
 };

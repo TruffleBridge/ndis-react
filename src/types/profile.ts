@@ -15,6 +15,7 @@ export interface AdminProfile {
     state: string;
     pincode: string;
     avatarUrl?: string;
+    url?: string;
     status: "Active" | "Inactive" | null;
 }
 

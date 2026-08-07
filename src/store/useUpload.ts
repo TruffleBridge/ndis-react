@@ -31,11 +31,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
             formData.append("file", file);
 
             // interceptor - nothing extra needed here.
-            const res = await createApiRequest(ENDPOINTS.upload, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const res = await createApiRequest(ENDPOINTS.upload, formData);
             const body = res.data?.data ?? res.data;
 
             const uploaded: ClientDocument = {

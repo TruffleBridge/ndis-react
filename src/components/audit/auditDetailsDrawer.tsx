@@ -55,10 +55,10 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({
             variant="body2"
             sx={{ color: "text.secondary", width: { sm: 140 }, flexShrink: 0 }}
         >
-            {label}
+            {label && label || '-'}
         </Typography>
         <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
-            {value}
+            {value && value || '-'}
         </Typography>
     </Stack>
 );
@@ -104,144 +104,170 @@ export const AuditDetailsDrawer: React.FC<AuditDetailsDrawerProps> = ({
         >
             {log && (
                 <>
-                    {/* Header */}
+                    {/* Fixed Header */}
                     <Box
                         sx={{
-                            p: { xs: 2, sm: 3 },
+                            p: { xs: 2, sm: 2 },
                             borderBottom: 1,
                             borderColor: "divider",
                             flexShrink: 0,
                             bgcolor: "background.paper",
                         }}
                     >
-                        <Stack direction="row" sx={{
-                            justifyContent: "space-between", alignItems: "center"
-                        }}>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center"
+                            }}
+                        >
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>
                                 Audit Details
                             </Typography>
+
                             <IconButton onClick={onClose} size="small">
                                 <CloseIcon />
                             </IconButton>
                         </Stack>
-                        {/* Scrollable Body */}
-                        <Box
-                            sx={{
-                                flex: 1,
-                                overflowY: "auto",
-                                p: { xs: 2, sm: 3 },
-                            }}
-                        >
-                            <SectionTitle>Entity Information</SectionTitle>
-                            <InfoRow label="Entity Type" value={log.entityType} />
-                            <InfoRow label="Entity ID" value={log.entityId} />
-                            <InfoRow label="Entity Label" value={log.entityLabel} />
+                    </Box>
 
-                            <Divider sx={{ my: 1.5 }} />
+                    {/* Scrollable Body Only */}
+                    <Box
+                        sx={{
+                            flex: 1,
+                            overflowY: "auto",
+                            p: { xs: 2, sm: 2 },
+                        }}
+                    >
+                        <SectionTitle>Entity Information</SectionTitle>
+                        <InfoRow label="Entity Type" value={log.entityType} />
+                        <InfoRow label="Entity ID" value={log.entityId} />
+                        <InfoRow label="Entity Label" value={log.entityLabel} />
 
-                            <SectionTitle>Actor Information</SectionTitle>
-                            <InfoRow label="Name" value={log.actorName} />
-                            <InfoRow label="Email" value={log.actorEmail} />
-                            <InfoRow label="Role" value={<Chip label={log?.actorRole} key={log?.id} size="small" />} />
+                        <Divider sx={{ my: 1.5 }} />
 
-                            <Divider sx={{ my: 1.5 }} />
+                        <SectionTitle>Actor Information</SectionTitle>
+                        <InfoRow label="Name" value={log.actorName} />
+                        <InfoRow label="Email" value={log.actorEmail} />
+                        <InfoRow
+                            label="Role"
+                            value={<Chip label={log.actorRole} size="small" />}
+                        />
 
-                            <SectionTitle>Action Details</SectionTitle>
-                            <InfoRow
-                                label="Action"
-                                value={
-                                    <Chip
-                                        label={log.action}
-                                        size="small"
-                                        color={ACTION_COLOR[log.action] ?? "default"}
-                                    />
-                                }
-                            />
-                            <InfoRow label="Source" value={log.source} />
-                            <InfoRow label="Changed Date" value={formatDate(log.changedAt)} />
+                        <Divider sx={{ my: 1.5 }} />
 
-                            <Divider sx={{ my: 1.5 }} />
+                        <SectionTitle>Action Details</SectionTitle>
 
-                            <SectionTitle>Changes</SectionTitle>
-                            {log.changes && log.changes.length > 0 ? (
-                                <Box sx={{ overflowX: "auto" }}>
-                                    <Table size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Field</TableCell>
-                                                <TableCell>Old Value</TableCell>
-                                                <TableCell>New Value</TableCell>
+                        <InfoRow
+                            label="Action"
+                            value={
+                                <Chip
+                                    label={log.action}
+                                    size="small"
+                                    color={ACTION_COLOR[log.action] ?? "default"}
+                                />
+                            }
+                        />
+
+                        <InfoRow label="Source" value={log.source} />
+                        <InfoRow
+                            label="Changed Date"
+                            value={formatDate(log.changedAt)}
+                        />
+
+                        <Divider sx={{ my: 1.5 }} />
+
+                        <SectionTitle>Changes</SectionTitle>
+
+                        {log.changes && log.changes.length > 0 ? (
+                            <Box sx={{ overflowX: "auto" }}>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Field</TableCell>
+                                            <TableCell>Old Value</TableCell>
+                                            <TableCell>New Value</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+
+                                    <TableBody>
+                                        {log.changes.map((change, idx) => (
+                                            <TableRow
+                                                key={`${change.fieldName}-${idx}`}
+                                            >
+                                                <TableCell sx={{ whiteSpace: "nowrap" }}>
+                                                    {change.fieldLabel ||
+                                                        change.fieldName ||
+                                                        "-"}
+                                                </TableCell>
+
+                                                <TableCell>
+                                                    {change.oldValue || "-"}
+                                                </TableCell>
+
+                                                <TableCell>
+                                                    <Typography sx={{ fontWeight: 600 }}>
+                                                        {change.newValue || "-"}
+                                                    </Typography>
+                                                </TableCell>
                                             </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {log.changes.map((change, idx) => (
-                                                <TableRow key={`${change.fieldName}-${idx}`}>
-                                                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                                        {(change?.fieldLabel && change?.fieldLabel || '-') || (change?.fieldName && change?.fieldName || '-')}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {/* {isMobile ? (
-                                                    <Stack spacing={0.5} sx={{ alignItems: "flex-start" }}>
-                                                        <Typography variant="body2">{change.oldValue}</Typography>
-                                                        <ArrowDownwardIcon fontSize="small" color="disabled" />
-                                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                            {change.newValue && change.newValue || '-'}
-                                                        </Typography>
-                                                    </Stack>
-                                                ) : ( */}
-                                                        {change.oldValue && change?.oldValue || '-'}
-                                                        {/* )} */}
-                                                    </TableCell>
-                                                    {/* {!isMobile && ( */}
-                                                    <TableCell>
-                                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                            {change.newValue && change.newValue || '-'}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    {/* )} */}
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </Box>
-                            ) : (
-                                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                                    No field-level changes recorded.
-                                </Typography>
-                            )}
-                        </Box>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Box>
+                        ) : (
+                            <Typography
+                                variant="body2"
+                                sx={{ color: "text.secondary" }}
+                            >
+                                No field-level changes recorded.
+                            </Typography>
+                        )}
+                    </Box>
 
-                        {/* Fixed Footer */}
-                        <Box
+                    {/* Fixed Footer */}
+                    <Box
+                        sx={{
+                            p: { xs: 2, sm: 2 },
+                            borderTop: 1,
+                            borderColor: "divider",
+                            bgcolor: "background.paper",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={1}
                             sx={{
-                                p: { xs: 2, sm: 3 },
-                                borderTop: 1,
-                                borderColor: "divider",
-                                bgcolor: "background.paper",
-                                flexShrink: 0,
+                                justifyContent: "space-between"
                             }}
                         >
-                            <Stack
-                                direction={{ xs: "column", sm: "row" }}
-                                spacing={1}
-                                sx={{ mt: 3 }}
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    onViewEntityHistory(
+                                        log.entityType,
+                                        log.entityId)
+                                }
+                                sx={{
+                                    flex: 1,
+                                }}
                             >
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => onViewEntityHistory(log.entityType, log.entityId)}
-                                    sx={{ width: { xs: "100%", sm: "auto" } }}
-                                >
-                                    View Entity History
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => onViewUserHistory(log.actorUserId)}
-                                    sx={{ width: { xs: "100%", sm: "auto" } }}
-                                >
-                                    View User Activity
-                                </Button>
-                            </Stack>
-                        </Box>
+                                View Entity History
+                            </Button>
+
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    onViewUserHistory(log.actorUserId)
+                                }
+                                sx={{
+                                    flex: 1,
+                                }}
+                            >
+                                View User Activity
+                            </Button>
+                        </Stack>
                     </Box>
                 </>
             )}

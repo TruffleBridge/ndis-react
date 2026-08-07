@@ -2,6 +2,7 @@ import React from "react";
 import { Box, ListItemButton, Typography, Avatar } from "@mui/material";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import type { NotificationData } from "@/types/notification";
+import { TimeAgo } from "@/utils/helper";
 
 export interface NotificationItemProps {
     notification: NotificationData;
@@ -46,8 +47,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                 >
                     {notification?.message}
                 </Typography>
-                <Typography variant="caption" style={{ color: "#bdbdbd" }}>
-                    {new Date(notification?.createdAt).toLocaleString()}
+                <Typography variant="caption" sx={{
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    color: "#98A2B3",
+                    mt: 0.75,
+                    textAlign: "start",
+                }}>
+                    {TimeAgo(notification?.createdAt)}
                 </Typography>
             </Box>
         </ListItemButton>

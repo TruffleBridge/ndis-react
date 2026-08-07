@@ -59,7 +59,7 @@ export interface AuditLogFilters {
     entityType?: string;
     action?: AuditAction | string;
     actor?: string; // name / email search
-    keyword?: string;
+    search?: string;
     startDate?: string; // ISO date
     endDate?: string; // ISO date
     page?: number;

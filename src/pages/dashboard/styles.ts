@@ -220,7 +220,7 @@ export const dashboardStyles: Record<string, SxProps<Theme>> = {
   activityList: {
     p: 0,
     flex: 1,
-    overflowY: "auto",
+    // overflowY: "auto",
     maxHeight: { xs: 260, md: 310 },
   },
 

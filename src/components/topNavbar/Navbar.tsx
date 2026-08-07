@@ -47,7 +47,7 @@ export const TopNavbar = ({
   const pageTitle = getNavTitle(location.pathname);
   const navigate = useNavigate();
 
-  const profile = useProfileStore((state) => state.profile);
+  const profile = useProfileStore((s) => s.profile);
   const logout = useProfileStore((state) => state.logout);
 
   const [anchorEl1, setAnchorEl1] = useState<null | HTMLElement>(null);
@@ -83,6 +83,8 @@ export const TopNavbar = ({
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+
 
   return (
     <Box sx={S.appBar}>
@@ -144,7 +146,7 @@ export const TopNavbar = ({
           }}
         >
           <Avatar
-            src={""}
+            src={profile?.avatarUrl}
             sx={navbarStyles.userBtn}
 
           >

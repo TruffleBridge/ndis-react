@@ -32,18 +32,20 @@ interface AuditStoreState {
     entityHistory: AuditLogItem[];
     entityHistoryLoading: boolean;
     entityHistoryError: string | null;
+    entityHistoryTotalPages?: string | null;
 
     // Flow 3 — user history
     userHistory: AuditLogItem[];
     userHistoryLoading: boolean;
     userHistoryError: string | null;
+    userHistoryTotalPages?: string | null;
 
     // Actions
     setFilters: (filters: Partial<AuditLogFilters>) => void;
     resetFilters: () => void;
     fetchAuditLogs: (overrideFilters?: Partial<AuditLogFilters>) => Promise<void>;
-    fetchEntityHistory: (entityType: string, entityId: number | string) => Promise<void>;
-    fetchUserHistory: (userId: number | string) => Promise<void>;
+    fetchEntityHistory: (entityType: string, entityId: number | string, page?: number, limit?: number) => Promise<void>;
+    fetchUserHistory: (userId: number | string, page?: number, limit?: number) => Promise<void>;
     clearEntityHistory: () => void;
     clearUserHistory: () => void;
 }
@@ -67,6 +69,8 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
     userHistory: [],
     userHistoryLoading: false,
     userHistoryError: null,
+    entityHistoryTotalPages: null,
+    userHistoryTotalPages: null,
 
     setFilters: (filters) => {
         set((state) => ({
@@ -84,7 +88,7 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
         try {
             const response = await getApiRequest(
                 "admin/auditLogs",
-                { mergedFilters }
+                mergedFilters
             );
 
             const { items, pagination } = response?.data?.data ?? response?.data;
@@ -104,14 +108,15 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
     },
 
     // ---- FLOW 2: GET /api/admin/auditLogs/entity/{entityType}/{entityId} ----
-    fetchEntityHistory: async (entityType, entityId) => {
+    fetchEntityHistory: async (entityType, entityId, page, limit) => {
         set({ entityHistoryLoading: true, entityHistoryError: null });
 
         try {
-            const response = await getApiRequest(`admin/auditLogs/entity/${entityType}/${entityId}`);
-
+            const response = await getApiRequest(`admin/auditLogs/entity/${entityType}/${entityId}?page=${page}&limit=${limit}`);
+            const res_ = response?.data?.data ?? response?.data
             set({
-                entityHistory: response.data.data.items,
+                entityHistoryTotalPages: res_?.pagination,
+                entityHistory: res_?.items,
                 entityHistoryLoading: false,
             });
         } catch (err: any) {
@@ -124,13 +129,14 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
     },
 
     // ---- FLOW 3: GET /api/admin/auditLogs/user/{userId} ----
-    fetchUserHistory: async (userId) => {
+    fetchUserHistory: async (userId, page, limit) => {
         set({ userHistoryLoading: true, userHistoryError: null });
 
         try {
-            const response = await getApiRequest(`admin/auditLogs/user/${userId}`);
-
+            const response = await getApiRequest(`admin/auditLogs/user/${userId}?page=${page}&limit=${limit}`);
+            const res_ = response?.data?.data ?? response?.data
             set({
+                userHistoryTotalPages: res_?.pagination,
                 userHistory: response.data.data.items,
                 userHistoryLoading: false,
             });

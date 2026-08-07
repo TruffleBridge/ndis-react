@@ -6,7 +6,6 @@ import {
   FormControl,
   Grid,
   IconButton,
-  List,
   ListItem,
   MenuItem,
   Select,
@@ -35,11 +34,12 @@ import {
 import { Line, Bar } from "react-chartjs-2";
 import { CalendarIcon, CardGraph, SparkleIcon } from "@/assets";
 import { buttonStyle, dashboardStyles as S } from "./styles";
-import { type ChatMessage } from "@/components";
-import { useMemo, useState } from "react";
+import { InfiniteScrollList, type ChatMessage } from "@/components";
+import { useEffect, useMemo, useState } from "react";
 import { VirtualAssistantPopover } from "@/components/askAI";
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import { FileDownloadOutlined } from "@mui/icons-material";
+import { useDashboardStore } from "@/store/dashboardStore";
+import { TimeAgo } from "@/utils/helper";
 
 ChartJS.register(
   CategoryScale,
@@ -241,35 +241,29 @@ const revenueOptions = {
   },
 };
 
-const statCards = [
-  { title: "Active Clients", value: "2,345" },
-  { title: "Active Workers", value: "1,254" },
-  { title: "Active Bookings", value: "312" },
-  { title: "Monthly Revenue", value: "$1,345K" },
-];
 
-const activities = [
-  {
-    title: "Booking Completed",
-    desc: "Care Specialist #102 logged 4.0 hours for Client: Mary S.",
-    time: "2 mins ago",
-  },
-  {
-    title: "New Client Signed",
-    desc: "Onboarding package sent to David L. in Melbourne.",
-    time: "14 mins ago",
-  },
-  {
-    title: "Worker Login",
-    desc: "Admin login detected from 192.168.1.45 (Sydney).",
-    time: "18 mins ago",
-  },
-  {
-    title: "Worker Verified",
-    desc: "ID verification approved for Jane K. (Brisbane).",
-    time: "32 mins ago",
-  },
-];
+// const activities = [
+//   {
+//     title: "Booking Completed",
+//     desc: "Care Specialist #102 logged 4.0 hours for Client: Mary S.",
+//     time: "2 mins ago",
+//   },
+//   {
+//     title: "New Client Signed",
+//     desc: "Onboarding package sent to David L. in Melbourne.",
+//     time: "14 mins ago",
+//   },
+//   {
+//     title: "Worker Login",
+//     desc: "Admin login detected from 192.168.1.45 (Sydney).",
+//     time: "18 mins ago",
+//   },
+//   {
+//     title: "Worker Verified",
+//     desc: "ID verification approved for Jane K. (Brisbane).",
+//     time: "32 mins ago",
+//   },
+// ];
 
 const actions = [
   {
@@ -307,6 +301,16 @@ const actions = [
 // ─── Component ───
 const Dashboard = () => {
   const [view, setView] = useState<"day" | "week" | "month">("month");
+
+  const {
+    summary,
+    liveActivities,
+    liveActivityHasMore,
+    liveActivityLoading,
+    getDashboardSummary,
+    getLiveActivityList,
+    loadMoreLiveActivities,
+  } = useDashboardStore();
 
   // ask ai state
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -385,6 +389,37 @@ const Dashboard = () => {
     ],
   }), [view]);
 
+
+  // cards keys
+  const statCards = [
+    {
+      title: "Active Clients",
+      key: "activeClients",
+    },
+    {
+      title: "Active Workers",
+      key: "activeWorkers",
+    },
+    {
+      title: "Active Bookings",
+      key: "activeBookings",
+    },
+    {
+      title: "Monthly Revenue",
+      key: "monthlyRevenue",
+    },
+  ];
+
+  useEffect(() => {
+    getDashboardSummary();
+
+    getLiveActivityList({
+      page: 1,
+      limit: 5,
+    });
+  }, []);
+
+
   return (
     <Box sx={S.root}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -405,9 +440,7 @@ const Dashboard = () => {
               Ask AI
             </Button>
           </VirtualAssistantPopover>
-          <Button startIcon={<FileDownloadOutlined sx={{ fontSize: 16 }} />} variant="outlined" sx={S.ctaExport}>
-            Export Report
-          </Button>
+
           <Button startIcon={<AddIcon />} variant="contained" sx={S.bookingCta}>
             New Booking
           </Button>
@@ -421,7 +454,9 @@ const Dashboard = () => {
             <Card sx={S.kpiCard}>
               <CardContent sx={S.kpiCardContent}>
                 <Typography variant="h5" sx={S.kpiValue}>
-                  {item.value}
+                  {item.key === "monthlyRevenue"
+                    ? `$${summary?.[item.key as keyof typeof summary]?.toLocaleString() || 0}`
+                    : summary?.[item.key as keyof typeof summary] || 0}
                 </Typography>
                 <Typography variant="body2" sx={S.kpiLabel}>
                   {item.title}
@@ -544,40 +579,51 @@ const Dashboard = () => {
         </Grid>
 
         {/* Live Activity */}
+        {/* Live Activity */}
         <Grid size={{ xs: 12, lg: 3 }}>
           <Card sx={S.sideCard}>
             <CardContent sx={S.sideCardContent}>
               <Box sx={S.pendingHeader}>
-                {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.sideCardTitle}>
                   Live Activity
                 </Typography>
               </Box>
-              <List sx={S.activityList}>
-                {activities.map((item, index) => (
-                  <ListItem key={index} sx={S.activityItem}>
-                    {/* Timeline dot + connector */}
-                    <Box sx={S.activityTimelineBox}>
-                      <Box sx={S.activityDot} />
-                      {/* Only draw connector when NOT the last item */}
-                      {index !== activities.length - 1 && (
-                        <Box
-                          sx={{
-                            ...S.activityLine,
-                            height: 60,
-                          }}
-                        />
-                      )}
-                    </Box>
 
-                    <Box>
-                      <Typography sx={S.activityTitle}>{item.title}</Typography>
-                      <Typography sx={S.activityDesc}>{item.desc}</Typography>
-                      <Typography sx={S.activityTime}>{item.time}</Typography>
-                    </Box>
-                  </ListItem>
-                ))}
-              </List>
+              <Box sx={S.activityList}>
+                <InfiniteScrollList
+                  items={liveActivities?.rows ?? []}
+                  keyExtractor={(item, index) => item?.id ?? index}
+                  onLoadMore={loadMoreLiveActivities}
+                  hasMore={liveActivityHasMore}
+                  loading={liveActivityLoading}
+                  height={320} // 🔑 unga S.activityList oda actual fixed height ah kudunga - important
+                  renderItem={(item, index) => {
+                    const rows = liveActivities?.rows ?? [];
+                    const isLast = index === rows.length - 1;
+
+                    return (
+                      <ListItem key={item?.id ?? index} sx={S.activityItem}>
+                        <Box sx={S.activityTimelineBox}>
+                          <Box sx={S.activityDot} />
+                          {!isLast && (
+                            <Box sx={{ ...S.activityLine, height: 60 }} />
+                          )}
+                        </Box>
+
+                        <Box>
+                          <Typography sx={S.activityTitle}>
+                            {item?.eventMaster?.name}
+                          </Typography>
+                          <Typography sx={S.activityDesc}>{item?.message}</Typography>
+                          <Typography sx={S.activityTime}>
+                            {TimeAgo(item.updatedAt)}
+                          </Typography>
+                        </Box>
+                      </ListItem>
+                    );
+                  }}
+                />
+              </Box>
 
               <Button fullWidth variant="outlined" sx={S.viewHistoryBtn}>
                 View all History

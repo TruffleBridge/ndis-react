@@ -3,12 +3,13 @@ import {
     Button,
     Popover,
     Stack,
-    Box,
     type SxProps,
-    type Theme,
 } from "@mui/material";
-import AutocompleteField from "../select/autocompleteField";
+import { Dayjs } from "dayjs";
 import FilterListIcon from "@mui/icons-material/FilterList";
+
+import AutocompleteField from "../select/autocompleteField";
+import DateField from "../dateField/dateField"; // Update the path if needed
 
 export interface FilterSelectConfig<T = any> {
     id: string;
@@ -23,15 +24,32 @@ export interface FilterSelectConfig<T = any> {
     onChange: (value: any) => void;
 }
 
+export interface FilterDateConfig {
+    id: string;
+    label: string;
+    value: Dayjs | null;
+    required?: boolean;
+    disabled?: boolean;
+    disableFuture?: boolean;
+    disablePast?: boolean;
+    minDate?: Dayjs;
+    maxDate?: Dayjs;
+    referenceDate?: Dayjs;
+    openToYear?: "year" | "month" | "day";
+    error?: string;
+    onChange: (value: Dayjs | null) => void;
+}
+
 interface Props {
     buttonLabel?: string;
-    selects: FilterSelectConfig[];
+    selects?: FilterSelectConfig[];
+    dates?: FilterDateConfig[];
     onApply: () => void;
     onClear: () => void;
     disabled?: boolean;
 }
 
-const toolbarBtnSx: SxProps<Theme> = {
+const toolbarBtnSx: SxProps = {
     color: "custom.200",
     borderColor: "#D0D5DD",
     borderRadius: "8px",
@@ -40,25 +58,26 @@ const toolbarBtnSx: SxProps<Theme> = {
     fontSize: "14px",
     px: 2,
     py: 0.75,
-    borderWidth: '1.4px',
-    "&:hover": { borderColor: "#D0D5DD", backgroundColor: "#F9FAFB" },
+    borderWidth: "1.4px",
+    "&:hover": {
+        borderColor: "#D0D5DD",
+        backgroundColor: "#F9FAFB",
+    },
 };
 
 export const FilterPopover = ({
     buttonLabel = "Filter",
-    selects,
+    selects = [],
+    dates = [],
     onApply,
     onClear,
-    disabled
+    disabled,
 }: Props) => {
-    const [anchorEl, setAnchorEl] =
-        useState<HTMLButtonElement | null>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
     const open = Boolean(anchorEl);
 
-    const handleOpen = (
-        event: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
@@ -73,7 +92,7 @@ export const FilterPopover = ({
 
     const handleClear = () => {
         if (disabled) {
-            handleClose()
+            handleClose();
         } else {
             onClear();
         }
@@ -94,17 +113,6 @@ export const FilterPopover = ({
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handleClose}
-                slotProps={{
-                    paper: {
-                        sx: {
-                            p: 2,
-                            boxShadow: "0px 1px 3px rgba(0,0,0,0.04),0px 12px 32px rgba(0,0,0,0.08)",
-                            borderRadius: 2,
-                            border: '1px solid',
-                            borderColor: 'custom.800'
-                        }
-                    }
-                }}
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "left",
@@ -113,38 +121,67 @@ export const FilterPopover = ({
                     vertical: "top",
                     horizontal: "left",
                 }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            p: 2,
+                            width: 340,
+                            boxShadow:
+                                "0px 1px 3px rgba(0,0,0,0.04),0px 12px 32px rgba(0,0,0,0.08)",
+                            borderRadius: 2,
+                            border: "1px solid",
+                            borderColor: "custom.800",
+                        },
+                    },
+                }}
             >
-                <Box sx={{ pt: 1, width: 320, maxHeight: 400, height: '100%', minHeight: 300 }}>
-                    <Stack spacing={2}>
-                        {selects.map((item) => (
-                            <AutocompleteField
-                                key={item.id}
-                                label={item?.label}
-                                multiple={item.multiple}
-                                options={item.options}
-                                value={item.value}
-                                disabled={item.disabled}
-                                onChange={(value) =>
-                                    item.onChange(value)
-                                }
-                            />
-                        ))}
-                    </Stack>
-                </Box>
+                <Stack spacing={2}>
+                    {selects.map((item) => (
+                        <AutocompleteField
+                            key={item.id}
+                            label={item.label}
+                            multiple={item.multiple}
+                            options={item.options}
+                            value={item.value}
+                            disabled={item.disabled}
+                            error={item.error}
+                            onChange={item.onChange}
+                        />
+                    ))}
+
+                    {dates.map((item) => (
+                        <DateField
+                            key={item.id}
+                            label={item.label}
+                            value={item.value}
+                            required={item.required}
+                            disabled={item.disabled}
+                            disableFuture={item.disableFuture}
+                            disablePast={item.disablePast}
+                            minDate={item.minDate}
+                            maxDate={item.maxDate}
+                            referenceDate={item.referenceDate}
+                            openToYear={item.openToYear}
+                            error={item.error}
+                            onChange={item.onChange}
+                        />
+                    ))}
+                </Stack>
+
                 <Stack
                     direction="row"
-                    spacing={2}
                     sx={{
-                        justifyContent: "space-between",
-                        pt: 1.5,
-                        borderTop: '1px solid',
-                        borderColor: 'custom.800'
+                        mt: 2,
+                        pt: 2,
+                        borderTop: "1px solid",
+                        borderColor: "custom.800",
+                        justifyContent: "space-between"
                     }}
                 >
                     <Button
                         variant="outlined"
                         sx={{
-                            borderColor: 'custom.800'
+                            borderColor: "custom.800",
                         }}
                         onClick={handleClear}
                     >
@@ -153,8 +190,8 @@ export const FilterPopover = ({
 
                     <Button
                         variant="contained"
-                        onClick={handleApply}
                         disabled={disabled}
+                        onClick={handleApply}
                     >
                         Apply
                     </Button>

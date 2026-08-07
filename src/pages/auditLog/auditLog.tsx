@@ -3,10 +3,12 @@ import { Box, Avatar, Chip, Typography } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { FilterPopover, FormLabel, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
 import { useEffect, useState } from "react";
+import type { Dayjs } from "dayjs";
 import { useAuditStore } from "@/store/auditStore";
 import type { AuditLogItem } from "@/types/audit";
 import { AuditDetailsDrawer, EntityHistoryDrawer, UserHistoryDrawer } from "@/components/audit";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import dayjs from "dayjs";
 
 interface AuditProps {
     [key: string]: unknown;
@@ -50,7 +52,13 @@ const formatDateTime = (iso?: string) => {
 export default function AuditLogsPage() {
     const { auditLogs, pagination, error, loading, fetchAuditLogs, setFilters } = useAuditStore();
     const [searchValue, setSearchValue] = useState("");
-    const [filter, setFilter] = useState<any>(null);
+    const [filter, setFilter] = useState<{ action: any[]; entityType: any[]; startDate: Dayjs | null; endDate: Dayjs | null; search: string }>({
+        action: [],
+        entityType: [],
+        startDate: null,
+        endDate: null,
+        search: "",
+    });
     const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [entityHistoryOpen, setEntityHistoryOpen] = useState(false);
@@ -129,31 +137,89 @@ export default function AuditLogsPage() {
 
     const handleSearch = (value: string) => {
         setSearchValue(value);
-        fetchAuditLogs({ keyword: value, page: 1, limit: ROWS_PER_PAGE });
+        fetchAuditLogs({ search: value, page: 1, limit: ROWS_PER_PAGE });
     };
 
     const handlePageChange = (page: number) => {
-        fetchAuditLogs({ page, limit: ROWS_PER_PAGE, keyword: searchValue });
+        debugger;
+        const offset = page;
+        fetchAuditLogs({ page: offset, limit: ROWS_PER_PAGE, search: searchValue });
     };
 
     const handleApplyFilter = () => {
         const payload = {
-            entityType: filter?.find((x: any) => x.id === "entityType")?.value ?? [],
-            action: filter?.find((x: any) => x.id === "action")?.value ?? [],
+            action: filter.action.map((x: any) => x.value).join(",") || undefined,
+            entityType: filter.entityType.map((x: any) => x.value).join(",") || undefined,
+            fromDate: filter.startDate ? filter.startDate.toISOString() : undefined,
+            toDate: filter.endDate ? filter.endDate.toISOString() : undefined,
+            page: 1,
+            limit: ROWS_PER_PAGE,
         };
+
         setFilters(payload);
-        fetchAuditLogs({ ...payload, page: 1, limit: ROWS_PER_PAGE });
+        fetchAuditLogs(payload);
     };
 
     const handleClear = () => {
-        setFilter(null);
-        fetchAuditLogs({ page: 1, limit: ROWS_PER_PAGE });
-    };
+        setFilter({
+            action: [],
+            entityType: [],
+            startDate: null,
+            endDate: null,
+            search: "",
+        });
+        const payload = {
+            action: undefined,
+            entityType: undefined,
+            fromDate: undefined,
+            toDate: undefined,
+            page: 1,
+            limit: ROWS_PER_PAGE,
+        };
 
+
+        setFilters({});
+        fetchAuditLogs(payload);
+    };
     const rows = auditLogs?.map((item) => ({
         ...item,
         changedAt: item.changedAt,
     })) ?? [];
+
+
+    const filterJson = [
+        {
+            id: "action",
+            label: "Action",
+            multiple: true,
+            options: [
+                { label: "Create", value: "CREATE" },
+                { label: "Update", value: "UPDATE" },
+                { label: "Delete", value: "DELETE" },
+            ],
+            value: filter.action,
+            onChange: (val: any) =>
+                setFilter((prev) => ({
+                    ...prev,
+                    action: val,
+                })),
+        },
+        {
+            id: "entityType",
+            label: "Entity Type",
+            multiple: true,
+            options: [
+                { label: "Workflow", value: "wf" },
+                { label: "User", value: "user" },
+            ],
+            value: filter.entityType,
+            onChange: (val: any) =>
+                setFilter((prev) => ({
+                    ...prev,
+                    entityType: val,
+                })),
+        },
+    ]
 
     return (
         <Box>
@@ -165,7 +231,7 @@ export default function AuditLogsPage() {
                 columns={AUDIT_COLUMNS}
                 rowActions={rowActions}
                 totalPages={pagination.totalPages}
-                currentPage={pagination.page}
+                currentPage={pagination.page === 1 ? 1 : pagination.page}
                 searchValue={searchValue}
                 noData="No audit records found"
                 noDataSubTitle="There is no audit data available."
@@ -181,21 +247,38 @@ export default function AuditLogsPage() {
                 filterChildren={
                     <FilterPopover
                         buttonLabel="Filter"
-                        selects={[
+                        selects={filterJson}
+                        dates={[
                             {
-                                id: "action",
-                                label: "Action",
-                                multiple: true,
-                                options: [
-                                    { label: "Create", value: "CREATE" },
-                                    { label: "Update", value: "UPDATE" },
-                                    { label: "Delete", value: "DELETE" },
-                                ],
-                                value: filter,
-                                onChange: (val: any) => setFilter(val),
+                                id: "startDate",
+                                label: "From Date",
+                                value: filter.startDate,
+                                disableFuture: true,
+                                onChange: (value) =>
+                                    setFilter((prev) => ({
+                                        ...prev,
+                                        startDate: value,
+                                    })),
+                            },
+                            {
+                                id: "endDate",
+                                label: "To Date",
+                                value: filter.endDate,
+                                minDate: dayjs(filter.startDate),
+                                disableFuture: true,
+                                onChange: (value) =>
+                                    setFilter((prev) => ({
+                                        ...prev,
+                                        endDate: value,
+                                    })),
                             },
                         ]}
-                        disabled={!filter?.length}
+                        disabled={
+                            !filter.action.length &&
+                            !filter.entityType.length &&
+                            !filter.startDate &&
+                            !filter.endDate
+                        }
                         onApply={handleApplyFilter}
                         onClear={handleClear}
                     />

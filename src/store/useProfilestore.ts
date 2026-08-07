@@ -1,8 +1,20 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { AdminProfile } from "@/types/profile";
-import { getApiRequest, updateApiRequest } from "@/api/api";
+import { createApiRequest, getApiRequest, updateApiRequest } from "@/api/api";
 import { handleApiError } from "@/utils/errorHandler";
+
+interface PasswordForm {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+const initialPasswordForm: PasswordForm = {
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+};
 
 interface ProfileState {
     // ---- data ----
@@ -13,6 +25,13 @@ interface ProfileState {
     isEditMode: boolean;
     isSaving: boolean;
     getlistLoading: boolean;
+    errors: string | null;
+
+    // ---- password change state ----
+    passwordForm: PasswordForm;
+    isPasswordSaving: boolean;
+    passwordError: string | null;
+    passwordSuccess: string | null;
 
     // ---- actions ----
     setField: <K extends keyof AdminProfile>(field: K, value: AdminProfile[K]) => void;
@@ -21,7 +40,11 @@ interface ProfileState {
     updateProfile: () => Promise<void>;
     initForm: () => Promise<void>;
     logout: () => void;
-    errors: string | null;
+
+    // ---- password actions ----
+    setPasswordField: <K extends keyof PasswordForm>(field: K, value: PasswordForm[K]) => void;
+    resetPasswordForm: () => void;
+    updatePassword: () => Promise<boolean>;
 }
 
 // ---- mock initial admin data (replace with API response) ----
@@ -36,6 +59,7 @@ const initialProfile: AdminProfile = {
     state: "",
     pincode: "",
     avatarUrl: "",
+    url: '',
     status: null,
 };
 
@@ -47,6 +71,12 @@ export const useProfileStore = create<ProfileState>()(
         isSaving: false,
         errors: "",
         getlistLoading: false,
+
+        // password state
+        passwordForm: initialPasswordForm,
+        isPasswordSaving: false,
+        passwordError: null,
+        passwordSuccess: null,
 
 
         setField: (field, value) =>
@@ -68,8 +98,6 @@ export const useProfileStore = create<ProfileState>()(
 
 
         initForm: async () => {
-
-
             // Edit and View both need the existing record - same GET, different
             // `isView` flag downstream in the components.
             set({ getlistLoading: true });
@@ -136,11 +164,10 @@ export const useProfileStore = create<ProfileState>()(
                     state: draftProfile?.state ?? "",
                     zipCode: draftProfile?.pincode ?? "",
                 },
-                profilePicture: draftProfile?.avatarUrl ?? "",
+                profilePicture: draftProfile?.url ?? "",
                 status: draftProfile?.status ?? "",
             }
             try {
-                // TODO: replace with real API call
                 const res = await updateApiRequest("/admin/updateUser", payload);
                 const updatedRecord = res.data?.status || res?.data?.data?.status;
                 if (updatedRecord) {
@@ -153,6 +180,57 @@ export const useProfileStore = create<ProfileState>()(
                 const message = handleApiError(err, "Failed to update user");
                 set({ isSaving: false, errors: message ?? "Failed to submit worker details" });
                 throw err;
+            }
+        },
+
+        // ---- password handlers ----
+        setPasswordField: (field, value) =>
+            set((state) => ({
+                passwordForm: { ...state.passwordForm, [field]: value },
+                passwordError: null,
+                passwordSuccess: null,
+            })),
+
+        resetPasswordForm: () =>
+            set({
+                passwordForm: initialPasswordForm,
+                passwordError: null,
+                passwordSuccess: null,
+            }),
+
+        updatePassword: async () => {
+            const { passwordForm } = get();
+            const { currentPassword, newPassword, confirmPassword } = passwordForm;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                set({ passwordError: "Please fill all password fields" });
+                return false;
+            }
+            if (newPassword !== confirmPassword) {
+                set({ passwordError: "New password and confirm password do not match" });
+                return false;
+            }
+
+            set({ isPasswordSaving: true, passwordError: null, passwordSuccess: null });
+            try {
+                const payload = { currentPassword, newPassword, confirmPassword };
+                const res = await createApiRequest("/auth/updatePassword", payload);
+                const success = res?.data?.status || res?.data?.data?.status;
+                if (success) {
+                    set({
+                        isPasswordSaving: false,
+                        passwordSuccess: "Password updated successfully",
+                        passwordForm: initialPasswordForm,
+                    });
+                    return true;
+                } else {
+                    set({ isPasswordSaving: false, passwordError: "Failed to update password" });
+                    return false;
+                }
+            } catch (err) {
+                const message = handleApiError(err, "Failed to update password");
+                set({ isPasswordSaving: false, passwordError: message ?? "Failed to update password" });
+                return false;
             }
         },
 
