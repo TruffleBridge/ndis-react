@@ -157,8 +157,9 @@ const ClientFormPage = () => {
                                     title={getHeader && getHeader(activeStep)}
                                     subtitle={getSubHeader && getSubHeader(activeStep)} />
 
-                                <CircularProgressWithLabel
-                                    value={progressValue(activeStep)} />
+                                {mode === 'create' && <CircularProgressWithLabel
+                                    value={progressValue(activeStep)}
+                                />}
                             </div>
                             <Box sx={ClientStyles.rightSide}>
                                 {renderRightSide()}

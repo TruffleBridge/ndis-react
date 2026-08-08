@@ -167,7 +167,7 @@ const WorkerPage = () => {
                             subtitle={getSubHeader && getSubHeader(activeStep)}
                         />
 
-                        {!isView && <CircularProgressWithLabel value={progressValue(activeStep)} />}
+                        {mode === 'create' && <CircularProgressWithLabel value={progressValue(activeStep)} />}
                     </Box>
                     <Box sx={WorkerStyles.rightSide}>{renderRightSide()}</Box>
                 </Box>

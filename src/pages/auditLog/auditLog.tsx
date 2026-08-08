@@ -50,7 +50,7 @@ const formatDateTime = (iso?: string) => {
 };
 
 export default function AuditLogsPage() {
-    const { auditLogs, pagination, error, loading, fetchAuditLogs, setFilters } = useAuditStore();
+    const { auditLogs, pagination, error, loading, fetchAuditLogs, setFilters, entityOption } = useAuditStore();
     const [searchValue, setSearchValue] = useState("");
     const [filter, setFilter] = useState<{ action: any[]; entityType: any[]; startDate: Dayjs | null; endDate: Dayjs | null; search: string }>({
         action: [],
@@ -148,7 +148,7 @@ export default function AuditLogsPage() {
     const handleApplyFilter = () => {
         const payload = {
             action: filter.action.map((x: any) => x.value).join(",") || undefined,
-            entityType: filter.entityType.map((x: any) => x.value).join(",") || undefined,
+            entityType: filter.entityType.map((x: any) => x.label).join(",") || undefined,
             fromDate: filter.startDate ? filter.startDate.toISOString() : undefined,
             toDate: filter.endDate ? filter.endDate.toISOString() : undefined,
             page: 1,
@@ -156,7 +156,7 @@ export default function AuditLogsPage() {
         };
 
         setFilters(payload);
-        fetchAuditLogs(payload);
+        fetchAuditLogs(payload, true);
     };
 
     const handleClear = () => {
@@ -194,6 +194,7 @@ export default function AuditLogsPage() {
             options: [
                 { label: "Create", value: "CREATE" },
                 { label: "Update", value: "UPDATE" },
+                { label: "Replace", value: "REPLACE" },
                 { label: "Delete", value: "DELETE" },
             ],
             value: filter.action,
@@ -207,10 +208,7 @@ export default function AuditLogsPage() {
             id: "entityType",
             label: "Entity Type",
             multiple: true,
-            options: [
-                { label: "Workflow", value: "wf" },
-                { label: "User", value: "user" },
-            ],
+            options: entityOption,
             value: filter.entityType,
             onChange: (val: any) =>
                 setFilter((prev) => ({

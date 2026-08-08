@@ -291,7 +291,7 @@ export default function WorkersTable() {
         showStatusSwitch={stateModal === 'status'}
         onStatusChange={(e) => updateState?.(e)}
         status={status}
-        backText={"cancel"}
+        backText={"Cancel"}
         primaryText="Confirm"
         onBack={handleClose}
         onPrimary={handleStatueChange}

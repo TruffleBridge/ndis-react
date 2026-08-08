@@ -190,7 +190,11 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                         }}
                     >
                         {userHistory.map((item, idx) => (
-                            <TimelineItem key={item.id}>
+                            <TimelineItem key={item.id} sx={{
+                                '::before':{
+                                    display:'none'
+                                }
+                            }}>
                                 <TimelineSeparator>
                                     <TimelineDot color={ACTION_COLOR[item.action] ?? "grey"} />
                                     {idx < userHistory.length - 1 && <TimelineConnector />}

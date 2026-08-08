@@ -135,7 +135,12 @@ export const FilterPopover = ({
                     },
                 }}
             >
-                <Stack spacing={2}>
+                <Stack spacing={2} sx={{
+                    height: '100%',
+                    maxHeight: '320px',
+                    overflow: 'auto',
+                    minHeight: '320px'
+                }}>
                     {selects.map((item) => (
                         <AutocompleteField
                             key={item.id}
