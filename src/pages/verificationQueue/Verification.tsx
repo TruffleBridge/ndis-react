@@ -5,20 +5,20 @@ import {
   Chip,
   Typography,
 } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { useEffect, useMemo, useState } from "react";
 import {
   Loading,
   TableComponent,
   type ColumnDef,
   type ColumnState,
-  type RowAction,
 } from "@/components";
 import { useVerificationQueueStore } from "@/store/useVerification";
 import dayjs from "dayjs";
 import { formatStatus } from "@/utils/menuUtils";
 import { cta, VerifyStyles } from "./style";
 import { useExportStore } from "@/store/useExportStore";
+import { usePermission } from "@/hooks/usePermission";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 interface VerificationRow {
   id: number;
@@ -80,9 +80,20 @@ export default function VerificationTable() {
     getVerificationQueue,
   } = useVerificationQueueStore();
 
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
+
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isLoading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canExport } = usePermission('Verification');
+
 
   const [selected, setSelected] = useState<"client" | "worker">("client");
   const [searchValue, setSearchValue] = useState("");
@@ -203,26 +214,14 @@ export default function VerificationTable() {
     buildColumnStates(columns)
   );
 
-  // row action
-  const rowActions: RowAction<VerificationRow>[] = [
-    {
-      label: "View",
-      icon: (
-        <VisibilityOutlinedIcon
-          sx={{
-            fontSize: 16,
-            color: "#7F7F7F",
-          }}
-        />
-      ),
-      onClick: (row) => {
-        console.log(
-          "View",
-          row
-        );
-      },
-    },
-  ];
+  // row actions 
+  // const rowActions = (row: VerificationRow) =>
+  //   useRowActions({
+  //     row,
+  //     status: row.status,
+
+  //     onEdit: () => console.log(row, "edit"),
+  //   });
 
   // tab function
   const handleTab = (val: any) => {
@@ -244,9 +243,11 @@ export default function VerificationTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
+    const offset = (page - 1) * ROWS_PER_PAGE;
+
     setCurrentPage(page - 1);
     getVerificationQueue({
-      offset: page - 1,
+      offset: offset,
       limit: ROWS_PER_PAGE,
       search: searchValue,
       type: selected,
@@ -275,7 +276,10 @@ export default function VerificationTable() {
     const visibleColumns = columnStates.filter((column) => column.visible).map((column) => column.key);
     exportExcel("/admin/verificationQueue/export", {
       customizeTable: visibleColumns ?? [],
-      type: selected
+      type: selected,
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows?.map((v) => v.id),
+      }),
     });
   }
 
@@ -311,7 +315,7 @@ export default function VerificationTable() {
       <TableComponent
         rows={tableRows}
         columns={columns}
-        rowActions={rowActions}
+        // rowActions={rowActions}
         searchPlaceholder={selected === 'client' ? 'Search Client name' : 'Search Support Worker name'}
         noData="No verification records found"
         noDataSubTitle="There is no data available to display at the moment."
@@ -322,9 +326,13 @@ export default function VerificationTable() {
         columnStates={columnStates}
         onColumnStatesChange={setColumnStates}
         onSearch={handleSearch}
+        showExport={canExport}
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
-        onFilter={() => { }}
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
     </Box>
   );

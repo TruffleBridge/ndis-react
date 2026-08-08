@@ -24,7 +24,6 @@ import type {
     Theme,
 } from "@mui/material"
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -32,6 +31,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { NoDataFound } from "../noData/NoDataFound";
+import { RoleCheckedboxIcon, RolesCheckboxIcon } from "@/assets";
+import { IndeterminateCheckBox } from "@mui/icons-material";
 
 //  Types 
 
@@ -72,11 +73,11 @@ export interface TableComponentProps<T = Record<string, unknown>> {
     showExport?: boolean;
 
     // Controlled column state from parent
-    columnStates: ColumnState[];
-    onColumnStatesChange: (next: ColumnState[]) => void;
+    columnStates?: ColumnState[];
+    onColumnStatesChange?: (next: ColumnState[]) => void;
 
     onSearch?: (value: string) => void;
-    onFilter?: () => void;
+    filterChildren?: any;
     onExportData?: () => void;
     onPageChange?: (page: number) => void;
     onCustomChange?: () => void;
@@ -85,6 +86,12 @@ export interface TableComponentProps<T = Record<string, unknown>> {
     noData?: string;
     noDataSubTitle?: string;
     isLoading?: boolean;
+
+    // checkbox fucntion
+    selectedRows?: any[];
+    onSelectAll?: (checked: boolean, rows: any[]) => void;
+    onSelectRow?: (checked: boolean, row: any) => void;
+
 }
 
 //  TableComponent 
@@ -105,13 +112,16 @@ export function TableComponent<T extends Record<string, unknown>>({
     columnStates,
     onColumnStatesChange,
     onSearch,
-    onFilter,
+    filterChildren,
     onExportData,
     onPageChange,
     onCustomChange,
     isHasAction = false,
     noData = '',
     noDataSubTitle = '',
+    onSelectAll = () => null,
+    onSelectRow = () => null,
+    selectedRows = []
 }: TableComponentProps<T>) {
 
     // ── Row context menu ──────────────────────────────────────────────────────
@@ -145,7 +155,7 @@ export function TableComponent<T extends Record<string, unknown>>({
 
     // Open panel → copy current columnStates into draft
     const handleOpenCustomize = () => {
-        setDraftStates(columnStates.map((cs) => ({ ...cs })));
+        setDraftStates(columnStates?.map((cs) => ({ ...cs })) || []);
         setCustomizeOpen(true);
     };
 
@@ -156,7 +166,7 @@ export function TableComponent<T extends Record<string, unknown>>({
 
     // Apply draft → push to parent, close panel
     const handleApply = () => {
-        onColumnStatesChange(draftStates);
+        onColumnStatesChange?.(draftStates);
         setCustomizeOpen(false);
     };
 
@@ -193,7 +203,7 @@ export function TableComponent<T extends Record<string, unknown>>({
     };
 
     // Derive columns to render from the committed columnStates (not draft)
-    const visibleColumns = columnStates
+    const visibleColumns = (columnStates ?? [])
         .filter((cs) => cs.visible)
         .map((cs) => columns.find((col) => col.headerName === cs.key)!)
         .filter(Boolean);
@@ -207,6 +217,7 @@ export function TableComponent<T extends Record<string, unknown>>({
         px: 2,
         whiteSpace: "nowrap",
         backgroundColor: "#F6F6F6",
+        textTransform: 'capitalize'
     };
 
     const baseBodyCellSx: SxProps<Theme> = {
@@ -215,12 +226,13 @@ export function TableComponent<T extends Record<string, unknown>>({
         fontSize: "14px",
         fontWeight: 400,
         color: "#222124",
-        borderBottom: "1px solid #E5E7EB",
+        borderBottom: "1px solid",
+        borderColor: 'custom.800'
 
     };
 
     const toolbarBtnSx: SxProps<Theme> = {
-        color: "#7F7F7F",
+        color: "custom.200",
         borderColor: "#D0D5DD",
         borderRadius: "8px",
         textTransform: "none",
@@ -235,6 +247,15 @@ export function TableComponent<T extends Record<string, unknown>>({
     const isStatusLast =
         visibleColumns?.find((v) => v?.field === "status")?.field;
 
+
+    // checkbox functions
+    const allSelected =
+        rows.length > 0 && selectedRows?.length === rows?.length;
+
+    const someSelected =
+        selectedRows?.length > 0 && selectedRows?.length < rows?.length;
+
+
     //  Render
     return (
         <Box sx={{
@@ -245,7 +266,6 @@ export function TableComponent<T extends Record<string, unknown>>({
             <Paper
                 elevation={0}
                 sx={{
-                    // border: "1px solid #E5E7EB",
                     borderTopLeftRadius: "12px !important",
                     borderTopRightRadius: "12px !important",
                     // overflow: "visible",
@@ -315,14 +335,7 @@ export function TableComponent<T extends Record<string, unknown>>({
                         )}
 
                         {showFilter && (
-                            <Button
-                                variant="outlined"
-                                startIcon={<FilterListIcon sx={{ fontSize: 16 }} />}
-                                onClick={onFilter}
-                                sx={toolbarBtnSx}
-                            >
-                                Filter
-                            </Button>
+                            filterChildren
                         )}
                     </Box>
 
@@ -363,9 +376,10 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                 top: "calc(100% + 8px)",
                                                 // right: 0,
                                                 zIndex: 1300,
-                                                width: 260,
+                                                width: 'auto',
                                                 borderRadius: "12px",
-                                                border: "1px solid #E5E7EB",
+                                                border: "1px solid",
+                                                borderColor: 'custom.800',
                                                 overflow: "hidden",
                                                 boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
                                             }}
@@ -420,11 +434,9 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                             checked={cs.visible}
                                                             onChange={() => handleToggleVisible(cs.key)}
                                                             onClick={(e) => e.stopPropagation()}
-                                                            sx={{
-                                                                padding: "4px",
-                                                                color: "#D1D5DB",
-                                                                "&.Mui-checked": { color: "#111827" },
-                                                            }}
+                                                            checkedIcon={<RoleCheckedboxIcon />}
+                                                            icon={<RolesCheckboxIcon />}
+
                                                         />
                                                     </Box>
                                                 ))}
@@ -536,7 +548,21 @@ export function TableComponent<T extends Record<string, unknown>>({
                     }}>
                         <Table>
                             <TableHead>
-                                <TableRow>
+                                <TableRow sx={{ bgcolor: '#F6F6F6' }}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={allSelected}
+                                            indeterminate={someSelected}
+                                            indeterminateIcon={<IndeterminateCheckBox sx={{
+                                                fontSize: 24,      // Change size
+                                                color: "custom.700",  // Icon color
+                                            }} />}
+                                            checkedIcon={<RoleCheckedboxIcon />}
+                                            icon={<RolesCheckboxIcon />}
+                                            onChange={(e) => onSelectAll(e.target.checked, rows)}
+                                        />
+                                    </TableCell>
+
                                     {visibleColumns.map((col, i) => (
                                         <TableCell
                                             key={i}
@@ -546,7 +572,9 @@ export function TableComponent<T extends Record<string, unknown>>({
                                                 ...col.headerSx,
                                                 ...((isHasAction && isStatusLast) &&
                                                     col.field === "status" && {
-                                                    borderLeft: "1px solid #FFFFFF",
+                                                    borderLeft: "1px solid",
+                                                    borderColor: "primary.contrastText",
+                                                    borderBottomColor: 'custom.800'
                                                 }),
                                             }}
                                         >
@@ -557,7 +585,9 @@ export function TableComponent<T extends Record<string, unknown>>({
                                         <TableCell sx={{
                                             ...baseHeaderCellSx,
                                             ...(isHasAction && {
-                                                borderLeft: "1px solid #FFFFFF",
+                                                borderLeft: "1px solid",
+                                                borderColor: 'primary.contrastText',
+                                                borderBottomColor: 'custom.800'
                                             }),
                                             width: 48, minWidth: 48
                                         }} />
@@ -565,53 +595,79 @@ export function TableComponent<T extends Record<string, unknown>>({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map((row, rowIdx) => (
-                                    <TableRow key={rowIdx} sx={{
-                                        height: '100%', minHeight: '360px'
-                                    }}>
-                                        {visibleColumns.map((col, colIdx) => {
-                                            const rawValue = col.field !== undefined ? row[col.field] : undefined;
-                                            return (
+                                {rows.map((row, rowIdx) => {
+                                    const isSelected = selectedRows.some(
+                                        (item) => item.id === row.id // unique key
+                                    );
+
+                                    return (
+                                        <TableRow
+                                            key={rowIdx}
+                                            hover
+                                            selected={isSelected}
+                                            sx={{
+                                                backgroundColor: isSelected ? "#F3F4F6" : "inherit",
+                                            }}
+                                        >
+                                            <TableCell padding="checkbox" sx={{
+                                                borderColor: 'custom.800',
+                                                ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
+                                            }}>
+                                                <Checkbox
+                                                    checked={isSelected}
+                                                    checkedIcon={<RoleCheckedboxIcon />}
+                                                    icon={<RolesCheckboxIcon />}
+                                                    onChange={(e) => onSelectRow(e.target.checked, row)}
+                                                />
+                                            </TableCell>
+
+                                            {visibleColumns.map((col, colIdx) => {
+                                                const rawValue =
+                                                    col.field !== undefined ? row[col.field] : undefined;
+
+                                                return (
+                                                    <TableCell
+                                                        key={colIdx}
+                                                        sx={{
+                                                            ...baseBodyCellSx,
+                                                            textTransform: col.headerName?.toLowerCase()?.includes('email') ? 'lowercase' : 'capitalize',
+                                                            ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
+                                                            ...col.cellSx,
+                                                            ...((isHasAction && isStatusLast) &&
+                                                                col.field === "status" && {
+                                                                borderLeft: "1px solid",
+                                                                borderColor: "#E5E7EB !important"
+                                                            }),
+                                                        }}
+                                                    >
+                                                        {col.render
+                                                            ? col.render(rawValue, row)
+                                                            : (rawValue as React.ReactNode) ?? "—"}
+                                                    </TableCell>
+                                                );
+                                            })}
+
+                                            {hasActions && (
                                                 <TableCell
-                                                    key={colIdx}
                                                     sx={{
-                                                        ...baseBodyCellSx,
-                                                        ...(rowIdx === rows.length - 1 ? { borderBottom: 0 } : {}),
-                                                        ...col.cellSx,
-                                                        ...((isHasAction && isStatusLast) &&
-                                                            col.field === "status" && {
-                                                            borderLeft: "1px solid #E5E7EB",
-                                                        }),
+                                                        px: 1,
+                                                        py: 1.5,
+                                                        width: 48,
                                                     }}
                                                 >
-                                                    {col.render
-                                                        ? col.render(rawValue, row)
-                                                        : (rawValue as React.ReactNode) ?? "—"}
+                                                    {rowActions && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={(e) => openMenu(e, row)}
+                                                        >
+                                                            <MoreVertIcon fontSize="small" sx={{ color: "custom.900" }} />
+                                                        </IconButton>
+                                                    )}
                                                 </TableCell>
-                                            );
-                                        })}
-
-                                        {hasActions && (
-                                            <TableCell
-                                                sx={{
-                                                    px: 1,
-                                                    py: 1.5,
-                                                    width: 48,
-                                                    borderBottom: rowIdx === rows.length - 1 ? 0 : "1px solid #E5E7EB",
-                                                    borderLeft: rowIdx === rows.length - 0 ? 0 : "1px solid #F3F4F6",
-                                                }}
-                                            >
-                                                {rowActions && (<IconButton
-                                                    size="small"
-                                                    onClick={(e) => openMenu(e, row)}
-                                                    sx={{ color: "#9CA3AF", "&:hover": { color: "#374151" } }}
-                                                >
-                                                    <MoreVertIcon fontSize="small" />
-                                                </IconButton>)}
-                                            </TableCell>
-                                        )}
-                                    </TableRow>
-                                ))}
+                                            )}
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </Box>
@@ -628,11 +684,12 @@ export function TableComponent<T extends Record<string, unknown>>({
                                 elevation: 2,
                                 sx: {
                                     borderRadius: "10px",
-                                    border: "1px solid #E5E7EB",
+                                    border: "1px solid",
+                                    borderColor: 'custom.800',
                                     minWidth: 140,
                                     "& .MuiMenuItem-root": {
                                         fontSize: "0.875rem",
-                                        color: "#7F7F7F",
+                                        color: "custom.200",
                                         gap: 1.25,
                                         py: 1,
                                         px: 2,
@@ -648,10 +705,11 @@ export function TableComponent<T extends Record<string, unknown>>({
                                 key={i}
                                 sx={{
                                     ...action.sx,
+                                    textTransform: 'capitalize',
                                     "&.MuiMenuItem-root": {
                                         fontSize: "12px",
                                         fontWeight: 500,
-                                        color: "#7F7F7F"
+                                        color: "custom.200"
                                     }
                                 }}
                                 onClick={() => {
@@ -672,15 +730,18 @@ export function TableComponent<T extends Record<string, unknown>>({
                     <Box
                         sx={{
                             display: "flex",
-                            justifyContent: "flex-end",
+                            justifyContent: "space-between",
+                            alignItems: 'center',
                             px: 2.5,
                             py: 1.5,
                             backgroundColor: "#FFFFFF",
-                            borderTop: "1px solid #E5E7EB",
+                            borderTop: "1px solid",
+                            borderColor: 'custom.800',
                             borderBottomLeftRadius: "12px",
                             borderBottomRightRadius: "12px",
                         }}
                     >
+                        <span style={{ color: "#b3abab" }}>Selected rows: <span style={{ color: '#222124' }}>({selectedRows?.length})</span></span>
                         <Pagination
                             count={totalPages ? totalPages : 1}
                             page={currentPage}

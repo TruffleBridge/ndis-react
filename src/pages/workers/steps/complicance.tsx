@@ -14,6 +14,7 @@ import { useWorkerStore } from "@/store/useWorker";
 import type { ComplianceInfo } from "@/types/worker";
 import { useUploadStore } from "@/store/useUpload";
 import { getViewFunction } from "@/utils/viewfunction";
+import { usePermission } from "@/hooks/usePermission";
 
 interface ComplianceProps {
     isView?: boolean;
@@ -30,6 +31,9 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
     const isSubmitting = useWorkerStore((s) => s.isSubmitting);
     const uploadDocument = useUploadStore((s) => s.uploadDocument);
     const uploadErrors = useUploadStore((s) => s.uploadErrors)
+
+    const { canCreate, canUpdate } = usePermission('Workers');
+
 
     // One handler shared by every UploadVariant2/3 field below.
     const handleUpload = async (field: keyof ComplianceInfo, file: any) => {
@@ -118,7 +122,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Driving License Number"
                                     value={data.drivingLicenseNumber}
                                     placeholder="Enter driving license"
-                                    isView={isView}
                                     onChange={(value) => setField("drivingLicenseNumber", value)}
                                 />}
                         </Grid>
@@ -165,7 +168,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="National Police Check Number"
                                     value={data.policeNumber}
                                     placeholder="Enter national police"
-                                    isView={isView}
                                     onChange={(value) => setField("policeNumber", value)}
                                 />}
                         </Grid>
@@ -214,7 +216,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Blue Card Number"
                                     value={data.blueCardNumber}
                                     placeholder="Enter blue card number"
-                                    isView={isView}
                                     onChange={(value) => setField("blueCardNumber", value)}
                                 />}
                         </Grid>
@@ -249,7 +250,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Certificate Number"
                                     placeholder="Enter certificate number"
                                     value={data.firstAidCertificateNumber}
-                                    isView={isView}
                                     onChange={(value) => setField("firstAidCertificateNumber", value)}
                                 />}
                         </Grid>
@@ -284,7 +284,6 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                                     label="Certificate Number"
                                     placeholder="Enter certificate number"
                                     value={data.cprCertificateNumber}
-                                    isView={isView}
                                     onChange={(value) => setField("cprCertificateNumber", value)}
                                 />}
                         </Grid>
@@ -327,14 +326,14 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                     Prev
                 </Button>
 
-                <Button
+                {(canCreate || (mode && canUpdate)) && <Button
                     sx={WorkerStyles.nextCta}
                     endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
                     onClick={onSubmit}
                     disabled={isSubmitting}
                 >
                     {isView ? "Close" : mode ? "Update" : isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
+                </Button>}
             </Box>
         </Box>
     );

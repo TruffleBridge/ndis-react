@@ -4,14 +4,15 @@ import { useLocation } from "react-router-dom";
 import { SideNavbar, TopNavbar } from "@/components";
 import { layoutStyles as S } from "./styles";
 import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
+import { Outlet } from "react-router-dom";
+import usePermissionStore from '@/store/usePermissionStore';
+import NotificationParent from "./components/notificationparent";
+import { useProfileStore } from "@/store/useProfilestore";
+
 
 const COLLAPSED_WIDTH = 72;
 
-interface Props {
-  children: React.ReactNode;
-}
-
-export default function MainLayout({ children }: Props) {
+export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobileNav = useMediaQuery(MOBILE_NAV_QUERY);
   const location = useLocation();
@@ -21,6 +22,22 @@ export default function MainLayout({ children }: Props) {
       setSidebarOpen(false);
     }
   }, [location.pathname, isMobileNav]);
+
+  const fetchRolePermissions = usePermissionStore((s) => s.fetchRolePermissions);
+  const initForm = useProfileStore((s) => s.initForm);
+
+
+  const token = localStorage.getItem('authToken'); // unga token key enna nu confirm pannunga
+  useEffect(() => {
+    if (token) {
+      fetchRolePermissions();
+    }
+  }, [token]);
+
+  useEffect(() => {
+    initForm();
+  }, [])
+
 
   return (
     <Box sx={S.root}>
@@ -39,10 +56,15 @@ export default function MainLayout({ children }: Props) {
         <TopNavbar
           sidebarOpen={sidebarOpen}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+          notificationChildren={
+            <NotificationParent />
+          }
         />
 
         <Box sx={S.content}>
-          {children}
+          <div>
+            <Outlet />
+          </div>
         </Box>
       </Box>
     </Box>

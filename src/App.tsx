@@ -6,6 +6,7 @@ import theme from '@/theme/theme';
 import { GlobalSnackbar } from '@/components';
 
 function App() {
+
   return (
     <MenuProvider>
       <ThemeProvider theme={theme}>

@@ -47,7 +47,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     placeholder="e.g Care Solutions Pty. Ltd"
                                     value={businessData?.businessName}
                                     required
-                                    isView={isView}
                                     error={!!errors.businessName}
                                     errors={errors.businessName}
                                     onChange={(e) => setBusinessField("businessName", e)}
@@ -61,7 +60,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     placeholder="#11-digit ABN"
                                     value={businessData?.abn}
                                     required
-                                    isView={isView}
                                     error={!!errors.abn}
                                     errors={errors.abn}
                                     onChange={(e) => {
@@ -79,7 +77,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     label="ACN"
                                     placeholder="#9-digit ACN"
                                     value={businessData?.acn}
-                                    isView={isView}
                                     error={!!errors.acn}
                                     errors={errors.acn}
                                     onChange={(e) => {
@@ -102,7 +99,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     placeholder="123 example street"
                                     value={businessData?.address}
                                     required
-                                    isView={isView}
                                     error={!!errors.address}
                                     errors={errors.address}
                                     onChange={(e) => setBusinessField("address", e)}
@@ -116,7 +112,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     required
                                     placeholder="enter suburb"
                                     value={businessData?.suburb}
-                                    isView={isView}
                                     error={!!errors.suburb}
                                     errors={errors.suburb}
                                     onChange={(e) => setBusinessField("suburb", e)}
@@ -128,7 +123,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     label="State"
                                     placeholder="enter state"
                                     value={businessData?.state}
-                                    isView={isView}
                                     onChange={(e) => setBusinessField("state", e)}
                                 />}
                         </Grid>
@@ -138,7 +132,6 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                     label="Postal Code"
                                     placeholder="0000"
                                     value={businessData?.postalCode}
-                                    isView={isView}
                                     onChange={(e) => {
                                         setBusinessField("postalCode", onlyNumbers(e))
                                     }

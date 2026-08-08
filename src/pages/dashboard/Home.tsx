@@ -6,7 +6,6 @@ import {
   FormControl,
   Grid,
   IconButton,
-  List,
   ListItem,
   MenuItem,
   Select,
@@ -35,11 +34,13 @@ import {
 import { Line, Bar } from "react-chartjs-2";
 import { CalendarIcon, CardGraph, SparkleIcon } from "@/assets";
 import { buttonStyle, dashboardStyles as S } from "./styles";
-import { type ChatMessage } from "@/components";
-import { useMemo, useState } from "react";
+import { InfiniteScrollList, type ChatMessage } from "@/components";
+import { useEffect, useMemo, useState } from "react";
 import { VirtualAssistantPopover } from "@/components/askAI";
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import { FileDownloadOutlined } from "@mui/icons-material";
+import { useDashboardStore } from "@/store/dashboardStore";
+import { TimeAgo } from "@/utils/helper";
+import { Upcoming } from "@/utils/viewfunction";
 
 ChartJS.register(
   CategoryScale,
@@ -241,35 +242,29 @@ const revenueOptions = {
   },
 };
 
-const statCards = [
-  { title: "Active Clients", value: "2,345" },
-  { title: "Active Workers", value: "1,254" },
-  { title: "Active Bookings", value: "312" },
-  { title: "Monthly Revenue", value: "$1,345K" },
-];
 
-const activities = [
-  {
-    title: "Booking Completed",
-    desc: "Care Specialist #102 logged 4.0 hours for Client: Mary S.",
-    time: "2 mins ago",
-  },
-  {
-    title: "New Client Signed",
-    desc: "Onboarding package sent to David L. in Melbourne.",
-    time: "14 mins ago",
-  },
-  {
-    title: "Worker Login",
-    desc: "Admin login detected from 192.168.1.45 (Sydney).",
-    time: "18 mins ago",
-  },
-  {
-    title: "Worker Verified",
-    desc: "ID verification approved for Jane K. (Brisbane).",
-    time: "32 mins ago",
-  },
-];
+// const activities = [
+//   {
+//     title: "Booking Completed",
+//     desc: "Care Specialist #102 logged 4.0 hours for Client: Mary S.",
+//     time: "2 mins ago",
+//   },
+//   {
+//     title: "New Client Signed",
+//     desc: "Onboarding package sent to David L. in Melbourne.",
+//     time: "14 mins ago",
+//   },
+//   {
+//     title: "Worker Login",
+//     desc: "Admin login detected from 192.168.1.45 (Sydney).",
+//     time: "18 mins ago",
+//   },
+//   {
+//     title: "Worker Verified",
+//     desc: "ID verification approved for Jane K. (Brisbane).",
+//     time: "32 mins ago",
+//   },
+// ];
 
 const actions = [
   {
@@ -308,6 +303,16 @@ const actions = [
 const Dashboard = () => {
   const [view, setView] = useState<"day" | "week" | "month">("month");
 
+  const {
+    summary,
+    liveActivities,
+    liveActivityHasMore,
+    liveActivityLoading,
+    getDashboardSummary,
+    getLiveActivityList,
+    loadMoreLiveActivities,
+  } = useDashboardStore();
+
   // ask ai state
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -329,10 +334,21 @@ const Dashboard = () => {
     { label: "Payments" },
   ];
 
+  const generateId = () => {
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto?.randomUUID === "function"
+    ) {
+      return crypto?.randomUUID();
+    }
+
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  };
+
   const handleSelectOption = (label: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto?.randomUUID(), fromAssistant: false, text: label },
+      { id: generateId(), fromAssistant: false, text: label },
     ]);
     // TODO: call your API / next-step logic here
   };
@@ -340,7 +356,7 @@ const Dashboard = () => {
   const handleSend = (value: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: crypto?.randomUUID(), fromAssistant: false, text: value },
+      { id: generateId(), fromAssistant: false, text: value },
     ]);
   };
 
@@ -374,6 +390,37 @@ const Dashboard = () => {
     ],
   }), [view]);
 
+
+  // cards keys
+  const statCards = [
+    {
+      title: "Active Clients",
+      key: "activeClients",
+    },
+    {
+      title: "Active Workers",
+      key: "activeWorkers",
+    },
+    {
+      title: "Active Bookings",
+      key: "activeBookings",
+    },
+    {
+      title: "Monthly Revenue",
+      key: "monthlyRevenue",
+    },
+  ];
+
+  useEffect(() => {
+    getDashboardSummary();
+
+    getLiveActivityList({
+      page: 1,
+      limit: 5,
+    });
+  }, []);
+
+
   return (
     <Box sx={S.root}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -394,9 +441,7 @@ const Dashboard = () => {
               Ask AI
             </Button>
           </VirtualAssistantPopover>
-          <Button startIcon={<FileDownloadOutlined sx={{ fontSize: 16 }} />} variant="outlined" sx={S.ctaExport}>
-            Export Report
-          </Button>
+
           <Button startIcon={<AddIcon />} variant="contained" sx={S.bookingCta}>
             New Booking
           </Button>
@@ -409,8 +454,10 @@ const Dashboard = () => {
           <Grid key={item.title} size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={S.kpiCard}>
               <CardContent sx={S.kpiCardContent}>
-                <Typography variant="h5" sx={S.kpiValue}>
-                  {item.value}
+                <Typography variant="h5" sx={{ ...S.kpiValue, fontSize: item.key === "monthlyRevenue" && 14 as any }}>
+                  {item.key === "monthlyRevenue"
+                    ? 'Coming soon'//`$${summary?.[item.key as keyof typeof summary]?.toLocaleString() || 0}`
+                    : summary?.[item.key as keyof typeof summary] || 0}
                 </Typography>
                 <Typography variant="body2" sx={S.kpiLabel}>
                   {item.title}
@@ -428,7 +475,7 @@ const Dashboard = () => {
         <Grid size={{ xs: 12, lg: 9 }}>
           <Card sx={S.bookingCard}>
 
-            <CardContent sx={{ p: 0 }}>
+            {true ? <Upcoming /> : <CardContent sx={{ p: 0 }}>
               <Grid container spacing={2} sx={{ mb: 1, px: 4, py: 2, alignItems: 'center' }}>
                 {/* Title */}
                 <Grid size={{ xs: 12, md: 3 }}>
@@ -528,45 +575,56 @@ const Dashboard = () => {
                 <Line
                   data={data} options={bookingOptions} />
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
+        {/* Live Activity */}
         {/* Live Activity */}
         <Grid size={{ xs: 12, lg: 3 }}>
           <Card sx={S.sideCard}>
             <CardContent sx={S.sideCardContent}>
               <Box sx={S.pendingHeader}>
-                {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.sideCardTitle}>
                   Live Activity
                 </Typography>
               </Box>
-              <List sx={S.activityList}>
-                {activities.map((item, index) => (
-                  <ListItem key={index} sx={S.activityItem}>
-                    {/* Timeline dot + connector */}
-                    <Box sx={S.activityTimelineBox}>
-                      <Box sx={S.activityDot} />
-                      {/* Only draw connector when NOT the last item */}
-                      {index !== activities.length - 1 && (
-                        <Box
-                          sx={{
-                            ...S.activityLine,
-                            height: 60,
-                          }}
-                        />
-                      )}
-                    </Box>
 
-                    <Box>
-                      <Typography sx={S.activityTitle}>{item.title}</Typography>
-                      <Typography sx={S.activityDesc}>{item.desc}</Typography>
-                      <Typography sx={S.activityTime}>{item.time}</Typography>
-                    </Box>
-                  </ListItem>
-                ))}
-              </List>
+              <Box sx={S.activityList}>
+                <InfiniteScrollList
+                  items={liveActivities?.rows ?? []}
+                  keyExtractor={(item, index) => item?.id ?? index}
+                  onLoadMore={loadMoreLiveActivities}
+                  hasMore={liveActivityHasMore}
+                  loading={liveActivityLoading}
+                  height={320} // 🔑 unga S.activityList actual fixed height - important
+                  renderItem={(item, index) => {
+                    const rows = liveActivities?.rows ?? [];
+                    const isLast = index === rows.length - 1;
+
+                    return (
+                      <ListItem key={item?.id ?? index} sx={S.activityItem}>
+                        <Box sx={S.activityTimelineBox}>
+                          <Box sx={S.activityDot} />
+                          {!isLast && (
+                            <Box sx={{ ...S.activityLine, height: 60 }} />
+                          )}
+                        </Box>
+
+                        <Box>
+                          <Typography sx={S.activityTitle}>
+                            {item?.eventMaster?.name}
+                          </Typography>
+                          <Typography sx={S.activityDesc}>{item?.message}</Typography>
+                          <Typography sx={S.activityTime}>
+                            {TimeAgo(item.updatedAt)}
+                          </Typography>
+                        </Box>
+                      </ListItem>
+                    );
+                  }}
+                />
+              </Box>
 
               <Button fullWidth variant="outlined" sx={S.viewHistoryBtn}>
                 View all History
@@ -579,9 +637,9 @@ const Dashboard = () => {
       {/* ── Bottom row: Revenue | Compliance | Pending Actions ──────────── */}
       <Grid container spacing={2}>
         {/* Revenue Trends */}
-        <Grid size={{ xs: 12, md: 12,lg:6 }}>
+        <Grid size={{ xs: 12, md: 12, lg: 6 }}>
           <Card sx={S.revenueCard}>
-            <CardContent>
+            {true ? <Upcoming /> : <CardContent>
               <Typography variant="h6" sx={S.revenueTitle}>
                 Revenue Trends
               </Typography>
@@ -591,14 +649,14 @@ const Dashboard = () => {
               <Box sx={S.revenueChartBox}>
                 <Bar data={revenueData} options={revenueOptions} />
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
         {/* Compliance Alerts */}
-        <Grid size={{ xs: 12, md: 6, lg: 3  }}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.complianceCard}>
-            <CardContent sx={S.pendingCardContent}>
+            {true ? <Upcoming /> : <CardContent sx={S.pendingCardContent}>
               <Box sx={S.complianceHeader}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
@@ -650,14 +708,14 @@ const Dashboard = () => {
                   </Box>
                 </Box>
               ))}
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
         {/* Pending Actions */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.pendingCard}>
-            <CardContent sx={S.pendingCardContent}>
+            {true ? <Upcoming /> : <CardContent sx={S.pendingCardContent}>
               <Box sx={S.pendingHeader}>
                 {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.pendingTitle}>
@@ -679,7 +737,7 @@ const Dashboard = () => {
                   </Box>
                 ))}
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
       </Grid>

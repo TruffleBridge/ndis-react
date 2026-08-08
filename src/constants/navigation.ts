@@ -45,6 +45,22 @@ export function getActiveNavItem(pathname: string): NavItem | undefined {
   );
 }
 
+// constants/navigation.ts (existing file la add pannunga)
+
+// label -> API moduleName mapping (spelling mismatch handle panna)
+export const NAV_MODULE_MAP: Record<string, string> = {
+  Dashboard: "Dashboard",
+  "Verification Queue": "Verification",
+  Workers: "Workers",
+  Jobs: "Jobs",
+  Clients: "Clients",
+  Bookings: "Bookings",
+  Budget: "Budget",
+  "Roles and Permission": "Roles & Permission",
+  Rewards: "Rewards",
+  Subscription: "Subscription", // API la illana, default hide aagum
+};
+
 /** Navbar title derived from the current route. */
 export function getNavTitle(pathname: string): string {
   return getActiveNavItem(pathname)?.label ?? "Dashboard";

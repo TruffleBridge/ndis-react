@@ -104,7 +104,7 @@ export const navbarStyles: Record<string, SxProps<Theme>> = {
 
   leftSection: {
     display: "flex",
-    gap: { xs: 1},
+    gap: { xs: 1 },
     alignItems: "center",
     flex: { xs: "1 1 auto", md: "0 0 40%" },
     minWidth: 0,
@@ -195,10 +195,13 @@ export const navbarStyles: Record<string, SxProps<Theme>> = {
   },
 
   userBtn: {
+    width: { xs: 34, sm: 42 },
+    height: { xs: 34, sm: 42 },
+    fontSize: { xs: "0.8rem", sm: "0.9rem" },
+    fontWeight: 600,
     border: "1px solid #E7EAEF",
-    width: 40,
-    height: 40,
-    mr:'10px',
+    mr: '10px',
+    color:'#093EB1',
     bgcolor: "#E7F4FF",
     borderRadius: "50%",
     flexShrink: 0,
@@ -209,4 +212,7 @@ export const navbarStyles: Record<string, SxProps<Theme>> = {
     fontSize: 14,
     fontWeight: 600,
   },
+  menu: {
+    py: 1.3, alignItems: 'center', display: 'flex', gap: 1
+  }
 };

@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Typography } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
-import {
-  DeleteIcon,
-  //  MoreCircleIcon, CircleTickIcon
-} from "@/assets";
+import { CustomModal, FilterPopover, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
-import { AutorenewOutlined, EditOutlined } from "@mui/icons-material";
 import type { Worker, WorkerFormNavState } from "@/types/worker";
 import { useWorkerStore } from "@/store/useWorker";
 import { formatStatus } from "@/utils/menuUtils";
 import { useExportStore } from "@/store/useExportStore";
+import { usePermission } from "@/hooks/usePermission";
+import { useRowSelection } from "@/hooks/useRowSelection";
+import { useRowActions } from "@/hooks/useRowActions";
 
 const STATUS_STYLES = {
   active: { backgroundColor: "#D9F7E5", color: "#07AB48" },
@@ -98,6 +95,7 @@ export default function WorkersTable() {
   const [columnStates, setColumnStates] = useState<ColumnState[]>(buildColumnStates(WORKER_COLUMNS));
   const [stateModal, setStateModal] = useState<'status' | 'delete' | null>(null);
   const [values, setValues] = useState<any>();
+  const [filter, setFilter] = useState<any>(null);
 
   const workers = useWorkerStore((s) => s.workers);
   // const workersLoading = useWorkerStore((s) => s.workersLoading);
@@ -113,88 +111,59 @@ export default function WorkersTable() {
   const updateState = useWorkerStore((s) => s.updateState);
   const status = useWorkerStore((s) => s.status);
 
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
+
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const loading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canDelete, canExport, canView, canCreate, canUpdate } = usePermission('Workers');
 
   useEffect(() => {
     fetchWorkers(ROWS_PER_PAGE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue, currentPage]);
 
+
+  // row actions
   const goToForm = (state: WorkerFormNavState) => navigate("/create-worker", { state });
+  const getRowActions = (row: Worker) =>
+    useRowActions({
+      row,
+      status: row.status,
+      canView,
+      canUpdate,
+      canDelete,
 
-  const getRowActions = (row: Worker): RowAction<Worker>[] => [
-    {
-      label: "Status",
-      icon: (
-        <AutorenewOutlined
-          sx={{
-            fontSize: 14,
-            color: "#7F7F7F",
-          }}
-        />
-      ),
-      onClick: () => {
+      onStatus: () => {
         setValues(row);
-        setStateModal('status');
+        setStateModal("status");
       },
-    },
-    ...(row?.status.toLowerCase() === "active"
-      ? [
-        {
-          label: "Edit",
-          icon: (
-            <EditOutlined
-              sx={{
-                fontSize: 14,
-                color: "#7F7F7F",
-              }}
-            />
-          ),
-          onClick: () =>
-            goToForm({
-              mode: "edit",
-              workerId: row.id,
-            }),
-        },
-      ]
-      : []),
 
-    {
-      label: "View",
-      icon: (
-        <VisibilityOutlinedIcon
-          sx={{
-            fontSize: 14,
-            color: "#7F7F7F",
-          }}
-        />
-      ),
-      onClick: () =>
+      onEdit: () =>
+        goToForm({
+          mode: "edit",
+          workerId: row.id,
+        }),
+
+      onView: () =>
         goToForm({
           mode: "view",
           workerId: row.id,
         }),
-    },
 
-    ...(row?.status.toLowerCase() === "active"
-      ? [
-        {
-          label: "Delete",
-          icon: <DeleteIcon height={13} width={11} />,
-          sx: {
-            color: "#7F7F7F",
-          },
+      onDelete: () => {
+        setValues(row);
+        setStateModal("delete");
+      },
+    });
 
-          onClick: () => {
-            setValues(row);
-            setStateModal('delete')
-          },
-        },
-      ]
-      : []),
-  ];
 
   // mapped
   const tableData = workers?.map((item: any) => {
@@ -236,9 +205,34 @@ export default function WorkersTable() {
     const visibleColumns = columnStates
       .filter((column) => column.visible)
       .map((column) => columnMapping[column.key] || column.key);
-    exportExcel("/admin/workerManagementList/export", { customizeTable: visibleColumns ?? [] });
+    exportExcel("/admin/workerManagementList/export", {
+      customizeTable: visibleColumns ?? [],
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows.map((v) => v.id),
+      }),
+    });
   }
 
+  // apply filter
+  const handleApplyFilter = () => {
+    const payload = {
+      status: filter?.value
+    }
+    fetchWorkers({
+      limit: ROWS_PER_PAGE,
+      filter: payload ?? []
+    });
+  }
+
+  // clear filter
+  const handleClear = () => {
+    setFilter(null);
+    fetchWorkers({
+      offset: 0,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
 
   return (
     <Box>
@@ -259,9 +253,34 @@ export default function WorkersTable() {
         onSearch={setSearchValue}
         onPageChange={setCurrentPage}
         onExportData={() => handleExport()}
-        onFilter={() => console.log("Filter")}
-        customLabel="Add Worker"
+        showExport={canExport}
+        customLabel={canCreate ? "Add Worker" : ""}
         onCustomChange={() => goToForm({ mode: "create" })}
+        //filter
+        filterChildren={
+          <FilterPopover
+            buttonLabel="Filter"
+            selects={
+              [
+                {
+                  id: "status",
+                  label: "Status",
+                  multiple: false,
+                  options: [
+                    { label: 'Active', value: true },
+                    { label: 'InActive', value: false }],
+                  value: filter,
+                  onChange: (val: any) => setFilter(val),
+                },
+              ]}
+            onApply={() => handleApplyFilter()}
+            onClear={() => handleClear()}
+            disabled={!Object.values(filter ?? {}).some((v: any) => v)}
+          />}
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
 
       <CustomModal

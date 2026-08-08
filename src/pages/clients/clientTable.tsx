@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { Avatar, Box, Chip, Menu, MenuItem, Typography } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { CustomModal, Loading, TableComponent, type ColumnDef, type ColumnState, type RowAction } from "@/components";
-import { DeleteIcon } from "@/assets";
+import { CustomModal, FilterPopover, Loading, TableComponent, type ColumnDef, type ColumnState } from "@/components";
 import { useNavigate } from "react-router-dom";
-import { EditOutlined } from "@mui/icons-material";
 import type { Client, ClientFormNavState } from "@/types/client";
 import { useClientStore } from "@/store/useClient";
 import { useExportStore } from "@/store/useExportStore";
-import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 import { formatStatus } from "@/utils/menuUtils";
+import { usePermission } from "@/hooks/usePermission";
+import { useRowActions } from "@/hooks/useRowActions";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 const CLIENT_STATUS_STYLES = {
     active: {
@@ -37,6 +36,7 @@ export default function ClientTable() {
     const [values, setValues] = useState<any>();
     const [supportAnchor, setSupportAnchor] = useState<HTMLElement | null>(null);
     const [selectedSupportTypes, setSelectedSupportTypes] = useState<string[]>([]);
+    const [filter, setFilter] = useState<any>(null);
     const ROWS_PER_PAGE = 10;
 
 
@@ -59,6 +59,17 @@ export default function ClientTable() {
     const exportExcel = useExportStore((s) => s.exportExcel);
     const loading = useExportStore((s) => s.loading);
 
+    // checkbox functions
+    const {
+        selectedRows,
+        handleSelectAll,
+        handleSelectRow,
+    } = useRowSelection<any>();
+
+    // roles based on access
+    const { canCreate, canDelete, canExport, canView, canUpdate } = usePermission('Clients');
+
+
 
     // Refetch whenever search text or page changes.
     useEffect(() => {
@@ -70,9 +81,6 @@ export default function ClientTable() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchValue, currentPage]);
 
-    // Single helper so Edit/View/Create all navigate the same way - only the
-
-    const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
 
     const CLIENT_COLUMNS: ColumnDef<Client>[] = [
         { headerName: "Client ID", field: "clientId" },
@@ -140,7 +148,7 @@ export default function ClientTable() {
         { headerName: "Location", field: "location" },
         { headerName: "Funding Type", field: "fundingType" },
         {
-            headerName: "Client Status",
+            headerName: "Status",
             field: "clientStatus",
             render: (value) => {
                 const key = formatStatus(value as string);
@@ -191,78 +199,44 @@ export default function ClientTable() {
         }
     })
 
-    const getRowActions = (row: Client): RowAction<Client>[] => [
-        {
-            label: "Status",
-            icon: (
-                <AutorenewOutlinedIcon
-                    sx={{
-                        fontSize: 14,
-                        color: "#7F7F7F",
-                    }}
-                />
-            ),
-            onClick: () => {
-                updateState?.('delete', false)
+    // row actions funcation
+
+    // Single helper so Edit/View/Create all navigate the same way - only the
+    const goToForm = (state: ClientFormNavState) => navigate("/create-client", { state });
+
+    const getRowActions = (row: Client) =>
+        useRowActions({
+            row,
+            status: row.clientStatus,
+            canView,
+            canUpdate,
+            canDelete,
+
+            onStatus: () => {
+                updateState?.("delete", false);
                 setValues(row);
                 setStateModal(true);
             },
-        },
-        ...(row?.clientStatus.toLowerCase() === "active"
-            ? [
-                {
-                    label: "Edit",
-                    icon: (
-                        <EditOutlined
-                            sx={{
-                                fontSize: 14,
-                                color: "#7F7F7F",
-                            }}
-                        />
-                    ),
-                    onClick: () =>
-                        goToForm({
-                            mode: "edit",
-                            clientId: row.id,
-                        }),
-                },
-            ]
-            : []),
 
-        {
-            label: "View",
-            icon: (
-                <VisibilityOutlinedIcon
-                    sx={{
-                        fontSize: 14,
-                        color: "#7F7F7F",
-                    }}
-                />
-            ),
-            onClick: () =>
+            onEdit: () =>
+                goToForm({
+                    mode: "edit",
+                    clientId: row.id,
+                }),
+
+            onView: () =>
                 goToForm({
                     mode: "view",
                     clientId: row.id,
                 }),
-        },
 
-        ...(row?.clientStatus.toLowerCase() === "active"
-            ? [
-                {
-                    label: "Delete",
-                    icon: <DeleteIcon height={13} width={11} />,
-                    sx: {
-                        color: "#7F7F7F",
-                    },
-                    onClick: () => {
-                        updateState?.('delete', true)
-                        setValues(row);
-                        setStateModal(true)
-                    },
-                },
-            ]
-            : []),
-    ];
+            onDelete: () => {
+                updateState?.("delete", true);
+                setValues(row);
+                setStateModal(true);
+            },
+        });
+
 
     const handleStatueChange = async () => {
         const res = await getStatusUpdate(values?.id)
@@ -291,10 +265,37 @@ export default function ClientTable() {
         const visibleColumns = columnStates
             .filter((column) => column.visible)
             .map((column) => columnMapping[column.key] || column.key);
-        exportExcel("/admin/clientManagementList/export", { customizeTable: visibleColumns ?? [] }
+        exportExcel("/admin/clientManagementList/export", {
+            customizeTable: visibleColumns ?? [],
+            ...(selectedRows?.length > 0 && {
+                ids: selectedRows.map((v) => v.id),
+            }),
+        }
         );
     }
 
+    // apply filter
+    const handleApplyFilter = () => {
+        const payload = {
+            status: filter?.value ?? null,
+        }
+        fetchClients({
+            offset: 0,
+            limit: ROWS_PER_PAGE,
+            search: searchValue,
+            filter: payload ?? []
+        });
+    }
+
+    // clear filter
+    const handleClear = () => {
+        setFilter(null);
+        fetchClients({
+            offset: 0,
+            limit: ROWS_PER_PAGE,
+            search: searchValue,
+        });
+    }
 
     return (
         <Box>
@@ -315,12 +316,38 @@ export default function ClientTable() {
                 onSearch={setSearchValue}
                 onPageChange={setCurrentPage}
                 onExportData={() => handleExport()}
-                onFilter={() => console.log("Filter")}
-                customLabel="Add Client"
+                customLabel={canCreate ? "Add Client" : ''}
+                showExport={canExport}
                 onCustomChange={() => {
                     resetForm();
                     goToForm({ mode: "create" })
                 }}
+                //filter
+                filterChildren={
+                    <FilterPopover
+                        buttonLabel="Filter"
+                        selects={
+                            [
+                                {
+                                    id: "status",
+                                    label: "Status",
+                                    multiple: false,
+                                    options: [
+                                        { label: 'Active', value: true },
+                                        { label: 'InActive', value: false }],
+                                    value: filter,
+                                    onChange: (val: any) => setFilter(val),
+                                },
+                            ]}
+                        onApply={() => handleApplyFilter()}
+                        onClear={() => handleClear()}
+                        disabled={!Object.values(filter ?? {}).some((v: any) => v)}
+
+                    />}
+                //checkbox
+                selectedRows={selectedRows}
+                onSelectAll={handleSelectAll}
+                onSelectRow={handleSelectRow}
             />
             <CustomModal
                 open={stateModal}

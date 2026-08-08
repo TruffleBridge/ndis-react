@@ -9,14 +9,16 @@ export const getApiRequest = (
   return axiosInstance.get(url, { params });
 };
 
+
 // POST
 export const createApiRequest = (
   url: string,
   payload: any,
-  header?: any
+  config?: any
 ): Promise<AxiosResponse> => {
-  return axiosInstance.post(url, payload, header);
+  return axiosInstance.post(url, payload, config);
 };
+
 
 // PUT
 export const updateApiRequest = (
@@ -25,6 +27,7 @@ export const updateApiRequest = (
 ): Promise<AxiosResponse> => {
   return axiosInstance.put(url, payload);
 };
+
 
 // DELETE
 export const deleteApiRequest = (

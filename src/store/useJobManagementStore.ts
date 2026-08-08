@@ -15,6 +15,7 @@ const mapJobs = (rows: JobManagement[]): JobProps[] =>
     rows.map((job) => {
 
         return {
+            id: job?.jobId,
             jobId: "J" + job?.jobId,
             avatar: job?.client.profilePicture ?? undefined,
             name: job?.client?.fullName,
@@ -45,7 +46,8 @@ export const useJobManagementStore = create<JobManagementState>((set) => ({
             const res = await createApiRequest('/admin/jobManagementList', {
                 "offset": payload?.offset ?? 0,
                 "limit": payload?.limit ?? 10,
-                "search": payload?.search ?? ""
+                "search": payload?.search ?? "",
+                ...(payload?.filter && { filters: payload?.filter })
             });
 
             set({

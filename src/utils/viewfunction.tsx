@@ -82,3 +82,22 @@ export const getViewFunction = (
         </Box>
     );
 };
+
+
+export const Upcoming = () => {
+    return (
+        <Box
+            sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "300px",
+                height: "100%",
+                fontSize: 18,
+                fontWeight: 600,
+            }}
+        >
+            Coming soon...
+        </Box>
+    )
+}

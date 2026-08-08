@@ -22,6 +22,8 @@ import { ArrowBackIosNewOutlined } from "@mui/icons-material";
 import { useRoles, PERMISSION_ACTIONS, STATUS_OPTIONS } from "@/store/useRoles";
 import dayjs from "dayjs";
 import { getViewFunction } from "@/utils/viewfunction";
+import { usePermission } from "@/hooks/usePermission";
+import usePermissionStore from "@/store/usePermissionStore";
 
 interface FormActionsProps {
     onCancel?: () => void;
@@ -147,6 +149,10 @@ const AddNewRolesPage: React.FC = () => {
         resetForm,
         formErrors
     } = useRoles();
+    const { fetchRolePermissions } = usePermissionStore();
+
+    // roles based on access
+    const { canCreate, canUpdate } = usePermission('Roles & Permission');
 
     // Flow 1: load modules once
     useEffect(() => {
@@ -175,6 +181,7 @@ const AddNewRolesPage: React.FC = () => {
             isEdit && roleId ? await updateRole(roleId) : await createRole();
 
         if (success) {
+            fetchRolePermissions();
             setSuccussModel(true)
         }
     };
@@ -191,10 +198,9 @@ const AddNewRolesPage: React.FC = () => {
     const handleModalPrimary = () => {
         setSuccussModel(false)
         resetForm();
-        navigate("/roles-permission");
+        navigate("/");
     };
 
-    console.log(formErrors, 'formErrors');
 
     return (
         <Box>
@@ -224,13 +230,13 @@ const AddNewRolesPage: React.FC = () => {
                             <Grid size={{ xs: 12, md: 12 }}>
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, sm: isView ? 2 : 4 }}>
-                                        {isView ? getViewFunction('Roll Name', form.roleName, 'plain') :
+                                        {isView ? getViewFunction('Role Name', form.roleName, 'plain') :
                                             <InputTextField
                                                 required
-                                                label="Roll Name"
+                                                label="Role Name"
                                                 value={form.roleName}
                                                 onChange={(val: any) => setRoleName(val)}
-                                                placeholder="enter roll name"
+                                                placeholder="enter role name"
                                                 disabled={isView}
                                                 errors={formErrors.roleName}
                                             />}
@@ -305,10 +311,12 @@ const AddNewRolesPage: React.FC = () => {
                 />
 
                 <FormActions
-                    onCancel={() => navigate("/roles-permission")}
+                    onCancel={() => {
+                        navigate("/roles-permission")
+                    }}
                     onSubmit={handleSubmit}
                     submitLabel={isEdit ? "Update" : "Save"}
-                    hideSubmit={isView}
+                    hideSubmit={(canCreate || canUpdate) ? false : isView}
                     submitting={submitting}
                 />
             </Box>

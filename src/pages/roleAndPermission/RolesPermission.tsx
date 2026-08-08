@@ -1,20 +1,20 @@
 import { Box, Chip } from "@mui/material";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
   CustomModal,
+  FilterPopover,
   Loading,
   TableComponent,
   type ColumnDef,
   type ColumnState,
-  type RowAction,
 } from "@/components";
 import { useEffect, useState } from "react";
-import { DeleteIcon } from "../../assets";
 import { useNavigate } from "react-router-dom";
-import { EditOutlined } from "@mui/icons-material";
 import { useRoles } from "@/store/useRoles";
 import { useExportStore } from "@/store/useExportStore";
 import dayjs from "dayjs";
+import { usePermission } from "@/hooks/usePermission";
+import { useRowActions } from "@/hooks/useRowActions";
+import { useRowSelection } from "@/hooks/useRowSelection";
 
 interface RoleProps {
   id: number;
@@ -121,18 +121,37 @@ export default function RolesAndPermissionTable() {
   const [currentPage, setCurrentPage] = useState(0);
   const [stateModal, setStateModal] = useState(false);
   const [values, setValues] = useState<any>();
+  const [filter, setFilter] = useState<any>({
+    modules: null,
+    level: null,
+    status: null
+  });
+
 
   const {
     roles,
     totalCount,
     getRoles,
     listLoading,
-    deleteRole
+    deleteRole,
+    resetForm,
+    modules,
+    getModules
   } = useRoles();
+
+  // checkbox functions
+  const {
+    selectedRows,
+    handleSelectAll,
+    handleSelectRow,
+  } = useRowSelection<any>();
 
   // export download data
   const exportExcel = useExportStore((s) => s.exportExcel);
   const isExcelloading = useExportStore((s) => s.loading);
+
+  // roles based on access
+  const { canDelete, canExport, canView, canCreate, canUpdate } = usePermission('Roles & Permission');
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(
     buildColumnStates(ROLES_COLUMNS)
@@ -152,31 +171,24 @@ export default function RolesAndPermissionTable() {
 
   }
 
-  const getRowActions = (row: RoleProps): RowAction<RoleProps>[] => [
-    {
-      label: "Edit",
-      icon: <EditOutlined sx={{ fontSize: 15, color: "#7F7F7F" }} />,
-      onClick: (row) => handleEdit(row, 'edit'),
-    },
-    {
-      label: "View",
-      icon: (
-        <VisibilityOutlinedIcon
-          sx={{ fontSize: 15, color: "#7F7F7F" }}
-        />
-      ),
-      onClick: (row) => handleEdit(row, 'view'),
-    },
-    ...(row?.status.toLowerCase() === "active"
-      ? [{
-        label: "Delete",
-        icon: <DeleteIcon width={11} height={13} />,
-        onClick: () => {
-          setValues(row);
-          setStateModal(true);
-        },
-      }] : []),
-  ];
+  // row actions function
+  const getRowActions = (row: RoleProps) =>
+    useRowActions({
+      row,
+      status: row.status,
+      canView,
+      canUpdate,
+      canDelete,
+
+      onEdit: () => handleEdit(row, "edit"),
+
+      onView: () => handleEdit(row, "view"),
+
+      onDelete: () => {
+        setValues(row);
+        setStateModal(true);
+      },
+    });
 
   const tableRows: RoleProps[] = roles.map((item: any) => ({
     id: item.id,
@@ -229,9 +241,11 @@ export default function RolesAndPermissionTable() {
 
   // page changing function
   const handlePageChange = (page: number) => {
+    const offset = (page - 1) * ROWS_PER_PAGE;
+
     setCurrentPage(page - 1);
     getRoles({
-      offset: page - 1,
+      offset: offset,
       limit: ROWS_PER_PAGE,
       search: searchValue,
     });
@@ -249,9 +263,96 @@ export default function RolesAndPermissionTable() {
       .map((column) => columnMapping[column.key] || column.key);
 
     exportExcel("/roles/list/export", {
-      customizeTable: visibleColumns,
+      customizeTable: visibleColumns ?? [],
+      ...(selectedRows?.length > 0 && {
+        ids: selectedRows?.map((v) => v.id),
+      }),
     });
   };
+
+
+  useEffect(() => {
+    getModules();
+  }, []);
+
+  // apply filter
+  const handleApplyFilter = () => {
+    const payload = {
+      moduleIds: filter?.modules?.map((v: any) => v?.value) ?? [],
+      accessLevel: filter?.level?.value ?? undefined,
+      status: filter?.status?.value ?? undefined,
+    };
+
+    getRoles({
+      offset: currentPage,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    }, {
+      filter: payload ?? []
+    });
+  }
+  
+  // clear filter
+  const handleClear = () => {
+    setFilter({
+      modules: null,
+      level: null,
+      status: null
+    });
+    getRoles({
+      offset: currentPage,
+      limit: ROWS_PER_PAGE,
+      search: searchValue,
+    });
+  }
+
+  const moduleOptions = modules?.map((m) => ({ label: m?.moduleName, value: m?.id }));
+
+  // filter fields showing
+  const filterFields = [
+    {
+      id: "access-modules",
+      label: "Access Modules",
+      multiple: true,
+      options: moduleOptions,
+      value: filter?.modules,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          modules: val,
+        })),
+    },
+    {
+      id: "access-level",
+      label: "Access Level",
+      multiple: false,
+      options: [
+        { label: 'Full', value: "FULL" },
+        { label: 'Limited', value: "LIMITED" },
+      ],
+      value: filter?.level,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          level: val,
+        }))
+    },
+    {
+      id: "status",
+      label: "Status",
+      multiple: false,
+      options: [
+        { label: 'Active', value: true },
+        { label: 'InActive', value: false },
+      ],
+      value: filter?.status,
+      onChange: (val: any) =>
+        setFilter((prev: any) => ({
+          ...prev,
+          status: val,
+        }))
+    },
+  ];
 
   return (
     <Box>
@@ -275,10 +376,26 @@ export default function RolesAndPermissionTable() {
         }}
         onPageChange={handlePageChange}
         onExportData={() => handleExport()}
-        onFilter={() => console.log("Filter")}
-        customLabel="Add Role"
-        onCustomChange={() => navigate("/create-roles")}
+        showExport={canExport}
+        customLabel={canCreate ? "Add Role" : ''}
+        onCustomChange={() => {
+          resetForm();
+          navigate("/create-roles")
+        }}
+        //filter
+        filterChildren={
+          <FilterPopover
+            buttonLabel="Filter"
+            selects={filterFields}
+            disabled={!Object.values(filter).some((value) => value)}
+            onApply={() => handleApplyFilter()}
+            onClear={() => handleClear()}
+          />}
         isHasAction
+        //checkbox
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
       />
 
       <CustomModal
