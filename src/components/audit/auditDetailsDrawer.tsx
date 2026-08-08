@@ -151,7 +151,7 @@ export const AuditDetailsDrawer: React.FC<AuditDetailsDrawerProps> = ({
                         <InfoRow label="Email" value={log.actorEmail} />
                         <InfoRow
                             label="Role"
-                            value={<Chip label={log.actorRole} size="small" />}
+                            value={<Chip label={log.actorRole} key={log?.actorUserId} size="small" />}
                         />
 
                         <Divider sx={{ my: 1.5 }} />

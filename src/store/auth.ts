@@ -18,7 +18,7 @@ export const useAuthStore = create<AuthStore>()(
             set({ loading: true, error: null });
 
             try {
-                const response = await createApiRequest('auth/login', {
+                const response = await createApiRequest('admin/login', {
                     email,
                     password,
                 });

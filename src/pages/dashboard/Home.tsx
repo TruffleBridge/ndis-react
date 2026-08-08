@@ -40,6 +40,7 @@ import { VirtualAssistantPopover } from "@/components/askAI";
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { useDashboardStore } from "@/store/dashboardStore";
 import { TimeAgo } from "@/utils/helper";
+import { Upcoming } from "@/utils/viewfunction";
 
 ChartJS.register(
   CategoryScale,
@@ -453,9 +454,9 @@ const Dashboard = () => {
           <Grid key={item.title} size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={S.kpiCard}>
               <CardContent sx={S.kpiCardContent}>
-                <Typography variant="h5" sx={S.kpiValue}>
+                <Typography variant="h5" sx={{ ...S.kpiValue, fontSize: item.key === "monthlyRevenue" && 14 as any }}>
                   {item.key === "monthlyRevenue"
-                    ? `$${summary?.[item.key as keyof typeof summary]?.toLocaleString() || 0}`
+                    ? 'Coming soon'//`$${summary?.[item.key as keyof typeof summary]?.toLocaleString() || 0}`
                     : summary?.[item.key as keyof typeof summary] || 0}
                 </Typography>
                 <Typography variant="body2" sx={S.kpiLabel}>
@@ -474,7 +475,7 @@ const Dashboard = () => {
         <Grid size={{ xs: 12, lg: 9 }}>
           <Card sx={S.bookingCard}>
 
-            <CardContent sx={{ p: 0 }}>
+            {true ? <Upcoming /> : <CardContent sx={{ p: 0 }}>
               <Grid container spacing={2} sx={{ mb: 1, px: 4, py: 2, alignItems: 'center' }}>
                 {/* Title */}
                 <Grid size={{ xs: 12, md: 3 }}>
@@ -574,7 +575,7 @@ const Dashboard = () => {
                 <Line
                   data={data} options={bookingOptions} />
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
@@ -596,7 +597,7 @@ const Dashboard = () => {
                   onLoadMore={loadMoreLiveActivities}
                   hasMore={liveActivityHasMore}
                   loading={liveActivityLoading}
-                  height={320} // 🔑 unga S.activityList oda actual fixed height ah kudunga - important
+                  height={320} // 🔑 unga S.activityList actual fixed height - important
                   renderItem={(item, index) => {
                     const rows = liveActivities?.rows ?? [];
                     const isLast = index === rows.length - 1;
@@ -638,7 +639,7 @@ const Dashboard = () => {
         {/* Revenue Trends */}
         <Grid size={{ xs: 12, md: 12, lg: 6 }}>
           <Card sx={S.revenueCard}>
-            <CardContent>
+            {true ? <Upcoming /> : <CardContent>
               <Typography variant="h6" sx={S.revenueTitle}>
                 Revenue Trends
               </Typography>
@@ -648,14 +649,14 @@ const Dashboard = () => {
               <Box sx={S.revenueChartBox}>
                 <Bar data={revenueData} options={revenueOptions} />
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
         {/* Compliance Alerts */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.complianceCard}>
-            <CardContent sx={S.pendingCardContent}>
+            {true ? <Upcoming /> : <CardContent sx={S.pendingCardContent}>
               <Box sx={S.complianceHeader}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
@@ -707,14 +708,14 @@ const Dashboard = () => {
                   </Box>
                 </Box>
               ))}
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
 
         {/* Pending Actions */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Card sx={S.pendingCard}>
-            <CardContent sx={S.pendingCardContent}>
+            {true ? <Upcoming /> : <CardContent sx={S.pendingCardContent}>
               <Box sx={S.pendingHeader}>
                 {/* <DragIndicatorIcon sx={{ color: "#000000", fontSize: 20 }} /> */}
                 <Typography variant="h6" sx={S.pendingTitle}>
@@ -736,7 +737,7 @@ const Dashboard = () => {
                   </Box>
                 ))}
               </Box>
-            </CardContent>
+            </CardContent>}
           </Card>
         </Grid>
       </Grid>
