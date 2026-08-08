@@ -23,6 +23,7 @@ const DEFAULT_PAGINATION: AuditPagination = {
 interface AuditStoreState {
     // Flow 1 — global logs
     auditLogs: AuditLogItem[];
+    entityOption: any[];
     pagination: AuditPagination;
     filters: AuditLogFilters;
     loading: boolean;
@@ -43,7 +44,7 @@ interface AuditStoreState {
     // Actions
     setFilters: (filters: Partial<AuditLogFilters>) => void;
     resetFilters: () => void;
-    fetchAuditLogs: (overrideFilters?: Partial<AuditLogFilters>) => Promise<void>;
+    fetchAuditLogs: (overrideFilters?: Partial<AuditLogFilters>, isFilter?: boolean) => Promise<void>;
     fetchEntityHistory: (entityType: string, entityId: number | string, page?: number, limit?: number) => Promise<void>;
     fetchUserHistory: (userId: number | string, page?: number, limit?: number) => Promise<void>;
     clearEntityHistory: () => void;
@@ -57,6 +58,7 @@ const INITIAL_FILTERS: AuditLogFilters = {
 
 export const useAuditStore = create<AuditStoreState>((set, get) => ({
     auditLogs: [],
+    entityOption: [],
     pagination: DEFAULT_PAGINATION,
     filters: INITIAL_FILTERS,
     loading: false,
@@ -81,7 +83,7 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
     resetFilters: () => set({ filters: INITIAL_FILTERS }),
 
     // ---- FLOW 1: GET /api/admin/auditLogs ----
-    fetchAuditLogs: async (overrideFilters) => {
+    fetchAuditLogs: async (overrideFilters, isFilter) => {
         const mergedFilters = { ...get().filters, ...overrideFilters };
         set({ loading: true, error: null, filters: mergedFilters });
 
@@ -92,7 +94,16 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
             );
 
             const { items, pagination } = response?.data?.data ?? response?.data;
-
+            if (!isFilter) {
+                set({
+                    entityOption: items?.map((v: any) => {
+                        return {
+                            label: v?.entityType,
+                            value: v?.entityId
+                        }
+                    }),
+                });
+            }
             set({
                 auditLogs: items,
                 pagination,

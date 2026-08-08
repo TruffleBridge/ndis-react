@@ -357,7 +357,7 @@ export default function ClientTable() {
                 showStatusSwitch={!deleteStatus}
                 onStatusChange={(e) => updateState?.('status', e)}
                 status={status}
-                backText={deleteStatus ? "cancel" : ''}
+                backText={deleteStatus ? "Cancel" : ''}
                 primaryText="Confirm"
                 onBack={handleClose}
                 onPrimary={handleStatueChange}

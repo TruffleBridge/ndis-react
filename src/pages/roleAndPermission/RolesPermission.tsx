@@ -402,7 +402,7 @@ export default function RolesAndPermissionTable() {
         open={stateModal}
         onClose={handleClose}
         type="warning"
-        backText={"cancel"}
+        backText={"Cancel"}
         primaryText="Confirm"
         onBack={handleClose}
         onPrimary={handleDelete}

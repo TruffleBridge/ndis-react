@@ -110,7 +110,7 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                                 <InputTextField
                                     label="Suburb"
                                     required
-                                    placeholder="enter suburb"
+                                    placeholder="Enter suburb"
                                     value={businessData?.suburb}
                                     error={!!errors.suburb}
                                     errors={errors.suburb}
@@ -121,7 +121,7 @@ const BusinessStep = ({ isView, handleNext, handlePrev }: BusinessProps) => {
                             {isView ? getViewFunction('Enter state', businessData?.state, 'plain') :
                                 <InputTextField
                                     label="State"
-                                    placeholder="enter state"
+                                    placeholder="Enter state"
                                     value={businessData?.state}
                                     onChange={(e) => setBusinessField("state", e)}
                                 />}

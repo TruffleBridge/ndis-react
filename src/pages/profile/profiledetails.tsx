@@ -244,7 +244,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a full name"
+                                    placeholder="Enter a full name"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -256,7 +256,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a email"
+                                    placeholder="Enter a email"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -268,7 +268,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a phone number"
+                                    placeholder="Enter a phone number"
                                     startAdornment={"+61 "}
                                     onChange={(value: string) => {
                                         const sanitizedValue = value.replace(/\D/g, "").slice(0, 9);
@@ -296,7 +296,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a address"
+                                    placeholder="Enter a address"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -308,7 +308,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a city"
+                                    placeholder="Enter a city"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -320,7 +320,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a state"
+                                    placeholder="Enter a state"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -332,7 +332,7 @@ const ProfileDetails = () => {
                             return (
                                 <InputTextField
                                     {...fp}
-                                    placeholder="enter a pincode"
+                                    placeholder="Enter a pincode"
                                     onChange={(value: string) => fp.onChange && fp.onChange({ target: { value } } as any)}
                                 />
                             );
@@ -390,7 +390,7 @@ const ProfileDetails = () => {
                             label="Current Password"
                             type="password"
                             value={passwordForm.currentPassword}
-                            placeholder="enter current password"
+                            placeholder="Enter current password"
                             onChange={(value: string) => setPasswordField("currentPassword", value)}
                         />
                     </Grid>
@@ -400,7 +400,7 @@ const ProfileDetails = () => {
                             label="New Password"
                             type="password"
                             value={passwordForm.newPassword}
-                            placeholder="enter new password"
+                            placeholder="Enter new password"
                             onChange={(value: string) => setPasswordField("newPassword", value)}
                         />
                     </Grid>
@@ -410,7 +410,7 @@ const ProfileDetails = () => {
                             label="Confirm Password"
                             type="password"
                             value={passwordForm.confirmPassword}
-                            placeholder="confirm new password"
+                            placeholder="Confirm new password"
                             onChange={(value: string) => setPasswordField("confirmPassword", value)}
                         />
                     </Grid>

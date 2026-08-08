@@ -236,7 +236,7 @@ const AddNewRolesPage: React.FC = () => {
                                                 label="Role Name"
                                                 value={form.roleName}
                                                 onChange={(val: any) => setRoleName(val)}
-                                                placeholder="enter role name"
+                                                placeholder="Enter role name"
                                                 disabled={isView}
                                                 errors={formErrors.roleName}
                                             />}
