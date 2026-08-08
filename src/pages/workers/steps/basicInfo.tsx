@@ -115,7 +115,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                             <InputTextField
                                 label="First Name"
                                 value={data?.firstName}
-                                placeholder="e.g. Jane Cooper"
+                                placeholder="E.g. Jane Cooper"
                                 errors={errors.firstName}
                                 onChange={(value) => setField("firstName", value)}
                             />}
@@ -126,7 +126,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                             <InputTextField
                                 label="Last Name"
                                 value={data.lastName}
-                                placeholder="e.g. Jane Cooper"
+                                placeholder="E.g. Jane Cooper"
                                 errors={errors.lastName}
                                 onChange={(value) => setField("lastName", value)}
                             />}
@@ -163,7 +163,7 @@ const PersonalInformation = ({ isView, handleNext }: PersonalProps) => {
                             <InputTextField
                                 label="Email Address"
                                 value={data.email}
-                                placeholder="jane@gmail.com"
+                                placeholder="Enter a email"
                                 errors={errors.email}
                                 onChange={(value) => setField("email", value)}
                             />}
