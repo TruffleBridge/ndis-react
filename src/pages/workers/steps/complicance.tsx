@@ -326,7 +326,7 @@ const Compliance = ({ isView, handlePrev, handleSubmit, mode }: ComplianceProps)
                     Prev
                 </Button>
 
-                {(canCreate || (mode && canUpdate)) && <Button
+                {((canCreate || (mode && canUpdate)) || isView) && <Button
                     sx={WorkerStyles.nextCta}
                     endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}
                     onClick={onSubmit}

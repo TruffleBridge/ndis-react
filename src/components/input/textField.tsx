@@ -92,7 +92,7 @@ export const InputTextField: React.FC<InputTextFieldProps> = ({
                             borderWidth: '1.4px',
                             borderColor: "#D0D5DD",
                             "&.MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#D0D5DD",
+                                borderColor: errors ? '#d32f2f' : "#D0D5DD",
                             },
                         },
 
