@@ -118,7 +118,7 @@ const DocumentRegisterStep = ({ isView, isSubmitting, handleNext, handlePrev }: 
                     Prev
                 </Button>
 
-                {((mode === "create" && canCreate) || (mode === "edit" && canUpdate)) && (
+                {(((mode === "create" && canCreate) || (mode === "edit" && canUpdate)) || isView) && (
                     <Button
                         sx={ClientStyles.nextCta}
                         endIcon={!isView && <ArrowForwardOutlined sx={{ fontSize: 12 }} />}

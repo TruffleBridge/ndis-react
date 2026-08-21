@@ -277,7 +277,7 @@ const buildDocuments = (compliance: ComplianceInfo) => {
         }
 
         documents.push({
-            documentType: "Identify & Legal",
+            documentType: "Driving License",
             referenceNumber:
                 compliance.drivingLicenseNumber,
             expiryDate:
@@ -393,7 +393,7 @@ const mapDocumentsToCompliance = (docs: any[] = []): ComplianceInfo => {
             result.policeCertificate = doc.documentUrls[0] ?? null;
         }
 
-        if (label === "Identify & Legal") {
+        if (label === "Driving License") {
             result.drivingLicenseNumber = doc.referenceNumber ?? "";
             result.drivingLicenseExpiry = doc.expiryDate ?? null;
             result.drivingFront = doc.documentUrls?.[0] ?? null;
@@ -705,8 +705,8 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         if (!personalInfo.gender) errors.gender = "Please select a gender";
         if (!personalInfo.idProof) errors.idProof = "ID proof is required";
         if (!personalInfo.suburb.trim()) errors.suburb = "Suburb is required";
-        if (!personalInfo.primaryLanguage?.label?.trim()) errors.primaryLanguage = "primary language is required";
-        if (!personalInfo?.experience?.trim()) errors.experience = "year is required";
+        if (!personalInfo.primaryLanguage?.label?.trim()) errors.primaryLanguage = "Primary language is required";
+        if (!personalInfo?.experience?.trim()) errors.experience = "Year is required";
 
         set((state) => ({ errors: { ...state.errors, personal: errors } }));
         return Object.keys(errors).length === 0;
