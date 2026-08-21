@@ -277,7 +277,7 @@ const buildDocuments = (compliance: ComplianceInfo) => {
         }
 
         documents.push({
-            documentType: "Identify & Legal",
+            documentType: "Driving License",
             referenceNumber:
                 compliance.drivingLicenseNumber,
             expiryDate:
@@ -393,7 +393,7 @@ const mapDocumentsToCompliance = (docs: any[] = []): ComplianceInfo => {
             result.policeCertificate = doc.documentUrls[0] ?? null;
         }
 
-        if (label === "Identify & Legal") {
+        if (label === "Driving License") {
             result.drivingLicenseNumber = doc.referenceNumber ?? "";
             result.drivingLicenseExpiry = doc.expiryDate ?? null;
             result.drivingFront = doc.documentUrls?.[0] ?? null;
