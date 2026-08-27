@@ -19,11 +19,11 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Workers", path: "/workers" },
   { label: "Jobs", path: "/jobs" },
   { label: "Clients", path: "/clients" },
+  { label: "Roles and Permission", path: "/roles-permission" },
+  { label: "Subscription", path: "/subscription", disabled: false },
   { label: "Bookings", path: "/bookings", disabled: true },
   { label: "Budget", path: "/budget", disabled: true },
-  { label: "Roles and Permission", path: "/roles-permission" },
   { label: "Rewards", path: "/rewards", disabled: true },
-  { label: "Subscription", path: "/subscription", disabled: true },
 ];
 
 const sortedNavItems = [...NAV_ITEMS].sort(
