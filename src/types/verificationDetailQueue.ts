@@ -1,13 +1,24 @@
-export type DocumentStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type DocumentStatus =
+  | "PENDING"
+  | "VERIFIED"
+  | "REJECTED";
 
 export type VerificationCategory = "Client";
+
+/* --------------------------------------------------
+ * API TYPES
+ * -------------------------------------------------- */
 
 export interface ApiDocumentUrl {
   url: string;
   name: string;
   size: number;
   type: string;
-  uploadedAt: string;
+
+  uploadedAt?: string | null;
+  createdAt?: string | null;
+
+  documentSide?: string;
 }
 
 export interface ApiDocumentType {
@@ -19,89 +30,152 @@ export interface ApiVerificationDocument {
   id: number;
   userId: number;
   documentTypeId: number;
+
   referenceNumber: string | null;
+
   isVerificationExpires: boolean;
+
   startDate: string | null;
+
   expiryDate: string | null;
+
+  /*
+   * IMPORTANT:
+   * One document can contain multiple files.
+   *
+   * Example:
+   * Driving License
+   *   - Front side
+   *   - Back side
+   */
   documentUrls: ApiDocumentUrl[];
+
   notes: string | null;
+
   isCurrent: boolean;
+
   status: DocumentStatus;
+
   isActive: boolean;
+
   createdAt: string;
+
   updatedAt: string;
+
   documentType: ApiDocumentType;
 }
 
 export interface ApiUser {
   id: number;
+
   firstName: string;
+
   lastName: string | null;
+
   email: string;
+
   phone: string;
+
   countryCode: string;
+
   profilePicture: string | null;
 }
 
 export interface UserDocumentsApiResponse {
   user: ApiUser;
+
   documents: ApiVerificationDocument[];
+
   count: number;
 }
 
 /* --------------------------------------------------
- * Frontend types
+ * FRONTEND TYPES
  * -------------------------------------------------- */
 
 export interface VerificationDocument {
   id: string;
+
   documentTypeId: number;
+
   documentName: string;
-  status: DocumentStatus;
-
-  referenceNumber: string | null;
-  startDate: string | null;
-  expiryDate: string | null;
-  isVerificationExpires: boolean;
-
-  notes: string | null;
-  isCurrent: boolean;
-  isActive: boolean;
-
-  documentUrl: string | null;
-  fileName: string | null;
-  fileSize: number | null;
-  fileType: string | null;
-  uploadedAt: string | null;
 
   documentType: string;
 
-  // Kept optional so existing identity preview UI won't break.
+  status: DocumentStatus;
+
+  referenceNumber: string | null;
+
+  startDate: string | null;
+
+  expiryDate: string | null;
+
+  isVerificationExpires: boolean;
+
+  notes: string | null;
+
+  isCurrent: boolean;
+
+  isActive: boolean;
+
+  /*
+   * ALL files belonging to this document.
+   */
+  documentUrls: ApiDocumentUrl[];
+
+  /*
+   * Backward-compatible first-file fields.
+   */
+  documentUrl: string | null;
+
+  fileName: string | null;
+
+  fileSize: number | null;
+
+  fileType: string | null;
+
+  uploadedAt: string | null;
+
   identityPreview?: {
     photoUrl?: string;
+
     givenNames: string;
+
     surname: string;
+
     documentType: string;
+
     issuingCountry: string;
+
     documentNo: string;
+
     sex: string;
+
     nationality: string;
+
     dateOfBirth: string;
+
     dateOfIssue: string;
+
     dateOfExpiry: string;
   };
 }
 
 export interface VerificationQueueItem {
   id: string;
+
   name: string;
+
   refId: string;
+
   category: VerificationCategory;
 
   documents: VerificationDocument[];
 
   totalDocuments: number;
+
   completedDocuments: number;
+
   rejectedDocuments: number;
 
   overallStatus: DocumentStatus;
@@ -109,24 +183,36 @@ export interface VerificationQueueItem {
   user: ApiUser;
 }
 
+/* --------------------------------------------------
+ * STORE STATE
+ * -------------------------------------------------- */
+
 export interface VerificationQueueState {
   queueList: VerificationQueueItem[];
 
   loading: boolean;
+
   error: string | null;
 
   activeTab: VerificationCategory;
 
   isPanelOpen: boolean;
+
   selectedJob: VerificationQueueItem | null;
+
   selectedDocument: VerificationDocument | null;
 
   actionLoading: boolean;
+
   actionError: string | null;
 
-  fetchVerificationQueue: (id: string) => Promise<void>;
+  fetchVerificationQueue: (
+    id: string
+  ) => Promise<void>;
 
-  setActiveTab: (tab: VerificationCategory) => void;
+  setActiveTab: (
+    tab: VerificationCategory
+  ) => void;
 
   openDocumentPanel: (
     jobId: string,
@@ -135,7 +221,9 @@ export interface VerificationQueueState {
 
   closeDocumentPanel: () => void;
 
-  selectDocument: (document: VerificationDocument) => void;
+  selectDocument: (
+    document: VerificationDocument
+  ) => void;
 
   approveDocument: (
     jobId: string,

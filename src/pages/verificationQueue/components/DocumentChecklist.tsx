@@ -1,204 +1,236 @@
 import React from "react";
 
-import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import CancelIcon from "@mui/icons-material/Cancel";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-import type {
-  DocumentStatus,
-  VerificationDocument,
-} from "@/types/verificationDetailQueue";
+import type { VerificationDocument } from "@/types/verificationDetailQueue";
+import { FilledTickIcon } from "@/assets";
 
 interface DocumentChecklistProps {
-  documents: VerificationDocument[];
-
-  selectedDocumentId?: string;
-
-  onSelect: (
-    document: VerificationDocument
-  ) => void;
+  documents: VerificationDocument[] | undefined;
+  selectedDocumentId: string | undefined;
+  onSelect: (document: VerificationDocument) => void;
 }
 
-const getStatusColor = (
-  status: DocumentStatus
-) => {
-  switch (status) {
-    case "VERIFIED":
-      return { color: "#07AB48", bg: "#D9F7E5" };
-
-    case "REJECTED":
-      return "error";
-
-    default:
-      return { bg: "#ECEFF1", color: "#64748B" };
-  }
-};
-
-const getStatusLabel = (
-  status: DocumentStatus
-) => {
-  switch (status) {
-    case "VERIFIED":
-      return "Verified";
-
-    case "REJECTED":
-      return "Rejected";
-
-    default:
-      return "Pending";
-  }
-};
-
-const DocumentChecklist: React.FC<
-  DocumentChecklistProps
-> = ({
-  documents,
+const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
+  documents = [],
   selectedDocumentId,
   onSelect,
 }) => {
+  const getStatusIcon = (status: VerificationDocument["status"]) => {
+    if (status === "VERIFIED") {
+      return <FilledTickIcon />;
+    }
+
+    if (status === "REJECTED") {
+      return (
+        <CancelIcon
+          sx={{
+            fontSize: 18,
+            color: "error.main",
+          }}
+        />
+      );
+    }
+
     return (
-      <Paper
-        variant="outlined"
+      <AccessTimeIcon
         sx={{
-          p: {
-            xs: 2,
-            sm: 2.5,
-          },
-          borderRadius: 2,
+          fontSize: 18,
+          color: "warning.main",
+        }}
+      />
+    );
+  };
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        textAlign: "left",
+        overflow: "hidden",
+      }}
+    >
+      {/* --------------------------------------------------
+       * HEADER
+       * -------------------------------------------------- */}
+
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
-        <Stack
-          sx={{
-            mb: 2,
-            direction: "row",
-            alignItems: "start",
-            justifyContent:
-              "space-between",
-          }}
-        >
-          <Typography
-            variant="subtitle2"
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          Document Checklist
+        </Typography>
+
+        <Typography variant="caption" color="text.secondary">
+          {documents.length} document{documents.length !== 1 ? "s" : ""}
+        </Typography>
+      </Box>
+
+      {/* --------------------------------------------------
+       * DOCUMENT LIST
+       * -------------------------------------------------- */}
+
+      <Stack
+        spacing={0.5}
+        sx={{
+          px: 1.5,
+          py: 1,
+        }}
+      >
+        {documents.length === 0 ? (
+          <Box
             sx={{
-              fontWeight: 700,
+              p: 3,
+              textAlign: "center",
             }}
           >
-            Document Checklist
-          </Typography>
+            <Typography variant="body2" color="text.secondary">
+              No documents available
+            </Typography>
+          </Box>
+        ) : (
+          documents.map((document, index) => {
+            const selected = document.id === selectedDocumentId;
 
-          <Typography
-            variant="caption"
-            color="text.secondary"
-          >
-            {documents?.length} Documents
-          </Typography>
-        </Stack>
-
-        <List disablePadding>
-          {documents?.map((doc) => {
-            const isActive =
-              doc?.id === selectedDocumentId;
+            const fileCount = document.documentUrls?.length ?? 0;
 
             return (
-              <ListItemButton
-                key={doc?.id}
-                selected={isActive}
-                onClick={() =>
-                  onSelect(doc)
-                }
+              <Box
+                key={document.id}
+                onClick={() => onSelect(document)}
                 sx={{
+                  p: 1.5,
                   borderRadius: 1,
-                  mb: 0.5,
-                  alignItems: "flex-start",
-                  "&.Mui-selected": {
-                    bgcolor: `#F2FCFA`,
-                    borderLeft: '3px solid',
-                    borderColor: 'primary.main'
+                  cursor: "pointer",
+                  bgcolor: selected ? "#F2FCFA" : "transparent",
+                  borderLeft: "3px solid",
+                  borderColor: selected
+                    ? "primary.main"
+                    : "transparent",
+                  transition: "all 0.2s",
+
+                  "&:hover": {
+                    bgcolor: selected ? "primary.50" : "grey.50",
                   },
                 }}
               >
-                <ListItemIcon
+                <Box
                   sx={{
-                    minWidth: 36,
-                    mt: 0.3,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 1.25,
                   }}
                 >
-                  <DescriptionOutlinedIcon
-                    fontSize="small"
-                    color={
-                      isActive
-                        ? "primary"
-                        : "disabled"
-                    }
-                  />
-                </ListItemIcon>
+                  {/* Number */}
 
-                <ListItemText
-                  sx={{
-                    mt: "0 !important",
-                  }}
-                  primary={
-                    doc?.documentName
-                  }
-                  secondary={
-                    <Chip
-                      label={getStatusLabel(
-                        doc?.status
-                      )}
-                      size="small"
+                  <Box
+                    sx={{
+                      minWidth: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      bgcolor: selected ? "primary.main" : "grey.100",
+                      color: selected ? "white" : "text.secondary",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {index + 1}
+                  </Box>
+
+                  {/* Content */}
+
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Box
                       sx={{
-                        mt: 0.5,
-                        height: 20,
-                        fontSize:12,
-                        color: getStatusColor(doc?.status)
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1,
                       }}
-                    />
-                  }
-                  slotProps={{
-                    primary: {
-                      sx: {
-                        fontSize:13,
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          wordBreak: "break-word",
+                          fontWeight: selected ? 600 : 500,
+                          fontSize: 13,
+                          color: selected ? "#1E293B" : "#64748B",
+                        }}
+                      >
+                        {document?.documentName}
+                      </Typography>
 
-                        fontWeight:
-                          isActive
-                            ? 600
-                            : 500,
+                      {getStatusIcon(document.status)}
+                    </Box>
 
-                        color: isActive
-                          ? "#1E293B"
-                          : "#64748B",
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        mt: 0.5,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Chip
+                        size="small"
+                        label={document.status}
+                        sx={{
+                          height: 20,
+                          color:
+                            document.status === "VERIFIED"
+                              ? "#07AB48"
+                              : document.status === "REJECTED"
+                                ? "#A11A1A"
+                                : "#34485F",
+                          bgcolor:
+                            document.status === "VERIFIED"
+                              ? "#D9F7E5"
+                              : document.status === "REJECTED"
+                                ? "#FDF0F0"
+                                : "#ECEFF1",
+                          fontSize: 10,
+                        }}
+                      />
 
-                        whiteSpace:
-                          "normal",
-                      },
-                    },
-                  }}
-                />
-
-                <VisibilityOutlinedIcon
-                  fontSize="small"
-                  color={
-                    isActive
-                      ? "primary"
-                      : "disabled"
-                  }
-                  sx={{
-                    mt: 1,
-                  }}
-                />
-              </ListItemButton>
+                      {fileCount > 1 && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          {fileCount} files
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
             );
-          })}
-        </List>
-      </Paper>
-    );
-  };
+          })
+        )}
+      </Stack>
+    </Paper>
+  );
+};
 
 export default DocumentChecklist;

@@ -8,37 +8,35 @@ import Typography from "@mui/material/Typography";
 
 import { useParams } from "react-router-dom";
 
-import {
-  useVerificationQueueStore,
-} from "@/store/verificationQueueStore";
+import { useVerificationQueueStore } from "@/store/verificationQueueStore";
 
-import {
-  LoadingState,
-  ErrorState,
-} from "@/components/RequestState";
+import { ErrorState } from "@/components/RequestState";
 
 import DocumentChecklist from "./components/DocumentChecklist";
 import DocumentPreview from "./components/DocumentPreview";
+import { Loading } from "@/components";
 
 const VerificationQueueScreen: React.FC = () => {
   const {
     loading,
     error,
-
     selectedJob,
     selectedDocument,
-
     actionLoading,
     actionError,
-
     fetchVerificationQueue,
     selectDocument,
-
     approveDocument,
     rejectDocument,
   } = useVerificationQueueStore();
 
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{
+    id: string;
+  }>();
+
+  /* --------------------------------------------------
+   * FETCH
+   * -------------------------------------------------- */
 
   useEffect(() => {
     if (id) {
@@ -47,19 +45,15 @@ const VerificationQueueScreen: React.FC = () => {
   }, [id, fetchVerificationQueue]);
 
   /* --------------------------------------------------
-   * Loading
+   * LOADING
    * -------------------------------------------------- */
 
   if (loading) {
-    return (
-      <LoadingState
-        label="Loading verification documents..."
-      />
-    );
+    return <Loading />;
   }
 
   /* --------------------------------------------------
-   * Error
+   * ERROR
    * -------------------------------------------------- */
 
   if (error) {
@@ -76,7 +70,7 @@ const VerificationQueueScreen: React.FC = () => {
   }
 
   /* --------------------------------------------------
-   * No user / documents
+   * NO DATA
    * -------------------------------------------------- */
 
   if (!selectedJob) {
@@ -114,7 +108,7 @@ const VerificationQueueScreen: React.FC = () => {
         }}
       >
         {/* --------------------------------------------------
-         * User Header
+         * USER HEADER
          * -------------------------------------------------- */}
 
         <Paper
@@ -137,19 +131,16 @@ const VerificationQueueScreen: React.FC = () => {
               variant="subtitle2"
               sx={{
                 fontWeight: 700,
-                textAlign: 'start'
+                textAlign: "start",
               }}
             >
-              {selectedJob?.name}
+              {selectedJob.name}
             </Typography>
 
-            <Typography
-              variant="caption"
-              color="text.secondary"
-            >
-              {selectedJob?.refId}
+            <Typography variant="caption" color="text.secondary">
+              {selectedJob.refId}
               {" - "}
-              {selectedJob?.user?.email}
+              {selectedJob.user.email}
             </Typography>
           </Box>
 
@@ -160,27 +151,21 @@ const VerificationQueueScreen: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <Typography
-              variant="caption"
-              color="text.secondary"
-            >
-              {selectedJob?.completedDocuments}/
-              {selectedJob?.totalDocuments} verified
+            <Typography variant="caption" color="text.secondary">
+              {selectedJob.completedDocuments}/
+              {selectedJob.totalDocuments} verified
             </Typography>
 
-            {selectedJob?.rejectedDocuments > 0 && (
-              <Typography
-                variant="caption"
-                color="error.main"
-              >
-                {selectedJob?.rejectedDocuments} rejected
+            {selectedJob.rejectedDocuments > 0 && (
+              <Typography variant="caption" color="error.main">
+                {selectedJob.rejectedDocuments} rejected
               </Typography>
             )}
           </Box>
         </Paper>
 
         {/* --------------------------------------------------
-         * Checklist + Preview
+         * CHECKLIST + PREVIEW
          * -------------------------------------------------- */}
 
         <Grid
@@ -190,7 +175,9 @@ const VerificationQueueScreen: React.FC = () => {
             sm: 2.5,
           }}
         >
-          {/* Checklist */}
+          {/* --------------------------------------------------
+           * CHECKLIST
+           * -------------------------------------------------- */}
 
           <Grid
             size={{
@@ -199,15 +186,15 @@ const VerificationQueueScreen: React.FC = () => {
             }}
           >
             <DocumentChecklist
-              documents={selectedJob?.documents}
-              selectedDocumentId={
-                selectedDocument?.id
-              }
+              documents={selectedJob.documents}
+              selectedDocumentId={selectedDocument?.id}
               onSelect={selectDocument}
             />
           </Grid>
 
-          {/* Preview */}
+          {/* --------------------------------------------------
+           * PREVIEW
+           * -------------------------------------------------- */}
 
           <Grid
             size={{
@@ -220,24 +207,18 @@ const VerificationQueueScreen: React.FC = () => {
               actionLoading={actionLoading}
               actionError={actionError}
               onApprove={() => {
-                if (
-                  selectedDocument &&
-                  selectedJob
-                ) {
+                if (selectedDocument && selectedJob) {
                   approveDocument(
-                    selectedJob?.id,
-                    selectedDocument?.id
+                    selectedJob.id,
+                    selectedDocument.id
                   );
                 }
               }}
               onReject={() => {
-                if (
-                  selectedDocument &&
-                  selectedJob
-                ) {
+                if (selectedDocument && selectedJob) {
                   rejectDocument(
-                    selectedJob?.id,
-                    selectedDocument?.id
+                    selectedJob.id,
+                    selectedDocument.id
                   );
                 }
               }}

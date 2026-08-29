@@ -10,13 +10,38 @@ import type {
   UserDocumentsApiResponse,
 } from "../types/verificationDetailQueue";
 
-import { createApiRequest, updateApiRequest } from "@/api/api";
+import {
+  createApiRequest,
+  updateApiRequest,
+} from "@/api/api";
+
 import { handleApiError } from "@/utils/errorHandler";
+
+/* --------------------------------------------------
+ * API DOCUMENT -> FRONTEND DOCUMENT
+ * -------------------------------------------------- */
 
 const mapApiDocument = (
   document: ApiVerificationDocument
 ): VerificationDocument => {
-  const file = document.documentUrls?.[0] ?? null;
+  /*
+   * IMPORTANT:
+   *
+   * Don't use only:
+   *
+   * document.documentUrls?.[0]
+   *
+   * because a document can have multiple files.
+   *
+   * Example:
+   *
+   * Driving License
+   *   documentUrls[0] = Front
+   *   documentUrls[1] = Back
+   */
+
+  const files = document.documentUrls ?? [];
+  const firstFile = files[0] ?? null;
 
   return {
     id: String(document.id),
@@ -25,7 +50,7 @@ const mapApiDocument = (
 
     documentName:
       document.documentType?.name ||
-      file?.name ||
+      firstFile?.name ||
       "Unknown Document",
 
     documentType:
@@ -40,7 +65,8 @@ const mapApiDocument = (
 
     expiryDate: document.expiryDate,
 
-    isVerificationExpires: document.isVerificationExpires,
+    isVerificationExpires:
+      document.isVerificationExpires,
 
     notes: document.notes,
 
@@ -48,22 +74,40 @@ const mapApiDocument = (
 
     isActive: document.isActive,
 
-    documentUrl: file?.url ?? null,
+    /*
+     * Store ALL files.
+     */
+    documentUrls: files,
 
-    fileName: file?.name ?? null,
+    /*
+     * Keep first-file values for
+     * existing components.
+     */
+    documentUrl: firstFile?.url ?? null,
 
-    fileSize: file?.size ?? null,
+    fileName: firstFile?.name ?? null,
 
-    fileType: file?.type || "application/pdf",
+    fileSize: firstFile?.size ?? null,
 
-    uploadedAt: file?.uploadedAt ?? null,
+    fileType: firstFile?.type ?? null,
+
+    uploadedAt:
+      firstFile?.uploadedAt ??
+      firstFile?.createdAt ??
+      null,
   };
 };
+
+/* --------------------------------------------------
+ * API RESPONSE -> QUEUE ITEM
+ * -------------------------------------------------- */
 
 const mapApiResponseToQueueItem = (
   response: UserDocumentsApiResponse
 ): VerificationQueueItem => {
-  const documents = (response.documents || []).map(mapApiDocument);
+  const documents = (response.documents || []).map(
+    mapApiDocument
+  );
 
   const completedDocuments = documents.filter(
     (doc) => doc.status === "VERIFIED"
@@ -79,7 +123,10 @@ const mapApiResponseToQueueItem = (
 
   let overallStatus: DocumentStatus = "PENDING";
 
-  if (documents.length > 0 && pendingDocuments === 0) {
+  if (
+    documents.length > 0 &&
+    pendingDocuments === 0
+  ) {
     if (rejectedDocuments > 0) {
       overallStatus = "REJECTED";
     } else {
@@ -117,8 +164,16 @@ const mapApiResponseToQueueItem = (
   };
 };
 
+/* --------------------------------------------------
+ * STORE
+ * -------------------------------------------------- */
+
 export const useVerificationQueueStore =
   create<VerificationQueueState>((set, get) => ({
+    /* --------------------------------------------------
+     * INITIAL STATE
+     * -------------------------------------------------- */
+
     queueList: [],
 
     loading: false,
@@ -138,15 +193,31 @@ export const useVerificationQueueStore =
     actionError: null,
 
     /* --------------------------------------------------
-     * Fetch user documents
+     * FETCH USER DOCUMENTS
      * -------------------------------------------------- */
 
     fetchVerificationQueue: async (id: string) => {
+      /*
+       * Reset selected document first.
+       *
+       * This is important when coming again
+       * from parent table.
+       *
+       * Every new user entry starts with
+       * document[0].
+       */
+
       set({
         loading: true,
+
         error: null,
+
         selectedJob: null,
+
         selectedDocument: null,
+
+        isPanelOpen: false,
+
         actionError: null,
       });
 
@@ -162,12 +233,18 @@ export const useVerificationQueueStore =
           response?.data?.data ?? response?.data;
 
         if (!res?.user) {
-          throw new Error("Invalid user documents response.");
+          throw new Error(
+            "Invalid user documents response."
+          );
         }
 
-        const queueItem = mapApiResponseToQueueItem(res);
+        const queueItem =
+          mapApiResponseToQueueItem(res);
 
-        // First document default selection
+        /*
+         * DEFAULT FIRST DOCUMENT
+         */
+
         const firstDocument =
           queueItem.documents?.[0] ?? null;
 
@@ -182,6 +259,8 @@ export const useVerificationQueueStore =
 
           loading: false,
 
+          error: null,
+
           actionError: null,
         });
       } catch (err: any) {
@@ -192,17 +271,20 @@ export const useVerificationQueueStore =
 
         set({
           error: message,
+
           loading: false,
+
           selectedJob: null,
+
           selectedDocument: null,
+
           isPanelOpen: false,
         });
       }
     },
 
-
     /* --------------------------------------------------
-     * Active tab
+     * ACTIVE TAB
      * -------------------------------------------------- */
 
     setActiveTab: (tab: VerificationCategory) => {
@@ -212,7 +294,7 @@ export const useVerificationQueueStore =
     },
 
     /* --------------------------------------------------
-     * Open document panel
+     * OPEN DOCUMENT PANEL
      * -------------------------------------------------- */
 
     openDocumentPanel: (
@@ -222,18 +304,25 @@ export const useVerificationQueueStore =
       const job =
         get().queueList.find(
           (item) => item.id === jobId
-        ) || null;
+        ) ?? null;
 
       if (!job) {
         return;
       }
 
-      const document =
-        documentId
-          ? job.documents.find(
+      /*
+       * If documentId is provided:
+       * select that document.
+       *
+       * Otherwise:
+       * select first document.
+       */
+
+      const document = documentId
+        ? job.documents.find(
             (doc) => doc.id === documentId
-          ) || null
-          : job.documents?.[0] || null;
+          ) ?? null
+        : job.documents?.[0] ?? null;
 
       set({
         selectedJob: job,
@@ -246,9 +335,8 @@ export const useVerificationQueueStore =
       });
     },
 
-
     /* --------------------------------------------------
-     * Close panel
+     * CLOSE PANEL
      * -------------------------------------------------- */
 
     closeDocumentPanel: () => {
@@ -264,7 +352,7 @@ export const useVerificationQueueStore =
     },
 
     /* --------------------------------------------------
-     * Select document
+     * SELECT DOCUMENT
      * -------------------------------------------------- */
 
     selectDocument: (
@@ -272,22 +360,13 @@ export const useVerificationQueueStore =
     ) => {
       set({
         selectedDocument: document,
+
         actionError: null,
       });
     },
 
-
     /* --------------------------------------------------
-     * Update document status
-     * -------------------------------------------------- */
-
-    updateDocumentStatus: async () => {
-      // kept internally through approve/reject below
-    },
-
-    /* --------------------------------------------------
-     * Approve
-     * PUT /admin/updateUserDocumentStatus
+     * APPROVE DOCUMENT
      * -------------------------------------------------- */
 
     approveDocument: async (
@@ -296,6 +375,7 @@ export const useVerificationQueueStore =
     ) => {
       set({
         actionLoading: true,
+
         actionError: null,
       });
 
@@ -304,8 +384,9 @@ export const useVerificationQueueStore =
           "admin/updateUserDocumentStatus",
           {
             documentId: Number(documentId),
+
             status: "VERIFIED",
-          },
+          }
         );
 
         updateLocalDocument(
@@ -315,17 +396,21 @@ export const useVerificationQueueStore =
           "VERIFIED"
         );
       } catch (err: any) {
-        const message = handleApiError(err, "Failed to approve document.");
+        const message = handleApiError(
+          err,
+          "Failed to approve document."
+        );
+
         set({
           actionError: message,
+
           actionLoading: false,
         });
       }
     },
 
     /* --------------------------------------------------
-     * Reject
-     * PUT /admin/updateUserDocumentStatus
+     * REJECT DOCUMENT
      * -------------------------------------------------- */
 
     rejectDocument: async (
@@ -334,17 +419,18 @@ export const useVerificationQueueStore =
     ) => {
       set({
         actionLoading: true,
+
         actionError: null,
       });
 
       try {
-        await createApiRequest(
+        await updateApiRequest(
           "admin/updateUserDocumentStatus",
           {
             documentId: Number(documentId),
+
             status: "REJECTED",
-          },
-          "PUT"
+          }
         );
 
         updateLocalDocument(
@@ -354,9 +440,14 @@ export const useVerificationQueueStore =
           "REJECTED"
         );
       } catch (err: any) {
-        const message = handleApiError(err, "Failed to reject document.");
+        const message = handleApiError(
+          err,
+          "Failed to reject document."
+        );
+
         set({
           actionError: message,
+
           actionLoading: false,
         });
       }
@@ -364,7 +455,7 @@ export const useVerificationQueueStore =
   }));
 
 /* --------------------------------------------------
- * Local state update after API success
+ * UPDATE LOCAL DOCUMENT AFTER API SUCCESS
  * -------------------------------------------------- */
 
 function updateLocalDocument(
@@ -384,9 +475,14 @@ function updateLocalDocument(
           (doc) =>
             doc.id === documentId
               ? {
-                ...doc,
-                status,
-              }
+                  /*
+                   * IMPORTANT:
+                   * This preserves documentUrls.
+                   */
+                  ...doc,
+
+                  status,
+                }
               : doc
         );
 
@@ -433,12 +529,16 @@ function updateLocalDocument(
     const updatedJob =
       updatedList.find(
         (job) => job.id === jobId
-      ) || null;
+      ) ?? null;
 
+    /*
+     * Keep selected document pointing
+     * to the updated object.
+     */
     const updatedDocument =
       updatedJob?.documents.find(
         (doc) => doc.id === documentId
-      ) || null;
+      ) ?? null;
 
     return {
       queueList: updatedList,
