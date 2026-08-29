@@ -1,96 +1,193 @@
-// ============================================================
-// Job Details — Type Definitions
-// ============================================================
+// src/types/jobDetails.ts
 
-export type JobStatus = "Open" | "In Progress" | "Closed" | "Cancelled";
-export type PaymentStatus = "Paid" | "Pending" | "Partial";
-
-export interface ClientDetails {
-  clientName: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  emergencyContact: string;
+export interface JobServiceCategory {
+  id: number;
+  name: string;
+  description?: string | null;
 }
 
-export interface WorkerDetails {
-  workerName: string;
-  email: string;
-  phoneNumber: string;
-  experience: string;
-  skills: string;
+export interface JobService {
+  id: number;
+  name: string;
+  description?: string | null;
+  serviceCategoryId: number;
 }
 
-export interface LocationDetails {
-  serviceAddress: string;
+export interface JobServiceCategoryItem {
+  id: number;
+  jobId: number;
+  serviceCategoryId: number;
+  serviceId: number;
+  serviceCategory: JobServiceCategory;
+  service: JobService;
+}
+
+export interface JobInfo {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  hourlyRate: number;
+  shift: string;
+  hoursPerDay: number;
+  serviceRequirement: string;
+  status: string;
+  experienceLevel: string | null;
+  genderPreference: string | null;
+  isNdisCompliant: boolean;
+  publishStatus: string;
+  frequency: string | null;
+  preferredStartDate: string | null;
+  clientPaidToNimora: string | null;
+  isUrgentShift: boolean;
+  postedBy: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Address {
+  id: number;
+  userId: number;
+  street1: string;
+  street2?: string | null;
+  suburb?: string | null;
   city: string;
   state: string;
-  postalCode: string;
+  zipCode: string;
+  timezone?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface ScheduleSummary {
+export interface UserBio {
+  yearsOfExperience?: number | null;
+  professionalBio?: string | null;
+  experienceInfo?: string | null;
+  newClientAvailability?: boolean | null;
+  degree?: string | null;
+  speciality?: string | null;
+}
+
+export interface JobUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  countryCode?: string | null;
+  profilePicture?: string | null;
+  emailVerified?: boolean;
+  activeStatus?: boolean;
+  fullName: string;
+  addresses: Address[];
+  bio?: UserBio | null;
+  businessInfo?: unknown;
+  businessName?: string | null;
+}
+
+export interface JobLocation {
+  id: number;
+  jobId: number;
+  street1: string;
+  street2?: string | null;
+  city: string;
+  state: string;
+  zipCode: string;
+  timezone?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BookingStatus {
+  id: number;
+  name: string;
+}
+
+export interface ShiftLog {
+  id: number;
+  bookingId: number;
+  clockInTime?: string | null;
+  clockOutTime?: string | null;
+  transportStartKm?: number | null;
+  transportEndKm?: number | null;
+  eSignatureImageData?: string | null;
+  transportStartKmImageData?: string | null;
+  transportEndKmImageData?: string | null;
+  shiftNotes?: string | null;
+  invoiceMetadata?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface JobBooking {
+  id: number;
+  jobSessionId: number;
+  bookingStatus: BookingStatus;
+  cancelReason?: string | null;
+  worker?: JobUser | null;
+  client?: JobUser | null;
+  payment?: unknown;
+  shiftLogs?: ShiftLog[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface JobSession {
+  id: number;
   startDate: string;
   endDate: string;
-  totalWorkingDays: number;
-  totalHours: number;
-}
-
-export interface PaymentSummary {
-  totalAmount: number;
-  paidAmount: number;
-  pendingAmount: number;
-  paymentMode: string;
-  paymentStatus: PaymentStatus;
-}
-
-export interface PaymentHistoryItem {
-  id: number;
-  transactionId: string;
-  date: string;
-  paymentMode: string;
-  amount: number;
-  status: PaymentStatus;
-  notes: string;
-}
-
-export type AttendanceStatus = "Present" | "Absent" | "Late";
-
-export interface WorkHistoryItem {
-  id: number;
-  date: string;
-  shiftTime: string;
-  hoursWorked: string;
-  attendanceStatus: AttendanceStatus;
-  notes: string;
+  startTime: string;
+  endTime: string;
+  dayOfWeek?: string | null;
+  dayName?: string | null;
+  bookings?: JobBooking[];
 }
 
 export interface JobDetails {
   jobId: string;
-  serviceType: string;
-  jobStatus: JobStatus;
-  serviceDate: string;
-  shiftTime: string;
-  location: string;
-  paymentStatus: PaymentStatus;
+  job: JobInfo;
 
-  client: ClientDetails;
-  worker: WorkerDetails;
-  locationDetails: LocationDetails;
-  scheduleSummary: ScheduleSummary;
-  paymentSummary: PaymentSummary;
+  jobServiceCategories: JobServiceCategoryItem[];
 
-  paymentHistory: PaymentHistoryItem[];
-  workHistory: WorkHistoryItem[];
+  serviceType: string | null;
+  serviceCategory: string | null;
+
+  requiredSkills: unknown[];
+  preferredLanguages: unknown[];
+  certifications: unknown[];
+
+  locations: JobLocation[];
+  sessions: JobSession[];
+
+  client: JobUser | null;
+  worker: JobUser | null;
+
+  booking?: JobBooking | null;
+  bookings: JobBooking[];
+
+  payments: unknown[];
+
+  jobStatus: string;
+  paymentStatus: string;
 }
 
-// ------------------------------------------------------------
-// Zustand store contract
-// ------------------------------------------------------------
+export interface JobDetailsApiResponse {
+  status: boolean;
+  message: string;
+  data: JobDetails;
+}
+
 export interface JobDetailsState {
   jobDetails: JobDetails | null;
   loading: boolean;
   error: string | null;
 
-  fetchJobDetails: (jobId: string) => Promise<void>;
+  fetchJobDetails: (jobId: string | number) => Promise<void>;
   resetJobDetails: () => void;
 }

@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useVerificationQueueStore } from "@/store/verificationQueueStore";
 
@@ -15,6 +15,7 @@ import { ErrorState } from "@/components/RequestState";
 import DocumentChecklist from "./components/DocumentChecklist";
 import DocumentPreview from "./components/DocumentPreview";
 import { Loading } from "@/components";
+import { ArrowBackIos } from "@mui/icons-material";
 
 const VerificationQueueScreen: React.FC = () => {
   const {
@@ -29,7 +30,7 @@ const VerificationQueueScreen: React.FC = () => {
     approveDocument,
     rejectDocument,
   } = useVerificationQueueStore();
-
+  const navigate = useNavigate();
   const { id } = useParams<{
     id: string;
   }>();
@@ -94,13 +95,36 @@ const VerificationQueueScreen: React.FC = () => {
   return (
     <Box
       sx={{
-        width: "100%",
-        p: {
-          xs: 2,
-          sm: 3,
-        },
+        width: "100%"
       }}
     >
+      <Box
+        sx={{
+          // position: "sticky",
+          // top: 0,
+          // zIndex: 1200,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          py: 1,
+          cursor: "pointer",
+          mb: 1
+        }}
+        onClick={() => navigate('/verification-queue')}
+      >
+
+        <ArrowBackIos fontSize="small" />
+
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
+          Back
+        </Typography>
+      </Box>
+
       <Stack
         spacing={{
           xs: 2,

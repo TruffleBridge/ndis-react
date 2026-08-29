@@ -1,4 +1,3 @@
-import React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
@@ -7,41 +6,51 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import { alpha } from "@mui/material/styles";
-import type { SxProps, Theme } from "@mui/material/styles";
+
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
-import type { PaymentSummary } from "@/types/jobDetails";
-import { StatusBadge } from "@/components/StatusBadge";
+
+// import type {
+//   PaymentSummary,
+// } from "@/types/jobDetails";
+
+import { StatusChip } from "@/components/StatusBadge";
 
 interface PaymentSummaryCardProps {
-  summary: PaymentSummary;
-  sx?: SxProps<Theme>;
+  summary: any;
 }
 
-const formatCurrency = (value: number): string => {
+const formatCurrency = (
+  value: number,
+): string => {
   return new Intl.NumberFormat("en-AU", {
     style: "currency",
     currency: "AUD",
   }).format(value);
 };
 
-interface AmountFieldProps {
+interface AmountProps {
   label: string;
   value: number;
-  color?: "text.primary" | "info.main" | "warning.main";
+  color:
+  | "success.main"
+  | "info.main"
+  | "warning.main";
 }
 
-const AmountField: React.FC<AmountFieldProps> = ({
+const Amount = ({
   label,
   value,
-  color = "text.primary",
-}) => {
+  color,
+}: AmountProps) => {
   return (
     <Box
       sx={{
-        width: {
-          xs: "33.333333%",
+        minWidth: 0,
+        flex: 1,
+        px: {
+          xs: 0.5,
+          sm: 0.75,
         },
-        px: 1,
       }}
     >
       <Typography
@@ -49,6 +58,11 @@ const AmountField: React.FC<AmountFieldProps> = ({
         color="text.secondary"
         sx={{
           display: "block",
+          whiteSpace: "nowrap",
+          fontSize: {
+            xs: "0.62rem",
+            sm: "0.68rem",
+          },
         }}
       >
         {label}
@@ -56,10 +70,14 @@ const AmountField: React.FC<AmountFieldProps> = ({
 
       <Typography
         variant="body2"
-        color={color}
         sx={{
-          fontWeight: 700,
-          mt: 0.25,
+          mt: 0.35,
+          fontWeight: 800,
+          color,
+          fontSize: {
+            xs: "0.82rem",
+            sm: "0.9rem",
+          },
         }}
       >
         {formatCurrency(value)}
@@ -68,17 +86,15 @@ const AmountField: React.FC<AmountFieldProps> = ({
   );
 };
 
-const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
+const PaymentSummaryCard = ({
   summary,
-  sx,
-}) => {
+}: PaymentSummaryCardProps) => {
   return (
     <Card
       variant="outlined"
       sx={{
         height: "100%",
         borderRadius: 3,
-        ...sx,
       }}
     >
       <CardContent
@@ -87,24 +103,33 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
             xs: 2,
             sm: 2.5,
           },
+          "&:last-child": {
+            pb: {
+              xs: 2,
+              sm: 2.5,
+            },
+          },
         }}
       >
         <Stack
-
-          spacing={1.5}
+          spacing={1.25}
           sx={{
             mb: 2,
             direction: "row",
             alignItems: "center"
+
           }}
         >
           <Avatar
             sx={{
+              width: 34,
+              height: 34,
               bgcolor: (theme) =>
-                alpha(theme.palette.primary.main, 0.1),
+                alpha(
+                  theme.palette.primary.main,
+                  0.1,
+                ),
               color: "primary.main",
-              width: 32,
-              height: 32,
             }}
           >
             <PaidOutlinedIcon fontSize="small" />
@@ -112,9 +137,7 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
 
           <Typography
             variant="subtitle2"
-            sx={{
-              fontWeight: 700,
-            }}
+            sx={{ fontWeight: 700 }}
           >
             Payment Summary
           </Typography>
@@ -124,48 +147,44 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
           sx={{
             display: "flex",
             width: "100%",
-            mx: -1,
+            mx: -0.5,
           }}
         >
-          <AmountField
+          <Amount
             label="Total Amount"
             value={summary.totalAmount}
+            color="success.main"
           />
 
-          <AmountField
+          <Amount
             label="Paid Amount"
             value={summary.paidAmount}
             color="info.main"
           />
 
-          <AmountField
+          <Amount
             label="Pending Amount"
             value={summary.pendingAmount}
             color="warning.main"
           />
         </Box>
 
-        <Divider
-          sx={{
-            my: 2,
-          }}
-        />
+        <Divider sx={{ my: 2 }} />
 
         <Box
           sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            width: "100%",
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+            },
+            gap: 2,
           }}
         >
           <Box>
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{
-                display: "block",
-              }}
             >
               Payment Mode
             </Typography>
@@ -173,8 +192,8 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
             <Typography
               variant="body2"
               sx={{
-                mt: 0.25,
-                fontWeight: 600,
+                mt: 0.35,
+                fontWeight: 700,
               }}
             >
               {summary.paymentMode}
@@ -183,25 +202,23 @@ const PaymentSummaryCard: React.FC<PaymentSummaryCardProps> = ({
 
           <Box
             sx={{
-              textAlign: "right",
+              textAlign: {
+                xs: "left",
+                sm: "right",
+              },
             }}
           >
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{
-                display: "block",
-              }}
             >
               Payment Status
             </Typography>
 
-            <Box
-              sx={{
-                mt: 0.5,
-              }}
-            >
-              <StatusBadge status={summary.paymentStatus} />
+            <Box sx={{ mt: 0.5 }}>
+              <StatusChip
+                status={summary.paymentStatus}
+              />
             </Box>
           </Box>
         </Box>

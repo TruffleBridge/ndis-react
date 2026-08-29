@@ -35,4 +35,4 @@ export { FilterPopover } from "./filterPopover/FilterPopover";
 export type { FilterSelectConfig } from "./filterPopover/FilterPopover";
 export { AuditDetailsDrawer, EntityHistoryDrawer, UserHistoryDrawer } from "./audit";
 export { ErrorState, LoadingState } from './RequestState'
-export { StatusBadge } from './StatusBadge'
+export { StatusChip } from './StatusBadge'
