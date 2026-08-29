@@ -153,8 +153,8 @@ const validateForm = (values: SubscriptionForm): FormErrors => {
     Number.isNaN(values.monthlyPrice)
   ) {
     errors.monthlyPrice = "Monthly price is required";
-  } else if (values.monthlyPrice < 0) {
-    errors.monthlyPrice = "Monthly price cannot be negative";
+  } else if (values.monthlyPrice <= 0) {
+    errors.monthlyPrice = "Monthly price must be greater than 0";
   }
 
   if (
@@ -163,9 +163,10 @@ const validateForm = (values: SubscriptionForm): FormErrors => {
     Number.isNaN(values.annualPrice)
   ) {
     errors.annualPrice = "Annual price is required";
-  } else if (values.annualPrice < 0) {
-    errors.annualPrice = "Annual price cannot be negative";
+  } else if (values.annualPrice <= 0) {
+    errors.annualPrice = "Annual price must be greater than 0";
   }
+
 
   if (
     values.maxWorkers === undefined ||
@@ -173,8 +174,8 @@ const validateForm = (values: SubscriptionForm): FormErrors => {
     Number.isNaN(values.maxWorkers)
   ) {
     errors.maxWorkers = "Maximum workers is required";
-  } else if (values.maxWorkers < 0) {
-    errors.maxWorkers = "Maximum workers cannot be negative";
+  } else if (values.maxWorkers <= 0) {
+    errors.maxWorkers = "Maximum workers must be greater than 0";
   }
 
   return errors;
@@ -447,7 +448,7 @@ const Subscription = () => {
               color: "#101828",
               mb: 0.5,
               fontSize: { xs: 22, sm: 24 },
-              textAlign:'start'
+              textAlign: 'start'
             }}
           >
             Subscription plans
@@ -900,387 +901,384 @@ const Subscription = () => {
           },
         }}
       >
-        {detailLoading ? (
-          <Loading />
-        ) : (
-          draft && (
+        {detailLoading && <Loading />}
+        {
+          draft &&
+          <Box
+            sx={{
+              p: { xs: 2, sm: 3 },
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              boxSizing: "border-box",
+              minWidth: 0,
+            }}
+          >
             <Box
               sx={{
-                p: { xs: 2, sm: 3 },
                 display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                boxSizing: "border-box",
-                minWidth: 0,
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 1,
+                mb: 2,
+                flexShrink: 0,
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 1,
-                  mb: 2,
-                  flexShrink: 0,
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 800,
-                      color: "#101828",
-                    }}
-                  >
-                    {editingId !== null
-                      ? "Edit plan"
-                      : "New plan"}
-                  </Typography>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
-                    {editingId !== null
-                      ? "Update subscription plan details"
-                      : "Create a new subscription plan"}
-                  </Typography>
-                </Box>
-
-                <IconButton
-                  onClick={closeDrawer}
-                  size="small"
-                  disabled={
-                    createLoading || updateLoading
-                  }
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-
-              <Box
-                sx={{
-                  overflowY: "auto",
-                  overflowX: "hidden",
-                  flex: 1,
-                  pr: 0.5,
-                  minHeight: 0,
-                }}
-              >
+              <Box>
                 <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ fontWeight: 700 }}
-                >
-                  Identity
-                </Typography>
-
-                <Box sx={{ mt: 1 }}>
-                  <InputTextField
-                    label="Plan Name"
-                    value={draft.name}
-                    placeholder="Enter plan name"
-                    errors={errors.name}
-                    onChange={(value) =>
-                      updateValue("name", value)
-                    }
-                  />
-                </Box>
-
-                <Box sx={{ mt: 2 }}>
-                  <AutocompleteField
-                    required
-                    label="Plan Type"
-                    value={selectedPlanType}
-                    error={errors.type}
-                    options={PLAN_TYPE_OPTIONS}
-                    placeholder="Select plan type"
-                    onChange={(value: any) => {
-                      const selectedValue =
-                        typeof value === "string"
-                          ? value
-                          : value?.value ?? value?.label;
-
-                      if (
-                        selectedValue === "Basic" ||
-                        selectedValue ===
-                        "Professional" ||
-                        selectedValue === "Premium"
-                      ) {
-                        updateValue(
-                          "type",
-                          selectedValue
-                        );
-                      }
-                    }}
-                  />
-                </Box>
-
-                <Box sx={{ mt: 2 }}>
-                  <InputTextField
-                    label="Description"
-                    value={draft.description}
-                    placeholder="Enter description"
-                    errors={errors.description}
-                    onChange={(value) =>
-                      updateValue(
-                        "description",
-                        value
-                      )
-                    }
-                  />
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ fontWeight: 700 }}
-                >
-                  Pricing
-                </Typography>
-
-                <Box
+                  variant="h6"
                   sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      sm: "repeat(2, minmax(0, 1fr))",
-                    },
-                    gap: 1.5,
-                    mt: 1,
+                    fontWeight: 800,
+                    color: "#101828",
                   }}
                 >
-                  <InputTextField
-                    label="Monthly Price"
-                    type="number"
-                    value={draft.monthlyPrice}
-                    placeholder="0"
-                    errors={errors.monthlyPrice}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        $
-                      </InputAdornment>
-                    }
-                    onChange={(value) =>
-                      updateValue(
-                        "monthlyPrice",
-                        Number(value) || 0
-                      )
-                    }
-                  />
-
-                  <InputTextField
-                    label="Annual Price / Month"
-                    type="number"
-                    value={draft.annualPrice}
-                    placeholder="0"
-                    errors={errors.annualPrice}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        $
-                      </InputAdornment>
-                    }
-                    onChange={(value) =>
-                      updateValue(
-                        "annualPrice",
-                        Number(value) || 0
-                      )
-                    }
-                  />
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ fontWeight: 700 }}
-                >
-                  Usage limits
+                  {editingId !== null
+                    ? "Edit plan"
+                    : "New plan"}
                 </Typography>
 
-                <Box sx={{ mt: 1 }}>
-                  <InputTextField
-                    label="Maximum Workers"
-                    type="number"
-                    value={draft.maxWorkers}
-                    placeholder="Enter maximum workers"
-                    errors={errors.maxWorkers}
-                    startAdornment={
-                      <GroupIcon
-                        sx={{
-                          fontSize: 18,
-                          color: "#667085",
-                        }}
-                      />
-                    }
-                    onChange={(value) =>
-                      updateValue(
-                        "maxWorkers",
-                        Number(value) || 0
-                      )
-                    }
-                  />
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
                 <Typography
-                  variant="overline"
+                  variant="caption"
                   color="text.secondary"
-                  sx={{ fontWeight: 700 }}
                 >
-                  Feature flags
+                  {editingId !== null
+                    ? "Update subscription plan details"
+                    : "Create a new subscription plan"}
                 </Typography>
-
-                <Box sx={{ mt: 0.5 }}>
-                  <CustomSwitch
-                    sxProps={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      display: "flex",
-                      mb: 1,
-                    }}
-                    label="AI Assistance"
-                    checked={draft.isAiEnabled}
-                    onChange={(checked) =>
-                      updateValue(
-                        "isAiEnabled",
-                        checked
-                      )
-                    }
-                  />
-
-                  <CustomSwitch
-                    sxProps={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      display: "flex",
-                    }}
-                    label="Priority Job Visibility"
-                    checked={draft.isUrgentShift}
-                    onChange={(checked) =>
-                      updateValue(
-                        "isUrgentShift",
-                        checked
-                      )
-                    }
-                  />
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ fontWeight: 700 }}
-                >
-                  Status
-                </Typography>
-
-                <Box sx={{ mt: 0.5 }}>
-                  <CustomSwitch
-                    sxProps={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      display: "flex",
-                      mb: 1,
-                    }}
-                    label='Mark as "Most Popular"'
-                    checked={draft.isPopular}
-                    onChange={(checked) =>
-                      updateValue(
-                        "isPopular",
-                        checked
-                      )
-                    }
-                  />
-
-                  <CustomSwitch
-                    sxProps={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      display: "flex",
-                    }}
-                    label="Active (visible in client app)"
-                    checked={draft.isActive}
-                    onChange={(checked) =>
-                      updateValue(
-                        "isActive",
-                        checked
-                      )
-                    }
-                  />
-                </Box>
               </Box>
+
+              <IconButton
+                onClick={closeDrawer}
+                size="small"
+                disabled={
+                  createLoading || updateLoading
+                }
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            <Box
+              sx={{
+                overflowY: "auto",
+                overflowX: "hidden",
+                flex: 1,
+                pr: 0.5,
+                minHeight: 0,
+              }}
+            >
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                Identity
+              </Typography>
+
+              <Box sx={{ mt: 1 }}>
+                <InputTextField
+                  label="Plan Name"
+                  value={draft.name}
+                  placeholder="Enter plan name"
+                  errors={errors.name}
+                  onChange={(value) =>
+                    updateValue("name", value)
+                  }
+                />
+              </Box>
+
+              <Box sx={{ mt: 2 }}>
+                <AutocompleteField
+                  required
+                  label="Plan Type"
+                  value={selectedPlanType}
+                  error={errors.type}
+                  options={PLAN_TYPE_OPTIONS}
+                  placeholder="Select plan type"
+                  onChange={(value: any) => {
+                    const selectedValue =
+                      typeof value === "string"
+                        ? value
+                        : value?.value ?? value?.label;
+
+                    if (
+                      selectedValue === "Basic" ||
+                      selectedValue ===
+                      "Professional" ||
+                      selectedValue === "Premium"
+                    ) {
+                      updateValue(
+                        "type",
+                        selectedValue
+                      );
+                    }
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mt: 2 }}>
+                <InputTextField
+                  label="Description"
+                  value={draft.description}
+                  placeholder="Enter description"
+                  errors={errors.description}
+                  onChange={(value) =>
+                    updateValue(
+                      "description",
+                      value
+                    )
+                  }
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                Pricing
+              </Typography>
 
               <Box
                 sx={{
-                  display: "flex",
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, minmax(0, 1fr))",
+                  },
                   gap: 1.5,
-                  pt: 2,
-                  flexShrink: 0,
-                  backgroundColor: "#FFFFFF",
+                  mt: 1,
                 }}
               >
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={closeDrawer}
-                  disabled={
-                    createLoading || updateLoading
+                <InputTextField
+                  label="Monthly Price"
+                  type="number"
+                  value={draft.monthlyPrice}
+                  placeholder="0"
+                  errors={errors.monthlyPrice}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      $
+                    </InputAdornment>
                   }
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 600,
-                    minHeight: 40,
-                  }}
-                >
-                  Discard
-                </Button>
+                  onChange={(value) =>
+                    updateValue(
+                      "monthlyPrice",
+                      Number(value) || 0
+                    )
+                  }
+                />
 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={save}
-                  disabled={
-                    createLoading || updateLoading
+                <InputTextField
+                  label="Annual Price / Month"
+                  type="number"
+                  value={draft.annualPrice}
+                  placeholder="0"
+                  errors={errors.annualPrice}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      $
+                    </InputAdornment>
                   }
-                  sx={{
-                    backgroundColor: "primary.main",
-                    textTransform: "none",
-                    fontWeight: 700,
-                    minHeight: 40,
-                    "&:hover": {
-                      backgroundColor: "#0A5A4B",
-                    },
-                  }}
-                >
-                  {createLoading || updateLoading ? (
-                    <CircularProgress
-                      size={20}
+                  onChange={(value) =>
+                    updateValue(
+                      "annualPrice",
+                      Number(value) || 0
+                    )
+                  }
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                Usage limits
+              </Typography>
+
+              <Box sx={{ mt: 1 }}>
+                <InputTextField
+                  label="Maximum Workers"
+                  type="number"
+                  value={draft.maxWorkers}
+                  placeholder="Enter maximum workers"
+                  errors={errors.maxWorkers}
+                  startAdornment={
+                    <GroupIcon
                       sx={{
-                        color: "#FFFFFF",
+                        fontSize: 18,
+                        color: "#667085",
                       }}
                     />
-                  ) : editingId !== null ? (
-                    "Update plan"
-                  ) : (
-                    "Save plan"
-                  )}
-                </Button>
+                  }
+                  onChange={(value) =>
+                    updateValue(
+                      "maxWorkers",
+                      Number(value) || 0
+                    )
+                  }
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                Feature flags
+              </Typography>
+
+              <Box sx={{ mt: 0.5 }}>
+                <CustomSwitch
+                  sxProps={{
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    display: "flex",
+                    mb: 1,
+                  }}
+                  label="AI Assistance"
+                  checked={draft.isAiEnabled}
+                  onChange={(checked) =>
+                    updateValue(
+                      "isAiEnabled",
+                      checked
+                    )
+                  }
+                />
+
+                <CustomSwitch
+                  sxProps={{
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    display: "flex",
+                  }}
+                  label="Priority Job Visibility"
+                  checked={draft.isUrgentShift}
+                  onChange={(checked) =>
+                    updateValue(
+                      "isUrgentShift",
+                      checked
+                    )
+                  }
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                Status
+              </Typography>
+
+              <Box sx={{ mt: 0.5 }}>
+                <CustomSwitch
+                  sxProps={{
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    display: "flex",
+                    mb: 1,
+                  }}
+                  label='Mark as "Most Popular"'
+                  checked={draft.isPopular}
+                  onChange={(checked) =>
+                    updateValue(
+                      "isPopular",
+                      checked
+                    )
+                  }
+                />
+
+                <CustomSwitch
+                  sxProps={{
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    display: "flex",
+                  }}
+                  label="Active (visible in client app)"
+                  checked={draft.isActive}
+                  onChange={(checked) =>
+                    updateValue(
+                      "isActive",
+                      checked
+                    )
+                  }
+                />
               </Box>
             </Box>
-          )
-        )}
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1.5,
+                pt: 2,
+                flexShrink: 0,
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={closeDrawer}
+                disabled={
+                  createLoading || updateLoading
+                }
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  minHeight: 40,
+                }}
+              >
+                Discard
+              </Button>
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={save}
+                disabled={
+                  createLoading || updateLoading
+                }
+                sx={{
+                  backgroundColor: "primary.main",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  minHeight: 40,
+                  "&:hover": {
+                    backgroundColor: "#0A5A4B",
+                  },
+                }}
+              >
+                {createLoading || updateLoading ? (
+                  <CircularProgress
+                    size={20}
+                    sx={{
+                      color: "#FFFFFF",
+                    }}
+                  />
+                ) : editingId !== null ? (
+                  "Update plan"
+                ) : (
+                  "Save plan"
+                )}
+              </Button>
+            </Box>
+          </Box>}
       </Drawer>
 
       <CustomModal
         open={deleteModalOpen}
         onClose={closeDeleteModal}
-        type="success"
+        type="warning"
         title="Delete subscription plan?"
         description={
           deletePlan

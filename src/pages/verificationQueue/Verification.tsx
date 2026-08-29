@@ -11,6 +11,7 @@ import {
   TableComponent,
   type ColumnDef,
   type ColumnState,
+  type RowAction,
 } from "@/components";
 import { useVerificationQueueStore } from "@/store/useVerification";
 import dayjs from "dayjs";
@@ -19,6 +20,8 @@ import { cta, VerifyStyles } from "./style";
 import { useExportStore } from "@/store/useExportStore";
 import { usePermission } from "@/hooks/usePermission";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { VisibilityOutlined } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 interface VerificationRow {
   id: number;
@@ -79,6 +82,8 @@ export default function VerificationTable() {
     loading,
     getVerificationQueue,
   } = useVerificationQueueStore();
+  const navigate = useNavigate()
+
 
   // checkbox functions
   const {
@@ -215,13 +220,19 @@ export default function VerificationTable() {
   );
 
   // row actions 
-  // const rowActions = (row: VerificationRow) =>
-  //   useRowActions({
-  //     row,
-  //     status: row.status,
-
-  //     onEdit: () => console.log(row, "edit"),
-  //   });
+  const rowActions: RowAction<VerificationRow>[] = [
+    {
+      label: "View",
+      icon: <VisibilityOutlined sx={{ fontSize: 16, color: '#7F7F7F' }} />,
+      onClick: (row) => navigate(`/verification-details/${row?.id}`),
+    },
+    // {
+    //   label: "Delete",
+    //   icon: <DeleteIcon />,
+    //   sx: { color: "#7F7F7F" },
+    //   onClick: (row) => console.log("Delete", row),
+    // },
+  ];
 
   // tab function
   const handleTab = (val: any) => {
@@ -315,7 +326,7 @@ export default function VerificationTable() {
       <TableComponent
         rows={tableRows}
         columns={columns}
-        // rowActions={rowActions}
+        rowActions={rowActions}
         searchPlaceholder={selected === 'client' ? 'Search Client name' : 'Search Support Worker name'}
         noData="No verification records found"
         noDataSubTitle="There is no data available to display at the moment."

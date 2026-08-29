@@ -23,6 +23,8 @@ const AddNewClientPage = lazy(() => import("@/pages/clients/createClient"));
 const AddNewRolesPage = lazy(() => import("@/pages/roleAndPermission/createRoles"));
 const ProfileDetails = lazy(() => import("@/pages/profile/profiledetails"));
 const AuditLogsPage = lazy(() => import("@/pages/auditLog/auditLog"));
+const JobDetailsPage = lazy(() => import("@/pages/jobs/JobDetailsScreen"));
+const VerificationDetailsPage = lazy(() => import("@/pages/verificationQueue/VerificationQueueScreen"));
 
 const AppRoutes = () => {
   return (
@@ -52,6 +54,13 @@ const AppRoutes = () => {
           <Route path="subscription" element={<Subscription />} />
           <Route path="profile-details" element={<ProfileDetails />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
+
+
+          <Route path="job-details/:id" element={<JobDetailsPage />} />
+          <Route
+            path="verification-details/:id"
+            element={<VerificationDetailsPage />}
+          />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

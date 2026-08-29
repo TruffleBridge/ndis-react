@@ -2,9 +2,7 @@ import React, { useCallback, useState } from "react";
 import {
     Box,
     Button,
-    Checkbox,
     CircularProgress,
-    FormControlLabel,
     IconButton,
     Link,
     Stack,
@@ -260,14 +258,14 @@ const Login = () => {
                             <Box
                                 sx={{
                                     display: "flex",
-                                    mt: "0 !important",
+                                    mt: "1 !important",
                                     justifyContent:
-                                        "space-between",
+                                        "end",
                                     alignItems: "center",
                                     gap: 1,
                                 }}
                             >
-                                <FormControlLabel
+                                {/* <FormControlLabel
                                     control={
                                         <Checkbox
                                             checked={
@@ -283,7 +281,7 @@ const Login = () => {
                                         />
                                     }
                                     label="Remember me"
-                                />
+                                /> */}
 
                                 <Link
                                     sx={{
