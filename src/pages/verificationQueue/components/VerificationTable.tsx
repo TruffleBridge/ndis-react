@@ -1,73 +1,197 @@
 import React from "react";
+
 import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import type { VerificationQueueItem } from "@/types/verificationDetailQueue";
-import { StatusBadge } from "@/components/StatusBadge";
+
+import type {
+  DocumentStatus,
+  VerificationQueueItem,
+} from "@/types/verificationDetailQueue";
 
 interface VerificationTableProps {
   items: VerificationQueueItem[];
-  onView: (jobId: string, documentTypeId?: string) => void;
+
+  onView: (
+    jobId: string,
+    documentId?: string
+  ) => void;
 }
 
-const VerificationTable: React.FC<VerificationTableProps> = ({ items, onView }) => {
+const getStatusColor = (
+  status: DocumentStatus
+) => {
+  switch (status) {
+    case "VERIFIED":
+      return "success";
+
+    case "REJECTED":
+      return "error";
+
+    default:
+      return "warning";
+  }
+};
+
+const getStatusLabel = (
+  status: DocumentStatus
+) => {
+  switch (status) {
+    case "VERIFIED":
+      return "Verified";
+
+    case "REJECTED":
+      return "Rejected";
+
+    default:
+      return "Pending";
+  }
+};
+
+const VerificationTable: React.FC<
+  VerificationTableProps
+> = ({
+  items,
+  onView,
+}) => {
   return (
-    <Paper variant="outlined" sx={{ width: "100%", p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
-      {items.length === 0 ? (
-        <Box sx={{ py: 8, textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            No records waiting for verification.
-          </Typography>
-        </Box>
-      ) : (
-        <TableContainer sx={{ mx: { xs: -2, sm: 0 }, width: { xs: "calc(100% + 32px)", sm: "100%" } }}>
-          <Table size="small" sx={{ minWidth: 760 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {items.map((item: any) => (
-                <TableRow key={item.id} hover>
-                  <TableCell>
-                    <Typography variant="body2" sx={{
-                      fontWeight: 600
-                    }}>
-                      {item?.documentType?.name}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={item.status} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<VisibilityOutlinedIcon fontSize="small" />}
-                      onClick={() => onView(item?.id, item?.documentTypeId)}
-                      sx={{ borderRadius: 2, textTransform: "none" }}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-    </Paper>
+    <TableContainer
+      component={Paper}
+      variant="outlined"
+      sx={{
+        borderRadius: 3,
+      }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>
+              User
+            </TableCell>
+
+            <TableCell>
+              Reference
+            </TableCell>
+
+            <TableCell>
+              Documents
+            </TableCell>
+
+            <TableCell>
+              Verified
+            </TableCell>
+
+            <TableCell>
+              Rejected
+            </TableCell>
+
+            <TableCell>
+              Status
+            </TableCell>
+
+            <TableCell align="right">
+              Action
+            </TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {items.map((item) => (
+            <TableRow
+              key={item.id}
+              hover
+            >
+              <TableCell>
+                <Stack>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.name}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                  >
+                    {item.user.email}
+                  </Typography>
+                </Stack>
+              </TableCell>
+
+              <TableCell>
+                <Typography
+                  variant="body2"
+                >
+                  {item.refId}
+                </Typography>
+              </TableCell>
+
+              <TableCell>
+                {item.totalDocuments}
+              </TableCell>
+
+              <TableCell>
+                {item.completedDocuments}
+              </TableCell>
+
+              <TableCell>
+                {item.rejectedDocuments}
+              </TableCell>
+
+              <TableCell>
+                <Chip
+                  size="small"
+                  label={getStatusLabel(
+                    item.overallStatus
+                  )}
+                  color={getStatusColor(
+                    item.overallStatus
+                  )}
+                />
+              </TableCell>
+
+              <TableCell align="right">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={
+                    <VisibilityOutlinedIcon />
+                  }
+                  onClick={() =>
+                    onView(
+                      item.id,
+                      item.documents[0]
+                        ?.id
+                    )
+                  }
+                  sx={{
+                    textTransform:
+                      "none",
+
+                    borderRadius: 2,
+                  }}
+                >
+                  View
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

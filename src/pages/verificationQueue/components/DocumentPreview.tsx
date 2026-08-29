@@ -1,43 +1,134 @@
 import React from "react";
+
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import Chip from "@mui/material/Chip";
 
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import CheckCircleOutlineOutlined from "@mui/icons-material/CheckCircleOutlineOutlined";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-import type { VerificationDocument } from "../../../types/verificationDetailQueue";
-import { StatusBadge } from "@/components/StatusBadge";
-import { CheckCircleOutlineOutlined } from "@mui/icons-material";
+import type {
+  VerificationDocument,
+} from "@/types/verificationDetailQueue";
 
 interface DocumentPreviewProps {
-  document: VerificationDocument | null;
+  document:
+    | VerificationDocument
+    | null;
+
   actionLoading: boolean;
+
   actionError: string | null;
+
   onApprove: () => void;
+
   onReject: () => void;
 }
 
-interface IdentityFieldProps {
+/* --------------------------------------------------
+ * Helpers
+ * -------------------------------------------------- */
+
+const formatDate = (
+  date: string | null
+) => {
+  if (!date) {
+    return "-";
+  }
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return date;
+  }
+
+  return parsedDate.toLocaleDateString(
+    "en-AU",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
+  );
+};
+
+const formatFileSize = (
+  size: number | null
+) => {
+  if (!size) {
+    return "-";
+  }
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(
+      1
+    )} KB`;
+  }
+
+  return `${(
+    size /
+    (1024 * 1024)
+  ).toFixed(1)} MB`;
+};
+
+const getStatusColor = (
+  status: VerificationDocument["status"]
+) => {
+  switch (status) {
+    case "VERIFIED":
+      return "success";
+
+    case "REJECTED":
+      return "error";
+
+    default:
+      return "warning";
+  }
+};
+
+const getStatusLabel = (
+  status: VerificationDocument["status"]
+) => {
+  switch (status) {
+    case "VERIFIED":
+      return "Verified";
+
+    case "REJECTED":
+      return "Rejected";
+
+    default:
+      return "Pending";
+  }
+};
+
+/* --------------------------------------------------
+ * Document info field
+ * -------------------------------------------------- */
+
+interface InfoFieldProps {
   label: string;
+
   value: string;
 }
 
-const IdentityField: React.FC<IdentityFieldProps> = ({
+const InfoField: React.FC<
+  InfoFieldProps
+> = ({
   label,
   value,
 }) => {
   return (
-    <Box
-      sx={{
-        minWidth: 0,
-      }}
-    >
+    <Box sx={{ minWidth: 0 }}>
       <Typography
         variant="caption"
         color="text.secondary"
@@ -52,187 +143,105 @@ const IdentityField: React.FC<IdentityFieldProps> = ({
         variant="body2"
         sx={{
           mt: 0.25,
+
           fontWeight: 600,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+
+          wordBreak: "break-word",
         }}
       >
-        {value}
+        {value || "-"}
       </Typography>
     </Box>
   );
 };
 
-interface IdentityPreviewCardProps {
+/* --------------------------------------------------
+ * PDF Preview
+ * -------------------------------------------------- */
+
+interface PdfPreviewProps {
   document: VerificationDocument;
 }
 
-const IdentityPreviewCard: React.FC<IdentityPreviewCardProps> = ({
+const PdfPreview: React.FC<
+  PdfPreviewProps
+> = ({
   document,
 }) => {
-  const preview = document.identityPreview!;
-
-  return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: {
-          xs: 2,
-          sm: 2.5,
-        },
-        borderRadius: 2,
-        bgcolor: "grey.50",
-      }}
-    >
-      <Stack
+  if (!document.documentUrl) {
+    return (
+      <Box
         sx={{
-          direction: {
-            xs: "column",
-            sm: "row",
-          },
-          alignItems: {
-            xs: "stretch",
-            sm: "flex-start",
-          }
+          minHeight: 500,
+
+          display: "flex",
+
+          alignItems: "center",
+
+          justifyContent: "center",
+
+          border: "1px dashed",
+
+          borderColor: "divider",
+
+          borderRadius: 2,
+
+          bgcolor: "grey.50",
         }}
-        spacing={3}
       >
-        <Avatar
-          src={preview.photoUrl}
-          alt={`${preview.givenNames} ${preview.surname}`}
-          variant="rounded"
-          sx={{
-            width: 112,
-            height: 128,
-            alignSelf: {
-              xs: "center",
-              sm: "flex-start",
-            },
-            flexShrink: 0,
-          }}
-        />
-
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(2, minmax(0, 1fr))",
-              sm: "repeat(3, minmax(0, 1fr))",
-            },
-            gap: 2,
-          }}
-        >
-          <IdentityField
-            label="Type"
-            value={preview.documentType}
-          />
-
-          <IdentityField
-            label="Issuing Country"
-            value={preview.issuingCountry}
-          />
-
-          <IdentityField
-            label="Document No."
-            value={preview.documentNo}
-          />
-
-          <IdentityField
-            label="Surname"
-            value={preview.surname}
-          />
-
-          <IdentityField
-            label="Given Names"
-            value={preview.givenNames}
-          />
-
-          <IdentityField
-            label="Sex"
-            value={preview.sex}
-          />
-
-          <IdentityField
-            label="Nationality"
-            value={preview.nationality}
-          />
-
-          <IdentityField
-            label="Date of Birth"
-            value={preview.dateOfBirth}
-          />
-
-          <IdentityField
-            label="Date of Issue"
-            value={preview.dateOfIssue}
-          />
-
-          <IdentityField
-            label="Date of Expiry"
-            value={preview.dateOfExpiry}
-          />
-        </Box>
-      </Stack>
-    </Paper>
-  );
-};
-
-interface GenericFilePreviewProps {
-  document: VerificationDocument;
-}
-
-const GenericFilePreview: React.FC<GenericFilePreviewProps> = ({
-  document,
-}) => {
-  return (
-    <Stack
-      sx={{
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1.5,
-        py: 8,
-        borderRadius: 2,
-        border: "1px dashed",
-        borderColor: "divider",
-        bgcolor: "grey.50",
-        textAlign: "center",
-      }}
-    >
-      <InsertDriveFileOutlinedIcon
-        sx={{
-          fontSize: 32,
-          color: "text.disabled",
-        }}
-      />
-
-      <Box>
         <Typography
           variant="body2"
-          sx={{
-            fontWeight: 600,
-          }}
-        >
-          {document.documentName}
-        </Typography>
-
-        <Typography
-          variant="caption"
           color="text.secondary"
-          sx={{
-            display: "block",
-          }}
         >
-          Preview not available for this file type
+          Document preview is not available.
         </Typography>
       </Box>
-    </Stack>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        border: "1px solid",
+
+        borderColor: "divider",
+
+        borderRadius: 2,
+
+        overflow: "hidden",
+
+        bgcolor: "grey.100",
+      }}
+    >
+      <Box
+        sx={{
+          height: {
+            xs: 450,
+            md: 600,
+          },
+        }}
+      >
+        <iframe
+          src={document.documentUrl}
+          title={document.documentName}
+          width="100%"
+          height="100%"
+          style={{
+            border: "none",
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 
-const DocumentPreview: React.FC<DocumentPreviewProps> = ({
+/* --------------------------------------------------
+ * Component
+ * -------------------------------------------------- */
+
+const DocumentPreview: React.FC<
+  DocumentPreviewProps
+> = ({
   document,
   actionLoading,
   actionError,
@@ -245,11 +254,17 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         variant="outlined"
         sx={{
           height: "100%",
+
           minHeight: 300,
+
           display: "flex",
+
           alignItems: "center",
+
           justifyContent: "center",
+
           p: 2.5,
+
           borderRadius: 3,
         }}
       >
@@ -263,78 +278,216 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
     );
   }
 
-  const isDecided = document.status !== "Pending";
+  const isDecided =
+    document.status !== "PENDING";
 
   return (
     <Paper
       variant="outlined"
       sx={{
         height: "100%",
+
         display: "flex",
+
         flexDirection: "column",
+
         p: {
           xs: 2,
           sm: 2.5,
         },
+
         borderRadius: 3,
       }}
     >
+      {/* Header */}
+
       <Stack
         sx={{
-          flexWrap:"wrap",
+          flexWrap: "wrap",
+
           direction: "row",
+
           alignItems: "center",
-          justifyContent: "space-between",
+
+          justifyContent:
+            "space-between",
+
           mb: 2,
+
           rowGap: 1,
+
+          gap: 1,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Viewing:{" "}
+        <Box sx={{ minWidth: 0 }}>
           <Typography
-            component="span"
             variant="subtitle2"
-            color="primary.main"
             sx={{
               fontWeight: 700,
+
+              overflow: "hidden",
+
+              textOverflow:
+                "ellipsis",
+
+              whiteSpace: "nowrap",
             }}
           >
-            {document.documentName}
+            Viewing:{" "}
+            <Box
+              component="span"
+              sx={{
+                color:
+                  "primary.main",
+              }}
+            >
+              {document.documentName}
+            </Box>
           </Typography>
-        </Typography>
+        </Box>
 
-        <StatusBadge status={document.status} />
+        <Chip
+          label={getStatusLabel(
+            document.status
+          )}
+          color={getStatusColor(
+            document.status
+          )}
+          size="small"
+        />
       </Stack>
+
+      {/* Document Details */}
+
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+
+          mb: 2,
+
+          borderRadius: 2,
+
+          bgcolor: "grey.50",
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+
+            gridTemplateColumns: {
+              xs: "1fr 1fr",
+
+              md: "repeat(3, 1fr)",
+            },
+
+            gap: 2,
+          }}
+        >
+          <InfoField
+            label="Document Type"
+            value={
+              document.documentType
+            }
+          />
+
+          <InfoField
+            label="Reference Number"
+            value={
+              document.referenceNumber ||
+              "-"
+            }
+          />
+
+          <InfoField
+            label="Uploaded"
+            value={formatDate(
+              document.uploadedAt
+            )}
+          />
+
+          <InfoField
+            label="Start Date"
+            value={formatDate(
+              document.startDate
+            )}
+          />
+
+          <InfoField
+            label="Expiry Date"
+            value={formatDate(
+              document.expiryDate
+            )}
+          />
+
+          <InfoField
+            label="File Size"
+            value={formatFileSize(
+              document.fileSize
+            )}
+          />
+        </Box>
+      </Paper>
+
+      {/* PDF */}
 
       <Box
         sx={{
           flex: 1,
+
           minWidth: 0,
+
+          mb: 2,
         }}
       >
-        {document.identityPreview ? (
-          <IdentityPreviewCard document={document} />
-        ) : (
-          <GenericFilePreview document={document} />
-        )}
+        <PdfPreview
+          document={document}
+        />
       </Box>
+
+      {/* Open document */}
+
+      {document.documentUrl && (
+        <Button
+          component="a"
+          href={document.documentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="text"
+          size="small"
+          startIcon={
+            <OpenInNewIcon />
+          }
+          sx={{
+            alignSelf:
+              "flex-start",
+
+            textTransform:
+              "none",
+
+            mb: 1,
+          }}
+        >
+          Open document in new tab
+        </Button>
+      )}
+
+      {/* Error */}
 
       {actionError && (
         <Alert
           severity="error"
           sx={{
-            mt: 2,
+            mb: 2,
+
             borderRadius: 2,
           }}
         >
           {actionError}
         </Alert>
       )}
+
+      {/* Actions */}
 
       <Stack
         direction={{
@@ -343,17 +496,25 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         }}
         sx={{
           gap: 1.5,
-          mt: 3,
+
+          mt: 1,
+
           pt: 2.5,
+
           borderTop: "1px solid",
-          borderColor: "divider",
+
+          borderColor:
+            "divider",
         }}
       >
         <Button
           fullWidth
           variant="outlined"
           color="error"
-          disabled={actionLoading || isDecided}
+          disabled={
+            actionLoading ||
+            isDecided
+          }
           onClick={onReject}
           startIcon={
             actionLoading ? (
@@ -367,8 +528,12 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           }
           sx={{
             borderRadius: 2,
-            textTransform: "none",
+
+            textTransform:
+              "none",
+
             fontWeight: 600,
+
             py: 1.1,
           }}
         >
@@ -378,7 +543,11 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         <Button
           fullWidth
           variant="contained"
-          disabled={actionLoading || isDecided}
+          color="success"
+          disabled={
+            actionLoading ||
+            isDecided
+          }
           onClick={onApprove}
           startIcon={
             actionLoading ? (
@@ -392,8 +561,12 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           }
           sx={{
             borderRadius: 2,
-            textTransform: "none",
+
+            textTransform:
+              "none",
+
             fontWeight: 600,
+
             py: 1.1,
           }}
         >
