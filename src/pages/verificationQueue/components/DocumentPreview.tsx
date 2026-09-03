@@ -12,6 +12,7 @@ import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { CheckCircleOutlineOutlined } from "@mui/icons-material";
 
 import type { VerificationDocument } from "@/types/verificationDetailQueue";
+import { formatDate } from "@/utils/helper";
 
 interface DocumentPreviewProps {
   document: VerificationDocument | null;
@@ -271,9 +272,9 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
          * DOCUMENT INFO
          * -------------------------------------------------- */}
 
-        {(document.referenceNumber ||
-          document.startDate ||
-          document.expiryDate) && (
+        {(document?.referenceNumber ||
+          document?.startDate ||
+          document?.expiryDate) && (
           <>
             <Box
               sx={{
@@ -302,7 +303,7 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                   </Typography>
 
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {document.startDate}
+                    {formatDate(document.startDate)}
                   </Typography>
                 </Box>
               )}
@@ -314,7 +315,7 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                   </Typography>
 
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {document.expiryDate}
+                    {formatDate(document.expiryDate)}
                   </Typography>
                 </Box>
               )}
