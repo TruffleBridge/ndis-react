@@ -342,7 +342,13 @@ const Dashboard = () => {
       return crypto?.randomUUID();
     }
 
-    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+      const values = new Uint32Array(2);
+      crypto.getRandomValues(values);
+      return `${Date.now()}-${values[0].toString(36)}${values[1].toString(36)}`;
+    }
+
+    throw new Error("Secure random number generation is unavailable");
   };
 
   const handleSelectOption = (label: string) => {
@@ -350,7 +356,6 @@ const Dashboard = () => {
       ...prev,
       { id: generateId(), fromAssistant: false, text: label },
     ]);
-    // TODO: call your API / next-step logic here
   };
 
   const handleSend = (value: string) => {
@@ -725,7 +730,7 @@ const Dashboard = () => {
 
               <Box sx={S.pendingList}>
                 {actions.map((item, index) => (
-                  <Box key={index} sx={S.pendingActionItem}>
+                  <Box key={item?.title + index} sx={S.pendingActionItem}>
                     <Box sx={S.pendingTimeRow}>
                       <CircleIcon sx={S.pendingDot} />
                       <Typography sx={S.pendingTime}>{item.time}</Typography>
