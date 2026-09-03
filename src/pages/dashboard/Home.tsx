@@ -13,7 +13,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import AddIcon from "@mui/icons-material/Add";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CircleIcon from "@mui/icons-material/Circle";
 
@@ -446,10 +445,6 @@ const Dashboard = () => {
               Ask AI
             </Button>
           </VirtualAssistantPopover>
-
-          <Button startIcon={<AddIcon />} variant="contained" sx={S.bookingCta}>
-            New Booking
-          </Button>
         </Stack>
       </Stack>
 

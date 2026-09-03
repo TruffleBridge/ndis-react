@@ -1,10 +1,10 @@
 import axiosInstance from "./axios";
-import type { AxiosResponse } from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
 // GET
 export const getApiRequest = (
   url: string,
-  params?: any
+  params?: Record<string, unknown>
 ): Promise<AxiosResponse> => {
   return axiosInstance.get(url, { params });
 };
@@ -13,8 +13,8 @@ export const getApiRequest = (
 // POST
 export const createApiRequest = (
   url: string,
-  payload: any,
-  config?: any
+  payload: unknown,
+  config?: AxiosRequestConfig
 ): Promise<AxiosResponse> => {
   return axiosInstance.post(url, payload, config);
 };
@@ -23,7 +23,7 @@ export const createApiRequest = (
 // PUT
 export const updateApiRequest = (
   url: string,
-  payload: any
+  payload: unknown
 ): Promise<AxiosResponse> => {
   return axiosInstance.put(url, payload);
 };
@@ -32,7 +32,7 @@ export const updateApiRequest = (
 // DELETE
 export const deleteApiRequest = (
   url: string,
-  payload?: any
+  payload?: unknown
 ): Promise<AxiosResponse> => {
   return axiosInstance.delete(url, { data: payload });
 };

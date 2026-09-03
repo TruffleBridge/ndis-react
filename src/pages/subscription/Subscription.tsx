@@ -463,7 +463,7 @@ const Subscription = () => {
         }}
       >
         {subscriptions.map((plan) => {
-          const color = getPlanColor(plan);
+          const color = getPlanColor();
 
           const pricingMode =
             pricingModes[plan.subscriptionId] ?? "monthly";

@@ -22,7 +22,11 @@ const LocationDetailsCard = ({
         latitude !== "" &&
         longitude !== "" &&
         Number.isFinite(lat) &&
-        Number.isFinite(lng);
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180;
 
     // OpenStreetMap embed URL
     const mapUrl = hasCoordinates
@@ -35,10 +39,6 @@ const LocationDetailsCard = ({
     const externalMapUrl = hasCoordinates
         ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
         : "";
-
-    console.log("Latitude:", lat);
-    console.log("Longitude:", lng);
-    console.log("Map URL:", mapUrl);
 
     return (
         <Card
@@ -83,6 +83,7 @@ const LocationDetailsCard = ({
                                     border: 0,
                                     display: "block",
                                 }}
+                                referrerPolicy="no-referrer"
                             />
                         </Box>
 
