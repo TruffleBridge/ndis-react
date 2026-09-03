@@ -7,6 +7,7 @@ import { formatTime } from "@/utils/helper";
 import { useExportStore } from "@/store/useExportStore";
 import { usePermission } from "@/hooks/usePermission";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { useNavigate } from "react-router-dom";
 
 interface JobProps {
   jobId: string;
@@ -43,6 +44,8 @@ export default function JobTable() {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [filter, setFilter] = useState<any>(null);
+
+  const navigate = useNavigate()
 
   //store
   const {
@@ -220,7 +223,7 @@ export default function JobTable() {
     {
       label: "View",
       icon: <VisibilityOutlinedIcon sx={{ fontSize: 16, color: '#7F7F7F' }} />,
-      onClick: (row) => console.log("View", row),
+      onClick: (row) => navigate(`/job-details/${row?.jobId}`),
     },
     // {
     //   label: "Delete",
@@ -309,7 +312,7 @@ export default function JobTable() {
       limit: ROWS_PER_PAGE,
       search: "",
     });
-  } 
+  }
 
   return (
     <Box>

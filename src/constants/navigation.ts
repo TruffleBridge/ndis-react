@@ -11,6 +11,8 @@ const ROUTE_ALIASES: Record<string, string> = {
   "/create-worker": "/workers",
   "/create-client": "/clients",
   "/create-roles": "/roles-permission",
+  "/verification-details": "/verification-queue",
+  "/job-details": "/jobs",
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -19,11 +21,11 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Workers", path: "/workers" },
   { label: "Jobs", path: "/jobs" },
   { label: "Clients", path: "/clients" },
+  { label: "Roles and Permission", path: "/roles-permission" },
+  { label: "Subscription", path: "/subscription", disabled: false },
   { label: "Bookings", path: "/bookings", disabled: true },
   { label: "Budget", path: "/budget", disabled: true },
-  { label: "Roles and Permission", path: "/roles-permission" },
   { label: "Rewards", path: "/rewards", disabled: true },
-  { label: "Subscription", path: "/subscription", disabled: true },
 ];
 
 const sortedNavItems = [...NAV_ITEMS].sort(
@@ -35,8 +37,21 @@ const sortedNavItems = [...NAV_ITEMS].sort(
  * Sub-routes (e.g. /create-worker) map to their parent section.
  */
 export function getActiveNavItem(pathname: string): NavItem | undefined {
-  const normalized = pathname.split("?")[0].split("#")[0].toLowerCase();
-  const resolvedPath = ROUTE_ALIASES[normalized] ?? normalized;
+  const normalized =
+    pathname.split("?")[0].split("#")[0].toLowerCase().replace(/\/+$/, "") ||
+    "/";
+
+  const alias = Object.keys(ROUTE_ALIASES)
+    .sort((a, b) => b.length - a.length)
+    .find(
+      (aliasPath) =>
+        normalized === aliasPath ||
+        normalized.startsWith(`${aliasPath}/`),
+    );
+
+  const resolvedPath = alias
+    ? ROUTE_ALIASES[alias]
+    : normalized;
 
   return sortedNavItems.find(
     (item) =>
@@ -44,6 +59,7 @@ export function getActiveNavItem(pathname: string): NavItem | undefined {
       resolvedPath.startsWith(`${item.path}/`),
   );
 }
+
 
 // constants/navigation.ts (existing file la add pannunga)
 

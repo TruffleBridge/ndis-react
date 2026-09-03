@@ -33,5 +33,6 @@ export { FileDownloadIcon } from "./fileDownload";
 export { MoreCircleIcon } from "./moreCircle";
 export { CircleTickIcon } from "./circleTick";
 export { NimoraIcon } from "./nimoraLogo";
+export { FilledTickIcon } from "./fillTick";
 
 
