@@ -144,12 +144,13 @@ export const useProfileStore = create<ProfileState>()(
                 });
 
             } catch (err) {
-                set({ getlistLoading: false, errors: "Failed to load client record" });
+                const message = handleApiError(err, "Failed to load client record");
+                set({ getlistLoading: false, errors: message });
             }
         },
 
         updateProfile: async () => {
-            const { draftProfile } = get();
+            const { draftProfile,profile } = get();
             set({ isSaving: true });
             const payload = {
                 userId: draftProfile?.id ?? "",
@@ -157,14 +158,14 @@ export const useProfileStore = create<ProfileState>()(
                 email: draftProfile?.email ?? "",
                 role: draftProfile?.role ?? "",
                 phoneNumber: draftProfile?.phone ?? "",
-                countryCode: "+61", // TODO: make this dynamic if needed
+                countryCode: "+61",
                 userAddress: {
                     street1: draftProfile?.address ?? "",
                     suburb: draftProfile?.city ?? "",
                     state: draftProfile?.state ?? "",
                     zipCode: draftProfile?.pincode ?? "",
                 },
-                profilePicture: draftProfile?.url ?? "",
+                profilePicture: draftProfile?.url ?? profile?.avatarUrl,
                 status: draftProfile?.status ?? "",
             }
             try {
@@ -235,10 +236,8 @@ export const useProfileStore = create<ProfileState>()(
         },
 
         logout: () => {
-            // TODO: clear auth tokens / call logout API, then redirect
-            window.location.href = "/login";
             localStorage.removeItem("authToken");
-            localStorage.clear();
+            window.location.href = "/login";
         },
     }))
 );

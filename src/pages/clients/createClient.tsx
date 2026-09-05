@@ -96,7 +96,12 @@ const ClientFormPage = () => {
         }
     };
 
-    const pageTitle = mode === "create" ? "Add New Client" : mode === "edit" ? "Edit Client" : "View Client";
+    let pageTitle = "View Client";
+    if (mode === "create") {
+        pageTitle = "Add New Client";
+    } else if (mode === "edit") {
+        pageTitle = "Edit Client";
+    }
 
     return (
         <Box sx={{ height: '100%' }}>
@@ -120,7 +125,7 @@ const ClientFormPage = () => {
                                                 mt: "0 !important",
                                                 cursor: "pointer",
                                                 bgcolor: isActive ? "#F2FCFA" : "transparent",
-                                                borderLeft: isActive ? "4px solid" : "4px solid",
+                                                borderLeft: "4px solid",
                                                 borderColor: isActive ? "primary.main" : "transparent",
                                                 transition: "0.2s",
                                                 display: "flex",
@@ -154,8 +159,8 @@ const ClientFormPage = () => {
                                 marginBottom: '10px',
                             }}>
                                 <PageHeader mainSx={{ boxShadow: 'none', border: 'none', p: 0 }}
-                                    title={getHeader && getHeader(activeStep)}
-                                    subtitle={getSubHeader && getSubHeader(activeStep)} />
+                                    title={getHeader?.(activeStep)}
+                                    subtitle={getSubHeader?.(activeStep)} />
 
                                 {mode === 'create' && <CircularProgressWithLabel
                                     value={progressValue(activeStep)}

@@ -13,7 +13,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import AddIcon from "@mui/icons-material/Add";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CircleIcon from "@mui/icons-material/Circle";
 
@@ -337,20 +336,32 @@ const Dashboard = () => {
   const generateId = () => {
     if (
       typeof crypto !== "undefined" &&
-      typeof crypto?.randomUUID === "function"
+      typeof crypto.randomUUID === "function"
     ) {
-      return crypto?.randomUUID();
+      return crypto.randomUUID();
     }
 
-    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto.getRandomValues === "function"
+    ) {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+
+      return Array.from(bytes, (byte) =>
+        byte.toString(16).padStart(2, "0")
+      ).join("");
+    }
+
+    throw new Error("Secure random number generator is not available");
   };
+
 
   const handleSelectOption = (label: string) => {
     setMessages((prev) => [
       ...prev,
       { id: generateId(), fromAssistant: false, text: label },
     ]);
-    // TODO: call your API / next-step logic here
   };
 
   const handleSend = (value: string) => {
@@ -441,10 +452,6 @@ const Dashboard = () => {
               Ask AI
             </Button>
           </VirtualAssistantPopover>
-
-          <Button startIcon={<AddIcon />} variant="contained" sx={S.bookingCta}>
-            New Booking
-          </Button>
         </Stack>
       </Stack>
 
@@ -725,7 +732,7 @@ const Dashboard = () => {
 
               <Box sx={S.pendingList}>
                 {actions.map((item, index) => (
-                  <Box key={index} sx={S.pendingActionItem}>
+                  <Box key={item?.title + index} sx={S.pendingActionItem}>
                     <Box sx={S.pendingTimeRow}>
                       <CircleIcon sx={S.pendingDot} />
                       <Typography sx={S.pendingTime}>{item.time}</Typography>

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Box, useMediaQuery } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { SideNavbar, TopNavbar } from "@/components";
 import { layoutStyles as S } from "./styles";
 import { MOBILE_NAV_QUERY } from "@/constants/breakpoints";
-import { Outlet } from "react-router-dom";
 import usePermissionStore from '@/store/usePermissionStore';
 import NotificationParent from "./components/notificationparent";
 import { useProfileStore } from "@/store/useProfilestore";
+import { useAuthStore } from "@/store/auth";
 
 
 const COLLAPSED_WIDTH = 72;
@@ -27,16 +27,16 @@ export default function MainLayout() {
   const initForm = useProfileStore((s) => s.initForm);
 
 
-  const token = localStorage.getItem('authToken'); // unga token key enna nu confirm pannunga
+  const accessToken = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       fetchRolePermissions();
     }
-  }, [token]);
+  }, [accessToken, fetchRolePermissions]);
 
   useEffect(() => {
     initForm();
-  }, [])
+  }, [initForm])
 
 
   return (

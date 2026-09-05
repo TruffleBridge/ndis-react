@@ -158,7 +158,7 @@ const Qualification = ({ isView, handlePrev, handleNext }: QualificationProps) =
                         // loading={isUploadingCertificate}
                         disabled={isView}
                         onChange={(file) => handleUpload(file)}
-                        errors={certificateUploadError || certificateUploadError}
+                        errors={certificateUploadError}
                     />
                 </Grid>
             </Box>

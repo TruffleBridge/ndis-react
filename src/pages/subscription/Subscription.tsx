@@ -90,8 +90,8 @@ const PLAN_TYPE_OPTIONS: AutocompleteOption[] = [
 
 const DEFAULT_TYPE: SubscriptionType = "Basic";
 
-const getPlanColor = (plan: SubscriptionItem) => {
-  return plan.isPopular ? "#0E6E5C" : "#0E6E5C";
+const getPlanColor = () => {
+  return "#0E6E5C";
 };
 
 const getPlanIcon = (plan: SubscriptionItem) => {
@@ -261,7 +261,6 @@ const Subscription = () => {
   };
 
   const openEdit = async (plan: SubscriptionItem) => {
-    debugger;
     setErrors({});
     setEditingId(plan.subscriptionId);
     setDraft(null);
@@ -303,7 +302,6 @@ const Subscription = () => {
   };
 
   const save = async () => {
-    debugger;
     if (!draft) {
       return;
     }
@@ -421,6 +419,436 @@ const Subscription = () => {
     value: draft?.type ?? DEFAULT_TYPE,
   };
 
+  const renderSubscriptionContent = () => {
+    if (loading && subscriptions.length === 0) {
+      return <Loading />;
+    }
+
+    if (subscriptions.length === 0) {
+      return (
+        <Card
+          variant="outlined"
+          sx={{
+            borderRadius: 3,
+            p: { xs: 3, sm: 5 },
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            sx={{ fontWeight: 700 }}
+            color="#344054"
+          >
+            No subscription plans found
+          </Typography>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 0.5 }}
+          >
+            Create your first subscription plan.
+          </Typography>
+        </Card>
+      );
+    }
+
+    return (
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+          gap: 2,
+          width: "100%",
+        }}
+      >
+        {subscriptions.map((plan) => {
+          const color = getPlanColor();
+
+          const pricingMode =
+            pricingModes[plan.subscriptionId] ?? "monthly";
+
+          const displayedPrice =
+            pricingMode === "monthly"
+              ? plan.monthlyPrice
+              : plan.annualPrice;
+
+          return (
+            <Card
+              key={plan.subscriptionId}
+              variant="outlined"
+              sx={{
+                borderRadius: 1.5,
+                borderColor: plan.isPopular
+                  ? color
+                  : "#E4E7EC",
+                boxShadow: plan.isPopular
+                  ? `0 0 0 1px ${color}`
+                  : "none",
+                position: "relative",
+                overflow: "visible",
+                height: "100%",
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              {plan.isPopular && (
+                <Chip
+                  label="MOST POPULAR"
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: -12,
+                    left: 16,
+                    backgroundColor: "primary.main",
+                    color: "#FFFFFF",
+                    fontWeight: 700,
+                    fontSize: 10,
+                    letterSpacing: 0.4,
+                    height: 24,
+                  }}
+                />
+              )}
+
+              <CardContent
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  height: "100%",
+                  boxSizing: "border-box",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 1,
+                    mb: 1.5,
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      backgroundColor: color,
+                      width: 36,
+                      height: 36,
+                    }}
+                  >
+                    {getPlanIcon(plan)}
+                  </Avatar>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Chip
+                      label={
+                        plan.isActive
+                          ? "Active"
+                          : "Inactive"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: plan.isActive
+                          ? "#E7F6EC"
+                          : "#F1F2F4",
+                        color: plan.isActive
+                          ? "#1A7F37"
+                          : "#667085",
+                        fontWeight: 700,
+                        fontSize: 11,
+                      }}
+                    />
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: "1px solid #E4E7EC",
+                        borderRadius: 1,
+                        p: 0.25,
+                        backgroundColor: "#F9FAFB",
+                      }}
+                    >
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          setCardPricingMode(
+                            plan.subscriptionId,
+                            "monthly"
+                          )
+                        }
+                        sx={{
+                          minWidth: 0,
+                          px: 1,
+                          minHeight: 28,
+                          fontSize: 11,
+                          textTransform: "none",
+                          fontWeight:
+                            pricingMode === "monthly"
+                              ? 700
+                              : 500,
+                          color:
+                            pricingMode === "monthly"
+                              ? "#0E6E5C"
+                              : "#667085",
+                          backgroundColor:
+                            pricingMode === "monthly"
+                              ? "#E7F6EC"
+                              : "transparent",
+                          "&:hover": {
+                            backgroundColor:
+                              pricingMode === "monthly"
+                                ? "#E7F6EC"
+                                : "transparent",
+                          },
+                        }}
+                      >
+                        Month
+                      </Button>
+
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          setCardPricingMode(
+                            plan.subscriptionId,
+                            "annual"
+                          )
+                        }
+                        sx={{
+                          minWidth: 0,
+                          px: 1,
+                          minHeight: 28,
+                          fontSize: 11,
+                          textTransform: "none",
+                          fontWeight:
+                            pricingMode === "annual"
+                              ? 700
+                              : 500,
+                          color:
+                            pricingMode === "annual"
+                              ? "#0E6E5C"
+                              : "#667085",
+                          backgroundColor:
+                            pricingMode === "annual"
+                              ? "#E7F6EC"
+                              : "transparent",
+                          "&:hover": {
+                            backgroundColor:
+                              pricingMode === "annual"
+                                ? "#E7F6EC"
+                                : "transparent",
+                          },
+                        }}
+                      >
+                        Annual
+                      </Button>
+                    </Box>
+                  </Box>
+                </Box>
+
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 800,
+                    color: "#101828",
+                  }}
+                >
+                  {plan.name}
+                </Typography>
+
+                {plan.type && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#0E6E5C",
+                      fontWeight: 700,
+                      mt: 0.25,
+                    }}
+                  >
+                    {plan.type}
+                  </Typography>
+                )}
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    minHeight: 42,
+                    mt: 0.5,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {plan.description}
+                </Typography>
+
+                <Box sx={{ mt: 0.5 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 800,
+                      color: "#101828",
+                    }}
+                  >
+                    ${displayedPrice}
+
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        fontWeight: 600,
+                        ml: 0.5,
+                      }}
+                    >
+                      /
+                      {pricingMode === "monthly"
+                        ? "month"
+                        : "month, billed annually"}
+                    </Typography>
+                  </Typography>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Stack spacing={1} sx={{ mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <FilledTickIcon />
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      Up to {plan.maxWorkers} workers
+                    </Typography>
+                  </Box>
+
+                  {plan.isAiEnabled && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <FilledTickIcon />
+
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        AI assistance
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {plan.isUrgentShift && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <FilledTickIcon />
+
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        Priority job visibility
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    mt: "auto",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => openEdit(plan)}
+                    disabled={deleteLoading}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      minHeight: 36,
+                    }}
+                  >
+                    Edit plan
+                  </Button>
+
+                  <Tooltip title="Delete">
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        openDeleteModal(plan)
+                      }
+                      disabled={deleteLoading}
+                      sx={{
+                        border: "1px solid #E4E7EC",
+                        borderRadius: 2,
+                        width: 36,
+                        height: 36,
+                        flexShrink: 0,
+                        color: "#DC4E4E",
+                      }}
+                    >
+                      {deleteLoading &&
+                        deletePlan?.subscriptionId ===
+                        plan.subscriptionId ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <DeleteIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Box>
+    );
+  };
+
+
+  const getSaveButtonContent = (): React.ReactNode => {
+    if (createLoading || updateLoading) {
+      return (
+        <CircularProgress
+          size={20}
+          sx={{
+            color: "#FFFFFF",
+          }}
+        />
+      );
+    }
+    if (editingId !== null) {
+      return "Update plan";
+    }
+    return "Save plan";
+  };
+
+
   return (
     <Box
       sx={{
@@ -486,407 +914,7 @@ const Subscription = () => {
         </Button>
       </Box>
 
-      {loading && subscriptions.length === 0 ? (
-        <Loading />
-      ) : subscriptions.length === 0 ? (
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 3,
-            p: { xs: 3, sm: 5 },
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            sx={{ fontWeight: 700 }}
-            color="#344054"
-          >
-            No subscription plans found
-          </Typography>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 0.5 }}
-          >
-            Create your first subscription plan.
-          </Typography>
-        </Card>
-      ) : (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
-            gap: 2,
-            width: "100%",
-          }}
-        >
-          {subscriptions.map((plan) => {
-            const color = getPlanColor(plan);
-
-            const pricingMode =
-              pricingModes[plan.subscriptionId] ?? "monthly";
-
-            const displayedPrice =
-              pricingMode === "monthly"
-                ? plan.monthlyPrice
-                : plan.annualPrice;
-
-            return (
-              <Card
-                key={plan.subscriptionId}
-                variant="outlined"
-                sx={{
-                  borderRadius: 1.5,
-                  borderColor: plan.isPopular
-                    ? color
-                    : "#E4E7EC",
-                  boxShadow: plan.isPopular
-                    ? `0 0 0 1px ${color}`
-                    : "none",
-                  position: "relative",
-                  overflow: "visible",
-                  height: "100%",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                {plan.isPopular && (
-                  <Chip
-                    label="MOST POPULAR"
-                    size="small"
-                    sx={{
-                      position: "absolute",
-                      top: -12,
-                      left: 16,
-                      backgroundColor: "primary.main",
-                      color: "#FFFFFF",
-                      fontWeight: 700,
-                      fontSize: 10,
-                      letterSpacing: 0.4,
-                      height: 24,
-                    }}
-                  />
-                )}
-
-                <CardContent
-                  sx={{
-                    p: { xs: 2, sm: 2.5 },
-                    height: "100%",
-                    boxSizing: "border-box",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 1.5,
-                    }}
-                  >
-                    <Avatar
-                      sx={{
-                        backgroundColor: color,
-                        width: 36,
-                        height: 36,
-                      }}
-                    >
-                      {getPlanIcon(plan)}
-                    </Avatar>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        minWidth: 0,
-                      }}
-                    >
-                      <Chip
-                        label={
-                          plan.isActive
-                            ? "Active"
-                            : "Inactive"
-                        }
-                        size="small"
-                        sx={{
-                          backgroundColor: plan.isActive
-                            ? "#E7F6EC"
-                            : "#F1F2F4",
-                          color: plan.isActive
-                            ? "#1A7F37"
-                            : "#667085",
-                          fontWeight: 700,
-                          fontSize: 11,
-                        }}
-                      />
-
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          border: "1px solid #E4E7EC",
-                          borderRadius: 1,
-                          p: 0.25,
-                          backgroundColor: "#F9FAFB",
-                        }}
-                      >
-                        <Button
-                          size="small"
-                          onClick={() =>
-                            setCardPricingMode(
-                              plan.subscriptionId,
-                              "monthly"
-                            )
-                          }
-                          sx={{
-                            minWidth: 0,
-                            px: 1,
-                            minHeight: 28,
-                            fontSize: 11,
-                            textTransform: "none",
-                            fontWeight:
-                              pricingMode === "monthly"
-                                ? 700
-                                : 500,
-                            color:
-                              pricingMode === "monthly"
-                                ? "#0E6E5C"
-                                : "#667085",
-                            backgroundColor:
-                              pricingMode === "monthly"
-                                ? "#E7F6EC"
-                                : "transparent",
-                            "&:hover": {
-                              backgroundColor:
-                                pricingMode === "monthly"
-                                  ? "#E7F6EC"
-                                  : "transparent",
-                            },
-                          }}
-                        >
-                          Month
-                        </Button>
-
-                        <Button
-                          size="small"
-                          onClick={() =>
-                            setCardPricingMode(
-                              plan.subscriptionId,
-                              "annual"
-                            )
-                          }
-                          sx={{
-                            minWidth: 0,
-                            px: 1,
-                            minHeight: 28,
-                            fontSize: 11,
-                            textTransform: "none",
-                            fontWeight:
-                              pricingMode === "annual"
-                                ? 700
-                                : 500,
-                            color:
-                              pricingMode === "annual"
-                                ? "#0E6E5C"
-                                : "#667085",
-                            backgroundColor:
-                              pricingMode === "annual"
-                                ? "#E7F6EC"
-                                : "transparent",
-                            "&:hover": {
-                              backgroundColor:
-                                pricingMode === "annual"
-                                  ? "#E7F6EC"
-                                  : "transparent",
-                            },
-                          }}
-                        >
-                          Annual
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 800,
-                      color: "#101828",
-                    }}
-                  >
-                    {plan.name}
-                  </Typography>
-
-                  {plan.type && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "#0E6E5C",
-                        fontWeight: 700,
-                        mt: 0.25,
-                      }}
-                    >
-                      {plan.type}
-                    </Typography>
-                  )}
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      minHeight: 42,
-                      mt: 0.5,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {plan.description}
-                  </Typography>
-
-                  <Box sx={{ mt: 0.5 }}>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 800,
-                        color: "#101828",
-                      }}
-                    >
-                      ${displayedPrice}
-
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          fontWeight: 600,
-                          ml: 0.5,
-                        }}
-                      >
-                        /
-                        {pricingMode === "monthly"
-                          ? "month"
-                          : "month, billed annually"}
-                      </Typography>
-                    </Typography>
-                  </Box>
-
-                  <Divider sx={{ my: 2 }} />
-
-                  <Stack
-                    spacing={1}
-                    sx={{ mb: 2 }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <FilledTickIcon />
-
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
-                        Up to {plan.maxWorkers} workers
-                      </Typography>
-                    </Box>
-
-                    {plan.isAiEnabled && <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <FilledTickIcon />
-
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
-                        {"AI assistance"}
-                      </Typography>
-                    </Box>}
-
-                    {plan.isUrgentShift && <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <FilledTickIcon />
-
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                      >
-                        {"Priority job visibility"}
-                      </Typography>
-                    </Box>}
-                  </Stack>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      mt: "auto",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => openEdit(plan)}
-                      disabled={deleteLoading}
-                      sx={{
-                        textTransform: "none",
-                        fontWeight: 600,
-                        minHeight: 36,
-                      }}
-                    >
-                      Edit plan
-                    </Button>
-
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          openDeleteModal(plan)
-                        }
-                        disabled={deleteLoading}
-                        sx={{
-                          border: "1px solid #E4E7EC",
-                          borderRadius: 2,
-                          width: 36,
-                          height: 36,
-                          flexShrink: 0,
-                          color: "#DC4E4E",
-                        }}
-                      >
-                        {deleteLoading &&
-                          deletePlan?.subscriptionId ===
-                          plan.subscriptionId ? (
-                          <CircularProgress size={16} />
-                        ) : (
-                          <DeleteIcon />
-                        )}
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </Box>
-      )}
+      {renderSubscriptionContent()}
 
       <Drawer
         anchor="right"
@@ -1187,6 +1215,7 @@ const Subscription = () => {
                     justifyContent: "space-between",
                     display: "flex",
                     mb: 1,
+                    fontSize: 12,
                   }}
                   label='Mark as "Most Popular"'
                   checked={draft.isPopular}
@@ -1245,9 +1274,7 @@ const Subscription = () => {
                 fullWidth
                 variant="contained"
                 onClick={save}
-                disabled={
-                  createLoading || updateLoading
-                }
+                disabled={createLoading || updateLoading}
                 sx={{
                   backgroundColor: "primary.main",
                   textTransform: "none",
@@ -1258,19 +1285,9 @@ const Subscription = () => {
                   },
                 }}
               >
-                {createLoading || updateLoading ? (
-                  <CircularProgress
-                    size={20}
-                    sx={{
-                      color: "#FFFFFF",
-                    }}
-                  />
-                ) : editingId !== null ? (
-                  "Update plan"
-                ) : (
-                  "Save plan"
-                )}
+                {getSaveButtonContent()}
               </Button>
+
             </Box>
           </Box>}
       </Drawer>
