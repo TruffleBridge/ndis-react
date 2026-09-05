@@ -93,8 +93,8 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
     const primaryActor = userHistory[0];
 
     const totalPages = typeof userHistoryTotalPages === "string"
-        ? parseInt(userHistoryTotalPages, 10) || 1
-        : (userHistoryTotalPages as any)?.totalPages ?? 1;
+        ? Number.parseInt(userHistoryTotalPages, 10) || 1
+        : userHistoryTotalPages;
 
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -191,8 +191,8 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                     >
                         {userHistory.map((item, idx) => (
                             <TimelineItem key={item.id} sx={{
-                                '::before':{
-                                    display:'none'
+                                '::before': {
+                                    display: 'none'
                                 }
                             }}>
                                 <TimelineSeparator>
@@ -276,7 +276,7 @@ export const UserHistoryDrawer: React.FC<UserHistoryDrawerProps> = ({
                     }}
                 >
                     <Pagination
-                        count={totalPages}
+                        count={totalPages ?? undefined}
                         page={page}
                         onChange={handlePageChange}
                         siblingCount={isMobile ? 0 : 1}

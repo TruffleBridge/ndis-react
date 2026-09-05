@@ -16,7 +16,7 @@ export const styles = {
     },
 
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: error ? "#D1D5DB" : "#D1D5DB",
+      borderColor: "#D1D5DB",
     },
 
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {

@@ -336,19 +336,26 @@ const Dashboard = () => {
   const generateId = () => {
     if (
       typeof crypto !== "undefined" &&
-      typeof crypto?.randomUUID === "function"
+      typeof crypto.randomUUID === "function"
     ) {
-      return crypto?.randomUUID();
+      return crypto.randomUUID();
     }
 
-    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
-      const values = new Uint32Array(2);
-      crypto.getRandomValues(values);
-      return `${Date.now()}-${values[0].toString(36)}${values[1].toString(36)}`;
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto.getRandomValues === "function"
+    ) {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+
+      return Array.from(bytes, (byte) =>
+        byte.toString(16).padStart(2, "0")
+      ).join("");
     }
 
-    throw new Error("Secure random number generation is unavailable");
+    throw new Error("Secure random number generator is not available");
   };
+
 
   const handleSelectOption = (label: string) => {
     setMessages((prev) => [
