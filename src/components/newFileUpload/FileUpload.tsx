@@ -48,7 +48,7 @@ function formatDate(date: Date | string | null | undefined): string {
 
     const parsedDate = date instanceof Date ? date : new Date(date);
 
-    if (isNaN(parsedDate.getTime())) {
+    if (Number.isNaN(parsedDate.getTime())) {
         return "";
     }
 

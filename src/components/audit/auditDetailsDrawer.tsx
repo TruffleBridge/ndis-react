@@ -53,13 +53,22 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({
     >
         <Typography
             variant="body2"
-            sx={{ color: "text.secondary", width: { sm: 140 }, flexShrink: 0 }}
+            sx={{
+                color: "text.secondary",
+                width: { sm: 140 },
+                flexShrink: 0,
+            }}
         >
-            {label && label || '-'}
+            {label ? label : "-"}
         </Typography>
-        <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
-            {value && value || '-'}
+
+        <Typography
+            variant="body2"
+            sx={{ wordBreak: "break-word" }}
+        >
+            {value ? value : "-"}
         </Typography>
+
     </Stack>
 );
 

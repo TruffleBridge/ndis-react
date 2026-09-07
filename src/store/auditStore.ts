@@ -93,8 +93,10 @@ export const useAuditStore = create<AuditStoreState>((set, get) => ({
                 mergedFilters
             );
 
-            const { items, pagination } = response?.data?.data ?? response?.data;
-            if (!isFilter) {
+            const { items, pagination } =
+                response?.data?.data ?? response?.data ?? {};
+
+                if (!isFilter) {
                 set({
                     entityOption: items?.map((v: any) => {
                         return {

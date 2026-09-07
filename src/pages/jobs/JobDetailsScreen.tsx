@@ -539,8 +539,8 @@ const JobDetailsScreen: React.FC = () => {
                     : "N/A",
               },
             ]}
-            latitude={locationDetails?.latitude && locationDetails?.latitude}
-            longitude={locationDetails?.longitude && locationDetails?.longitude}
+            latitude={locationDetails?.latitude ?? '-'}
+            longitude={locationDetails?.longitude ?? '-'}
           />
 
           {/* ALL SESSIONS */}

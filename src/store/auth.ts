@@ -9,8 +9,8 @@ export const useAuthStore = create<AuthStore>()(
 
     (set) => ({
         user: null,
-        accessToken: null,
-        isAuthenticated: false,
+        accessToken: localStorage.getItem("authToken"),
+        isAuthenticated: Boolean(localStorage.getItem("authToken")),
         loading: false,
         error: null,
 
@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthStore>()(
                 set({ loading: false, error: message });
 
                 return { success: false, message };
-            } catch (err: any) {
-                const message = handleApiError(err ?? err?.data, "Something went wrong. Please try again.");
+            } catch (err: unknown) {
+                const message = handleApiError(err, "Something went wrong. Please try again.");
 
                 set({ loading: false, error: message });
 
@@ -88,7 +88,7 @@ export const useAuthStore = create<AuthStore>()(
         },
 
         logout: () => {
-            localStorage.clear();
+            localStorage.removeItem("authToken");
 
             set({
                 user: null,
@@ -130,7 +130,7 @@ export const useAuthStore = create<AuthStore>()(
                 }
                 return false;
 
-            } catch (error: any) {
+            } catch (error: unknown) {
                 const message = handleApiError(error, "Failed to refresh token");
                 set({
                     error: message,

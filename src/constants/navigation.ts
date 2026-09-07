@@ -37,9 +37,15 @@ const sortedNavItems = [...NAV_ITEMS].sort(
  * Sub-routes (e.g. /create-worker) map to their parent section.
  */
 export function getActiveNavItem(pathname: string): NavItem | undefined {
-  const normalized =
-    pathname.split("?")[0].split("#")[0].toLowerCase().replace(/\/+$/, "") ||
-    "/";
+  const pathWithoutQuery = pathname.split("?")[0].split("#")[0].toLowerCase();
+
+  let normalized = pathWithoutQuery;
+
+  while (normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
+  }
+
+  normalized = normalized || "/";
 
   const alias = Object.keys(ROUTE_ALIASES)
     .sort((a, b) => b.length - a.length)
