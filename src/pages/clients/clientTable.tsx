@@ -341,7 +341,7 @@ export default function ClientTable() {
                             ]}
                         onApply={() => handleApplyFilter()}
                         onClear={() => handleClear()}
-                        disabled={!Object.values(filter ?? {}).some((v: any) => v)}
+                        disabled={!Object.values(filter ?? {}).some(Boolean)}
 
                     />}
                 //checkbox
@@ -378,7 +378,7 @@ export default function ClientTable() {
                 }}
             >
                 {selectedSupportTypes?.map((type, index) => (
-                    <MenuItem key={index}>
+                    <MenuItem key={type + index}>
                         <Typography
                             sx={{
                                 fontSize: "12px",

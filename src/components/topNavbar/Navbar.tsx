@@ -75,6 +75,7 @@ export const TopNavbar = ({
   const handleLogoutClick = () => {
     handleClose();
     logout();
+    navigate('/login');
   };
 
   const initials = profile.fullName

@@ -99,9 +99,11 @@ export const EntityHistoryDrawer: React.FC<EntityHistoryDrawerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, entityType, entityId, page, limit]);
 
-    const totalPages = typeof entityHistoryTotalPages === "string"
-        ? parseInt(entityHistoryTotalPages, 10) || 1
-        : (entityHistoryTotalPages as any)?.totalPages ?? 1;
+const totalPages =
+    typeof entityHistoryTotalPages === "string"
+        ? Number.parseInt(entityHistoryTotalPages, 10) || 1
+        : entityHistoryTotalPages;
+
 
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -364,7 +366,7 @@ export const EntityHistoryDrawer: React.FC<EntityHistoryDrawerProps> = ({
                     }}
                 >
                     <Pagination
-                        count={totalPages}
+                        count={totalPages ?? undefined}
                         page={page}
                         onChange={handlePageChange}
                         siblingCount={isMobile ? 0 : 1}

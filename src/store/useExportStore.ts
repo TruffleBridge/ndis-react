@@ -33,7 +33,7 @@ export const useExportStore = create<ExportStore>((set) => ({
             const blob = new Blob(
                 [
                     Uint8Array.from(atob(base64), (c) =>
-                        c.charCodeAt(0)
+                        c.codePointAt(0) ?? 0
                     ),
                 ],
                 {
@@ -53,7 +53,7 @@ export const useExportStore = create<ExportStore>((set) => ({
             a.remove();
             URL.revokeObjectURL(url);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             const message = handleApiError(error, "Excel export failed");
             set({ error: message ?? "Excel export failed" });
 

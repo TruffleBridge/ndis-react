@@ -79,7 +79,10 @@ const Login = () => {
                 password: values.password,
             });
 
-            if (result.success) window.location.href = "/";
+            if (result.success) {
+                navigate("/");
+                window.location.reload();
+            };
         },
         [values, login, navigate]
     );
