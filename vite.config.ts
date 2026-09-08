@@ -1,8 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import path from "path";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -10,11 +9,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
   build: {
     sourcemap: false,
-    minify: true,
+    minify: "terser",
     chunkSizeWarningLimit: 1000,
+    terserOptions: {
+      compress: {
+        drop_console: true,     // console.log remove
+        drop_debugger: true,    // debugger remove
+      },
+      mangle: true,             // variable names shorten
+      format: {
+        comments: false,        // comments remove
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -25,4 +33,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
