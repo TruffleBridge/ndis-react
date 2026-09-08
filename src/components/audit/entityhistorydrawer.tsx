@@ -99,10 +99,10 @@ export const EntityHistoryDrawer: React.FC<EntityHistoryDrawerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, entityType, entityId, page, limit]);
 
-const totalPages =
-    typeof entityHistoryTotalPages === "string"
-        ? Number.parseInt(entityHistoryTotalPages, 10) || 1
-        : entityHistoryTotalPages;
+    const totalPages =
+        typeof entityHistoryTotalPages === "string"
+            ? Number.parseInt(entityHistoryTotalPages, 10) || 1
+            : entityHistoryTotalPages;
 
 
     const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -354,26 +354,34 @@ const totalPages =
                     sx={{
                         display: "flex",
                         flexDirection: { xs: "column", sm: "row" },
-                        justifyContent: { xs: "center", sm: "center" },
                         alignItems: "center",
-                        gap: 1,
+                        justifyContent: { xs: "center", sm: "center" },
+                        borderTop: "1px solid",
                         px: { xs: 1.5, sm: 2.5 },
                         py: 1.5,
+                        gap: 1,
                         backgroundColor: "#FFFFFF",
-                        borderTop: "1px solid",
                         borderColor: "divider",
                         flexShrink: 0,
                     }}
                 >
                     <Pagination
                         count={totalPages ?? undefined}
-                        page={page}
                         onChange={handlePageChange}
+                        page={page}
                         siblingCount={isMobile ? 0 : 1}
+                        size={isMobile ? "small" : "medium"}
                         boundaryCount={1}
                         shape="rounded"
-                        size={isMobile ? "small" : "medium"}
                         sx={{
+                            "& .MuiPaginationItem-root.Mui-selected": {
+                                backgroundColor: "#c9c2c2db",
+                                fontWeight: 600,
+                                color: "#222124",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                "&:hover": { backgroundColor: "#c9c2c2db" },
+                            },
                             "& .MuiPaginationItem-root": {
                                 fontSize: "14px",
                                 color: "#b3abab",
@@ -383,14 +391,7 @@ const totalPages =
                                 borderRadius: "8px",
                                 border: "none",
                             },
-                            "& .MuiPaginationItem-root.Mui-selected": {
-                                backgroundColor: "#c9c2c2db",
-                                color: "#222124",
-                                fontSize: "14px",
-                                borderRadius: "8px",
-                                fontWeight: 600,
-                                "&:hover": { backgroundColor: "#c9c2c2db" },
-                            },
+
                         }}
                     />
                 </Box>
