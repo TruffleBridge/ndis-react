@@ -148,9 +148,9 @@ const getDefaultComplianceInfo = (): ComplianceInfo => ({
     cprCertificate: null,
 });
 
-const EMAIL_REGEX = /^[^@]+@[^@]+\.[^@]+$/;
 const MOBILE_REGEX = /^\+?[0-9\s-]{8,15}$/;
 const STEP_ORDER: StepId[] = ["basic", "support", "qual", "compliance"];
+const EMAIL_REGEX_ = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
 
 // ---------------------------------------------------------------------------
 // Payload builder - maps our 4 step objects onto the /api/auth/register /
@@ -700,7 +700,7 @@ export const useWorkerStore = create<WorkerStore>((set, get) => ({
         if (!personalInfo.mobile.trim()) errors.mobile = "Mobile number is required";
         else if (!MOBILE_REGEX.test(personalInfo.mobile.trim())) errors.mobile = "Enter a valid mobile number";
         if (!personalInfo.email.trim()) errors.email = "Email is required";
-        else if (!EMAIL_REGEX.test(personalInfo.email.trim())) errors.email = "Enter a valid email";
+        else if (!EMAIL_REGEX_.test(personalInfo.email.trim())) errors.email = "Enter a valid email";
         // if (mode === "create" && !personalInfo.password?.trim()) errors.password = "Password is required";
         if (!personalInfo.gender) errors.gender = "Please select a gender";
         if (!personalInfo.idProof) errors.idProof = "ID proof is required";
