@@ -150,8 +150,8 @@ const getDefaultComplianceInfo = (): ComplianceInfo => ({
 
 const MOBILE_REGEX = /^\+?[0-9\s-]{8,15}$/;
 const STEP_ORDER: StepId[] = ["basic", "support", "qual", "compliance"];
-const EMAIL_REGEX_ = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+// const EMAIL_REGEX_ = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX_ = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/
 
 // ---------------------------------------------------------------------------
 // Payload builder - maps our 4 step objects onto the /api/auth/register /
