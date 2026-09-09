@@ -4,7 +4,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# Which env to bake in: `development` -> .env.development, `production` -> .env.production.
+# Set per environment via the compose build arg (defaults to production).
+ARG BUILD_MODE=production
+RUN npm run build -- --mode ${BUILD_MODE}
 
 # --- serve stage ---
 FROM nginx:1.27-alpine

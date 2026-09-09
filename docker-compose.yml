@@ -2,7 +2,11 @@
 # Deployed by ndis-devops/deploy/ndis-react.sh:  docker compose up -d --build
 services:
   admin:
-    build: .
+    build:
+      context: .
+      args:
+        # Vite build mode -> selects .env.<mode>. Override per box, e.g. BUILD_MODE=development.
+        BUILD_MODE: ${BUILD_MODE:-production}
     image: ndis-react-admin:latest
     restart: unless-stopped
     ports:
